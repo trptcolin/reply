@@ -1,0 +1,21 @@
+# REPL-y
+
+A newer, hotter REPL using JLine2.
+
+Improvements:
+- allow jumping back and forth by words
+- CTRL-C doesn't bail out of the process; just gives a fresh prompt
+- some code completion
+
+Nice to haves:
+- colorization
+
+## Usage
+
+Run `bin/reply.sh`
+
+## License
+
+Copyright (C) 2011 Colin Jones
+
+Distributed under the Eclipse Public License, the same as Clojure.
