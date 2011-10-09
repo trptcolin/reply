@@ -4,8 +4,7 @@
   (:require [reply.printing])
   (:import [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.history FileHistory]
-           [java.io File
-                    PrintWriter]))
+           [java.io File]))
 
 ; TODO: allow multi-line input
 (defn actual-read [input request-prompt request-exit]
@@ -13,13 +12,6 @@
     (clojure.main/repl-read request-prompt request-exit)))
 
 (def main-thread (Thread/currentThread))
-(def jline-reader (atom nil))
-
-(defn handle-ctrl-c [signal]
-  (println "^C")
-  (.interrupt main-thread)
-  (-> (.getCursorBuffer @jline-reader)
-      (.clear)))
 
 (defn make-reader []
   (let [reader (ConsoleReader.)
@@ -29,37 +21,38 @@
       (.setBellEnabled false)
       (.setHistory history))))
 
-(defn interpret-input [input request-prompt request-exit]
-  (cond (not input)
-          request-exit
-        (= :interrupt-caught input)
-          request-prompt
-        (= :found-old-interrupt input)
-          ""
-        (every? #(Character/isWhitespace %) input)
-          request-prompt
-        :else
-          (actual-read input request-prompt request-exit)))
+(def jline-reader (make-reader))
+
+(defn handle-ctrl-c [signal]
+  (println "^C")
+  (.interrupt main-thread)
+  (-> (.getCursorBuffer jline-reader)
+      (.clear)))
 
 (defn jline-read [request-prompt request-exit]
   (try
-    (.setPrompt @jline-reader (format "%s=> " (ns-name *ns*)))
-    (let [input (.readLine @jline-reader)]
-      (interpret-input input request-prompt request-exit))
+    (.setPrompt jline-reader (format "%s=> " (ns-name *ns*)))
+    (let [input (.readLine jline-reader)]
+      (cond (not input)
+              request-exit
+            (every? #(Character/isWhitespace %) input)
+              request-prompt
+            :else
+              (do
+                (Thread/interrupted) ; just to clear the status
+                (actual-read input request-prompt request-exit))))
     (catch InterruptedException e
-      (-> (.getCursorBuffer @jline-reader)
+      (-> (.getCursorBuffer jline-reader)
           (.clear))
       (request-prompt))))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
 
-  (reset! jline-reader (make-reader))
-
   (repl :read jline-read
         :prompt (constantly ""))
 
-  (.flush (.getHistory @jline-reader))
+  (.flush (.getHistory jline-reader))
 
   (shutdown-agents))
 
