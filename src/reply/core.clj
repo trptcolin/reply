@@ -1,6 +1,7 @@
 (ns reply.core
   (:use [clojure.main :only [repl repl-read]]
         [clojure.repl :only [set-break-handler!]])
+  (:require [reply.printing])
   (:import [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.history FileHistory]
            [java.io File
