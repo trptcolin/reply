@@ -6,51 +6,60 @@
            [java.io File
                     PrintWriter]))
 
-(def input-getter (atom (future)))
+; TODO: allow multi-line input
+(defn actual-read [input request-prompt request-exit]
+  (binding [*in* (clojure.lang.LineNumberingPushbackReader. (java.io.StringReader. input))]
+    (clojure.main/repl-read request-prompt request-exit)))
+
+(def main-thread (Thread/currentThread))
+(def jline-reader (atom nil))
 
 (defn handle-ctrl-c [signal]
   (println "^C")
-  (future-cancel @input-getter))
+  (.interrupt main-thread)
+  (-> (.getCursorBuffer @jline-reader)
+      (.clear)))
 
-(defn jline-read [reader request-prompt request-exit]
+(defn make-reader []
+  (let [reader (ConsoleReader.)
+        home (System/getProperty "user.home")
+        history (FileHistory. (File. home ".jline-reply.history"))]
+    (doto reader
+      (.setBellEnabled false)
+      (.setHistory history))))
+
+(defn interpret-input [input request-prompt request-exit]
+  (cond (not input)
+          request-exit
+        (= :interrupt-caught input)
+          request-prompt
+        (= :found-old-interrupt input)
+          ""
+        (every? #(Character/isWhitespace %) input)
+          request-prompt
+        :else
+          (actual-read input request-prompt request-exit)))
+
+(defn jline-read [request-prompt request-exit]
   (try
-    (let [future-input (future
-                         (try
-                           (.setPrompt reader (format "%s=> " (ns-name *ns*)))
-                           (.readLine reader)
-                           (catch Throwable e
-                             nil)))
-          _ (reset! input-getter future-input)
-          input (deref future-input)]
-      (cond (not input)
-              request-exit
-            (every? #(Character/isWhitespace %) input)
-              request-prompt
-            :else
-              (read (java.io.PushbackReader. (java.io.StringReader. input)))))
-    (catch Throwable e
-      (-> (.getCursorBuffer reader)
+    (.setPrompt @jline-reader (format "%s=> " (ns-name *ns*)))
+    (let [input (.readLine @jline-reader)]
+      (interpret-input input request-prompt request-exit))
+    (catch InterruptedException e
+      (-> (.getCursorBuffer @jline-reader)
           (.clear))
-      request-prompt)))
+      (request-prompt))))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
-    (try
-      (let [reader (ConsoleReader.)
-            home (System/getProperty "user.home")
-            history (FileHistory. (File. home ".jline-reply.history"))]
-        (doto reader
-          (.setBellEnabled false)
-          (.setHistory history))
 
-        (repl :read (partial jline-read reader)
-              :prompt (constantly ""))
+  (reset! jline-reader (make-reader))
 
-        (.flush history))
+  (repl :read jline-read
+        :prompt (constantly ""))
 
-      ; TODO: surely we can avoid this - not sure what's keeping the jvm alive.
-      (System/exit 0)
+  (.flush (.getHistory @jline-reader))
 
-      (catch Exception e
-        (prn e))))
+  (shutdown-agents))
+
 
