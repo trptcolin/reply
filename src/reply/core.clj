@@ -52,8 +52,5 @@
   (repl :read jline-read
         :prompt (constantly ""))
 
-  (.flush (.getHistory jline-reader))
-
-  (shutdown-agents))
-
+  (.flush (.getHistory jline-reader)))
 
