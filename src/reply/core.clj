@@ -6,9 +6,8 @@
            [scala.tools.jline.console.history FileHistory]
            [java.io File]))
 
-; TODO: allow multi-line input
 (defn actual-read [input request-prompt request-exit]
-  (binding [*in* (clojure.lang.LineNumberingPushbackReader. (java.io.StringReader. input))]
+  (binding [*in* (clojure.lang.LineNumberingPushbackReader. input)]
     (clojure.main/repl-read request-prompt request-exit)))
 
 (def main-thread (Thread/currentThread))
@@ -27,37 +26,55 @@
 (defn get-prompt [ns]
   (format "%s=> " (ns-name ns)))
 
+(def output-pipe (java.io.PipedWriter.))
+(def input-pipe (java.io.PipedReader. output-pipe))
+
+(defn clear-jline-buffer []
+  (-> (.getCursorBuffer jline-reader)
+      (.clear)))
+
 (defn handle-ctrl-c [signal]
   (println "^C")
   (.interrupt main-thread)
-  (-> (.getCursorBuffer jline-reader)
-      (.clear))
-  (print (get-prompt @current-repl-ns))
+  (clear-jline-buffer)
   (flush))
 
 (defn jline-read [request-prompt request-exit]
   (try
     (.setPrompt jline-reader (get-prompt *ns*))
     (reset! current-repl-ns *ns*)
-    (let [input (.readLine jline-reader)]
-      (cond (not input)
-              request-exit
-            (every? #(Character/isWhitespace %) input)
-              request-prompt
-            :else
-              (do
-                (Thread/interrupted) ; just to clear the status
-                (actual-read input request-prompt request-exit))))
+    (let [future-input (future
+                         ; TODO: need to loop here to read multiple lines
+                         (try
+                            (let [string-input (.readLine jline-reader)]
+                              (if string-input
+                                (do
+                                  (doseq [c (map int (.getBytes string-input))]
+                                    (.write output-pipe c)
+                                    (.flush output-pipe))
+                                  (.write output-pipe (int \newline)))
+                                (.close output-pipe)))
+                         (catch Throwable e
+                           (prn e)
+                           (throw e))))
+          _ @future-input
+          input input-pipe]
+        (do
+          (Thread/interrupted) ; just to clear the status
+          (actual-read input-pipe request-prompt request-exit)))
     (catch InterruptedException e
-      (-> (.getCursorBuffer jline-reader)
-          (.clear))
-      (request-prompt))))
+      (clear-jline-buffer)
+      request-prompt)
+    (catch Throwable e
+      (prn e))))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
 
   (repl :read jline-read
         :prompt (constantly ""))
+
+  (shutdown-agents)
 
   (.flush (.getHistory jline-reader)))
 
