@@ -23,15 +23,22 @@
 
 (def jline-reader (make-reader))
 
+(def current-repl-ns (atom *ns*))
+(defn get-prompt [ns]
+  (format "%s=> " (ns-name ns)))
+
 (defn handle-ctrl-c [signal]
   (println "^C")
   (.interrupt main-thread)
   (-> (.getCursorBuffer jline-reader)
-      (.clear)))
+      (.clear))
+  (print (get-prompt @current-repl-ns))
+  (flush))
 
 (defn jline-read [request-prompt request-exit]
   (try
-    (.setPrompt jline-reader (format "%s=> " (ns-name *ns*)))
+    (.setPrompt jline-reader (get-prompt *ns*))
+    (reset! current-repl-ns *ns*)
     (let [input (.readLine jline-reader)]
       (cond (not input)
               request-exit
