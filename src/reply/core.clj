@@ -2,12 +2,13 @@
   (:use [clojure.main :only [repl repl-read]]
         [clojure.repl :only [set-break-handler!]])
   (:require [reply.printing])
-  (:import [scala.tools.jline.console ConsoleReader]
+  (:import [reply JlineInputReader]
+           [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.history FileHistory]
            [java.io File]))
 
-(defn actual-read [input request-prompt request-exit]
-  (binding [*in* (clojure.lang.LineNumberingPushbackReader. input)]
+(defn actual-read [input-reader request-prompt request-exit]
+  (binding [*in* input-reader]
     (clojure.main/repl-read request-prompt request-exit)))
 
 (def main-thread (Thread/currentThread))
@@ -20,17 +21,13 @@
       (.setBellEnabled false)
       (.setHistory history))))
 
-(def jline-reader (make-reader))
+(def jline-reader (atom nil))
 
-(def current-repl-ns (atom *ns*))
 (defn get-prompt [ns]
   (format "%s=> " (ns-name ns)))
 
-(def output-pipe (java.io.PipedWriter.))
-(def input-pipe (java.io.PipedReader. output-pipe))
-
 (defn clear-jline-buffer []
-  (-> (.getCursorBuffer jline-reader)
+  (-> (.getCursorBuffer @jline-reader)
       (.clear)))
 
 (defn handle-ctrl-c [signal]
@@ -41,40 +38,30 @@
 
 (defn jline-read [request-prompt request-exit]
   (try
-    (.setPrompt jline-reader (get-prompt *ns*))
-    (reset! current-repl-ns *ns*)
-    (let [future-input (future
-                         ; TODO: need to loop here to read multiple lines
-                         (try
-                            (let [string-input (.readLine jline-reader)]
-                              (if string-input
-                                (do
-                                  (doseq [c (map int (.getBytes string-input))]
-                                    (.write output-pipe c)
-                                    (.flush output-pipe))
-                                  (.write output-pipe (int \newline)))
-                                (.close output-pipe)))
-                         (catch Throwable e
-                           (prn e)
-                           (throw e))))
-          _ @future-input
-          input input-pipe]
+    (.setPrompt @jline-reader (get-prompt *ns*))
+    (let [input-stream (clojure.lang.LineNumberingPushbackReader.
+                         (JlineInputReader.
+                           jline-reader
+                           (java.util.LinkedList.))
+                         1)]
         (do
           (Thread/interrupted) ; just to clear the status
-          (actual-read input-pipe request-prompt request-exit)))
+          (actual-read input-stream request-prompt request-exit)))
     (catch InterruptedException e
       (clear-jline-buffer)
       request-prompt)
-    (catch Throwable e
-      (prn e))))
+    (catch RuntimeException e
+      (print "caught something: ")
+      (prn e)
+      (.printStackTrace e))))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
+  (reset! jline-reader (make-reader))
 
   (repl :read jline-read
-        :prompt (constantly ""))
+        :prompt (constantly false)
+        :need-prompt (constantly false))
 
-  (shutdown-agents)
-
-  (.flush (.getHistory jline-reader)))
+  (.flush (.getHistory @jline-reader)))
 
