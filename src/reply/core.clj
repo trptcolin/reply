@@ -31,7 +31,8 @@
       (.clear)))
 
 (defn handle-ctrl-c [signal]
-  (println "^C")
+  (print "^C")
+  (flush)
   (.interrupt main-thread)
   (clear-jline-buffer))
 
