@@ -33,8 +33,7 @@
 (defn handle-ctrl-c [signal]
   (println "^C")
   (.interrupt main-thread)
-  (clear-jline-buffer)
-  (flush))
+  (clear-jline-buffer))
 
 (defn set-empty-prompt []
   (.setPrompt
@@ -58,9 +57,10 @@
       (clear-jline-buffer)
       request-prompt)
     (catch RuntimeException e
-      (print "caught something: ")
-      (prn e)
-      (.printStackTrace e))))
+      (if (= InterruptedException (type (clojure.main/repl-exception e)))
+        (do (clear-jline-buffer)
+            request-prompt)
+        (throw e)))))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)

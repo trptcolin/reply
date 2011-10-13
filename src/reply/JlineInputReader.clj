@@ -12,25 +12,25 @@
 
 (defn -read-single [this]
   (let [state @(.state this)
-        input-queue (:internal-queue state)
+        internal-queue (:internal-queue state)
         jline-reader (:jline-reader state)
         set-empty-prompt (:set-empty-prompt state)]
 
-    (if-let [c (.peekFirst input-queue)]
-      (.removeFirst input-queue)
+    (if-let [c (.peekFirst internal-queue)]
+      (.removeFirst internal-queue)
       (let [line (.readLine jline-reader)]
         (set-empty-prompt)
         (if line
           (do
             (doseq [c line]
-              (.addLast input-queue (int c)))
-            (.addLast input-queue (int \newline))
+              (.addLast internal-queue (int c)))
+            (.addLast internal-queue (int \newline))
             (-read-single this))
           -1)))))
 
 (defn -read-char<>-int-int [this cbuf off len]
   (let [state @(.state this)
-        input-queue (:internal-queue state)
+        internal-queue (:internal-queue state)
         jline-reader (:jline-reader state)]
     (loop [i   off
            left len]
