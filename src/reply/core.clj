@@ -36,13 +36,20 @@
   (clear-jline-buffer)
   (flush))
 
+(defn set-empty-prompt []
+  (.setPrompt
+    @jline-reader
+    (apply str
+           (concat (repeat (- (count (get-prompt *ns*)) 2) \space)
+                   [\| \space]))))
+
 (defn jline-read [request-prompt request-exit]
   (try
     (.setPrompt @jline-reader (get-prompt *ns*))
     (let [input-stream (clojure.lang.LineNumberingPushbackReader.
                          (JlineInputReader.
-                           jline-reader
-                           (java.util.LinkedList.))
+                           {:jline-reader @jline-reader
+                            :set-empty-prompt set-empty-prompt})
                          1)]
         (do
           (Thread/interrupted) ; just to clear the status
@@ -60,8 +67,8 @@
   (reset! jline-reader (make-reader))
 
   (repl :read jline-read
-        :prompt (constantly false)
-        :need-prompt (constantly false))
+        :prompt (fn [] false)
+        :need-prompt (fn [] false))
 
   (.flush (.getHistory @jline-reader)))
 

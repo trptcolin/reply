@@ -3,30 +3,34 @@
    :extends java.io.Reader
    :state state
    :init init
-   :constructors {[clojure.lang.Atom java.util.Deque] []}
+   :constructors {[clojure.lang.Associative] []}
    :main false))
 
-(defn -init [jlr q]
-  [[] (atom {:jline-reader @jlr :input-queue q})])
+(defn -init [config]
+  [[] (atom (assoc config
+                   :internal-queue (java.util.LinkedList.)))])
 
 (defn -read-single [this]
   (let [state @(.state this)
-        input-queue (:input-queue state)
-        jline-reader (:jline-reader state)]
+        input-queue (:internal-queue state)
+        jline-reader (:jline-reader state)
+        set-empty-prompt (:set-empty-prompt state)]
 
     (if-let [c (.peekFirst input-queue)]
       (.removeFirst input-queue)
-      (if-let [line (.readLine jline-reader)]
-        (do
-          (doseq [c line]
-            (.addLast input-queue (int c)))
-          (.addLast input-queue (int \newline))
-          (-read-single this))
-        -1))))
+      (let [line (.readLine jline-reader)]
+        (set-empty-prompt)
+        (if line
+          (do
+            (doseq [c line]
+              (.addLast input-queue (int c)))
+            (.addLast input-queue (int \newline))
+            (-read-single this))
+          -1)))))
 
 (defn -read-char<>-int-int [this cbuf off len]
   (let [state @(.state this)
-        input-queue (:input-queue state)
+        input-queue (:internal-queue state)
         jline-reader (:jline-reader state)]
     (loop [i   off
            left len]
