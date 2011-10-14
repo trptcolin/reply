@@ -11,11 +11,7 @@
                    :internal-queue (java.util.LinkedList.)))])
 
 (defn -read-single [this]
-  (let [state @(.state this)
-        internal-queue (:internal-queue state)
-        jline-reader (:jline-reader state)
-        set-empty-prompt (:set-empty-prompt state)]
-
+  (let [{:keys [internal-queue jline-reader set-empty-prompt]} @(.state this)]
     (if-let [c (.peekFirst internal-queue)]
       (.removeFirst internal-queue)
       (let [line (.readLine jline-reader)]
@@ -28,19 +24,17 @@
             (-read-single this))
           -1)))))
 
-(defn -read-char<>-int-int [this cbuf off len]
-  (let [state @(.state this)
-        internal-queue (:internal-queue state)
-        jline-reader (:jline-reader state)]
-    (loop [i   off
-           left len]
+(defn -read-char<>-int-int [this buffer offset length]
+  (let [{:keys [internal-queue jline-reader]} @(.state this)]
+    (loop [i    offset
+           left length]
       (if (> left 0)
         (let [c (-read-single this)]
           (if (= c -1)
-            (if (= i off)
+            (if (= i offset)
               -1
-              (- i off))
-            (do (aset-char cbuf i c)
+              (- i offset))
+            (do (aset-char buffer i c)
                 (recur (inc i) (dec left)))))
-        (- i off)))))
+        (- i offset)))))
 
