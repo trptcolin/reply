@@ -1,5 +1,5 @@
 (ns reply.core
-  (:use [clojure.main :only [repl repl-read]]
+  (:use [clojure.main :only [repl repl-read repl-exception]]
         [clojure.repl :only [set-break-handler!]])
   (:require [reply.printing])
   (:import [reply JlineInputReader]
@@ -9,7 +9,7 @@
 
 (defn actual-read [input-reader request-prompt request-exit]
   (binding [*in* input-reader]
-    (clojure.main/repl-read request-prompt request-exit)))
+    (repl-read request-prompt request-exit)))
 
 (def main-thread (Thread/currentThread))
 
@@ -58,7 +58,7 @@
       (clear-jline-buffer)
       request-prompt)
     (catch RuntimeException e
-      (if (= InterruptedException (type (clojure.main/repl-exception e)))
+      (if (= InterruptedException (type (repl-exception e)))
         (do (clear-jline-buffer)
             request-prompt)
         (throw e)))))
