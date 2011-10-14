@@ -2,7 +2,8 @@
   (:use [clojure.main :only [repl repl-read repl-exception]]
         [clojure.repl :only [set-break-handler!]])
   (:require [reply.printing])
-  (:import [reply JlineInputReader]
+  (:import [reply JlineInputReader
+                  CustomizableBufferLineNumberingPushbackReader]
            [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.history FileHistory]
            [java.io File]))
@@ -65,7 +66,7 @@
   (set-break-handler! handle-ctrl-c)
   (reset! jline-reader (make-reader))
   (reset! jline-pushback-reader
-    (clojure.lang.LineNumberingPushbackReader.
+    (CustomizableBufferLineNumberingPushbackReader.
       (JlineInputReader.
         {:jline-reader @jline-reader
          :set-empty-prompt set-empty-prompt})
