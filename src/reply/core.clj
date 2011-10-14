@@ -43,14 +43,12 @@
            (concat (repeat (- (count (get-prompt *ns*)) 2) \space)
                    [\| \space]))))
 
+(def jline-pushback-reader (atom nil))
+
 (defn jline-read [request-prompt request-exit]
   (try
     (.setPrompt @jline-reader (get-prompt *ns*))
-    (let [input-stream (clojure.lang.LineNumberingPushbackReader.
-                         (JlineInputReader.
-                           {:jline-reader @jline-reader
-                            :set-empty-prompt set-empty-prompt})
-                         1)]
+    (let [input-stream @jline-pushback-reader]
         (do
           (Thread/interrupted) ; just to clear the status
           (actual-read input-stream request-prompt request-exit)))
@@ -66,7 +64,12 @@
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
   (reset! jline-reader (make-reader))
-
+  (reset! jline-pushback-reader
+    (clojure.lang.LineNumberingPushbackReader.
+      (JlineInputReader.
+        {:jline-reader @jline-reader
+         :set-empty-prompt set-empty-prompt})
+      1))
   (repl :read jline-read
         :prompt (fn [] false)
         :need-prompt (fn [] false))
