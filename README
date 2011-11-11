@@ -11,11 +11,17 @@ A fitter, happier, more productive REPL for Clojure.
 - CTRL-C doesn't bail out of the process; just cancels the current command
 
 ## Coming soon
-- some code completion
+- hold full source code of in-repl defns in metadata?
+- code completion for:
+  - vars
+  - namespaces
+  - Java classes & packages
 
 ## Maybe one day
 - indentation
 - colorization
+- code completion for:
+  - Java methods (maybe on type-hinted clojure vars?)
 
 ## Installation
 
