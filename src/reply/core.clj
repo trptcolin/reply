@@ -20,14 +20,6 @@
 
 (def main-thread (Thread/currentThread))
 
-(defn get-unambiguous-completion [candidates]
-  (if-let [candidates (seq candidates)]
-    (apply str
-      (map first
-           (take-while #(apply = %)
-                       (apply map vector candidates))))
-    nil))
-
 (defn make-completion-handler []
   (proxy [CandidateListCompletionHandler] []
     (complete [^ConsoleReader reader ^java.util.List candidates pos]
@@ -47,7 +39,8 @@
               (CandidateListCompletionHandler/setBuffer
                 reader
                 (str (completion/but-last-word (:buffer (first candidates)))
-                     (get-unambiguous-completion (map :candidate candidates)))
+                     (completion/get-unambiguous-completion
+                       (map :candidate candidates)))
                 pos))
             (CandidateListCompletionHandler/printCandidates
               reader
@@ -63,8 +56,7 @@
             possible-completions (completion/get-candidates
                                    completions last-word-in-buffer)
             get-full-completion (fn [candidate]
-                                  {:candidate candidate
-                                   :buffer buffer})]
+                                  {:candidate candidate :buffer buffer})]
 
         (.addAll candidates (map get-full-completion possible-completions))
 

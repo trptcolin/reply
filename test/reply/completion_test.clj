@@ -17,9 +17,9 @@
   (get-candidates ["map" "map-indexed"] "map") => ["map" "map-indexed"]
   (get-candidates ["map" "map-indexed"] "map-in") => ["map-indexed"])
 
-(facts "get-replaced-buffer"
-  (get-replaced-buffer ["sequential?"] "(sequenti") => "(sequential?"
-  (get-replaced-buffer ["sequential?" "sequence"] "(sequen") => "(sequen"
-)
+(facts "get-unambiguous-completion"
+  (get-unambiguous-completion []) => ""
+  (get-unambiguous-completion ["map"]) => "map"
+  (get-unambiguous-completion ["map", "map-indexed"]) => "map")
 
 
