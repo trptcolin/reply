@@ -2,14 +2,6 @@
   (:use [reply.completion]
         [midje.sweet]))
 
-(facts "get-last-word"
-  (get-last-word "") => nil
-  (get-last-word " ") => nil
-  (get-last-word "ohai") => "ohai"
-  (get-last-word "ohai kthx") => "kthx"
-  (get-last-word "(map") => "map"
-  (get-last-word "(map-indexed") => "map-indexed")
-
 (facts "get-candidates"
   (get-candidates [] "map") => []
   (get-candidates ["map"] "foo") => []
@@ -22,4 +14,12 @@
   (get-unambiguous-completion ["map"]) => "map"
   (get-unambiguous-completion ["map", "map-indexed"]) => "map")
 
+(facts "get-word-ending-at"
+  (get-word-ending-at "" 0) => ""
+  (get-word-ending-at " " 0) => ""
+  (get-word-ending-at "map" 0) => ""
+  (get-word-ending-at "map" 2) => "ma"
+  (get-word-ending-at "map" 3) => "map"
+  (get-word-ending-at "(map first [0 1 2])" 4) => "map"
+  )
 

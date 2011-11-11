@@ -30,17 +30,15 @@
               false
               (do (CandidateListCompletionHandler/setBuffer
                     reader
-                    (str (completion/but-last-word (:buffer (first candidates)))
-                         value)
+                    value
                     pos)
                   true)))
           (do
             (when (> (.size candidates) 1)
               (CandidateListCompletionHandler/setBuffer
                 reader
-                (str (completion/but-last-word (:buffer (first candidates)))
-                     (completion/get-unambiguous-completion
-                       (map :candidate candidates)))
+                (completion/get-unambiguous-completion
+                  (map :candidate candidates))
                 pos))
             (CandidateListCompletionHandler/printCandidates
               reader
@@ -52,17 +50,16 @@
   (proxy [Completer] []
     (complete [^String buffer cursor ^java.util.List candidates]
       (let [buffer (or buffer "")
-            last-word-in-buffer (or (completion/get-last-word buffer) "")
-            possible-completions (completion/get-candidates
-                                   completions last-word-in-buffer)
+            prefix (or (completion/get-word-ending-at buffer cursor) "")
+            prefix-length (.length prefix)
+            possible-completions (completion/get-candidates completions prefix)
             get-full-completion (fn [candidate]
                                   {:candidate candidate :buffer buffer})]
-
-        (.addAll candidates (map get-full-completion possible-completions))
-
-        (if (empty? candidates)
+        (if (or (empty? possible-completions) (zero? prefix-length))
           -1
-          0)))))
+          (do
+            (.addAll candidates (map get-full-completion possible-completions))
+            (- cursor prefix-length)))))))
 
 
 (defn make-reader []
