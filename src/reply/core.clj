@@ -1,11 +1,11 @@
 (ns reply.core
   (:use [clojure.main :only [repl repl-read repl-exception]]
         [clojure.repl :only [set-break-handler!]])
-  (:require [reply.printing]
+  (:require [reply.hacks.printing]
             [reply.completion :as completion]
             [clojure.string :as str])
-  (:import [reply JlineInputReader
-                  CustomizableBufferLineNumberingPushbackReader]
+  (:import [reply JlineInputReader]
+           [reply.hacks CustomizableBufferLineNumberingPushbackReader]
            [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.completer Completer]
            [scala.tools.jline.console.completer

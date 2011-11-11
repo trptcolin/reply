@@ -1,4 +1,4 @@
-(ns reply.printing)
+(ns reply.hacks.printing)
 
 (in-ns 'clojure.core)
 

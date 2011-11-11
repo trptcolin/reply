@@ -8,7 +8,7 @@
  * You must not remove this notice, or any other, from this software.
  */
 
-package reply;
+package reply.hacks;
 
 import java.io.PushbackReader;
 import java.io.Reader;
