@@ -47,4 +47,10 @@
             (.addAll candidates (map get-full-completion possible-completions))
             (- cursor prefix-length)))))))
 
+(defn make-var-completer [ns]
+  (let [collections ((juxt ns-publics ns-refers) ns)]
+    (make-completer
+      (apply concat
+        (map (comp sort (partial map str) keys)
+             collections)))))
 
