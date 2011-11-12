@@ -71,15 +71,18 @@
             request-prompt)
         (throw e)))))
 
-(defn -main [& args]
-  (set-break-handler! handle-ctrl-c)
-  (reset! jline-reader (make-reader))
-  (reset! jline-pushback-reader
+(defn setup-reader! []
+  (reset! jline-reader (make-reader)) ; since construction is side-effect-y
+  (reset! jline-pushback-reader ; since this depends on jline-reader
     (CustomizableBufferLineNumberingPushbackReader.
       (JlineInputReader.
         {:jline-reader @jline-reader
          :set-empty-prompt set-empty-prompt})
-      1))
+      1)))
+
+(defn -main [& args]
+  (set-break-handler! handle-ctrl-c)
+  (setup-reader!)
   (repl :read jline-read
         :prompt (fn [] false)
         :need-prompt (fn [] false))
