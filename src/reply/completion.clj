@@ -16,7 +16,11 @@
 (defn get-word-ending-at [input index]
   (let [start (if (>= (.length input) index)
                 (.substring input 0 index)
-                "")]
-    (or (last (str/split start #"[^\w\-]"))
+                "")
+        groups (re-seq #"[^\w\-]+|[\w\-]+" start)]
+     (if groups
+       (if-let [last-word (last (re-seq #"[\w\-]+" (last groups)))]
+         last-word
+         "")
         "")))
 

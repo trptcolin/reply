@@ -21,5 +21,5 @@
   (get-word-ending-at "map" 2) => "ma"
   (get-word-ending-at "map" 3) => "map"
   (get-word-ending-at "(map first [0 1 2])" 4) => "map"
-  )
+  (get-word-ending-at "(map " 5) => "")
 
