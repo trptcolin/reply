@@ -9,24 +9,25 @@ A fitter, happier, more productive REPL for Clojure.
   - history searching
   - and much much more
 - CTRL-C doesn't bail out of the process; just cancels the current command
-- code completion for vars
+- code completion for vars & Java classes
 
 ## Coming soon
-- hold full source code of in-repl defns in metadata?
 - code completion for:
   - namespaces
-  - Java classes & packages
+  - Java packages
+- hold full source code in metadata? (for in-repl defns)
 
 ## Maybe one day
-- indentation
+- smart indentation
 - colorization
 - code completion for:
-  - Java methods (maybe on type-hinted clojure vars?)
+  - Java methods (maybe based on type-hinted clojure vars?)
 
 ## Installation
 
 I'm hoping this will eventually be distributed with Russ Olsen's excellent
-[dejour](https://github.com/russolsen/dejour.git).
+[dejour](https://github.com/russolsen/dejour.git), and perhaps also with
+Phil Hagelberg's [leiningen](https://github.com/technomancy/leiningen).
 
 Meantime (assuming you have
 [leiningen](https://github.com/technomancy/leiningen.git) installed):
