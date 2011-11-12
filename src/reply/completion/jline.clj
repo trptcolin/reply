@@ -48,7 +48,7 @@
             (- cursor prefix-length)))))))
 
 (defn make-var-completer [ns]
-  (let [collections ((juxt ns-publics ns-refers) ns)]
+  (let [collections ((juxt ns-publics ns-refers ns-imports) ns)]
     (make-completer
       (apply concat
         (map (comp sort (partial map str) keys)
