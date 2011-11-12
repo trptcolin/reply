@@ -17,9 +17,9 @@
   (let [start (if (>= (.length input) index)
                 (.substring input 0 index)
                 "")
-        groups (re-seq #"[^\w\-]+|[\w\-]+" start)]
+        groups (re-seq #"[^\s\(\),]+|[\s\(\),]+" start)]
      (if groups
-       (if-let [last-word (last (re-seq #"[\w\-]+" (last groups)))]
+       (if-let [last-word (last (re-seq #"[^\s\(\),]+" (last groups)))]
          last-word
          "")
         "")))

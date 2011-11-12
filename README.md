@@ -9,19 +9,18 @@ A fitter, happier, more productive REPL for Clojure.
   - history searching
   - and much much more
 - CTRL-C doesn't bail out of the process; just cancels the current command
-- code completion for vars & Java classes
+- code completion for vars, namespaces, Java classes
 
 ## Coming soon
 - code completion for:
-  - namespaces
   - Java packages
-- hold full source code in metadata? (for in-repl defns)
 
 ## Maybe one day
 - smart indentation
 - colorization
 - code completion for:
   - Java methods (maybe based on type-hinted clojure vars?)
+- hold full source code in metadata? (for in-repl defns)
 
 ## Installation
 
