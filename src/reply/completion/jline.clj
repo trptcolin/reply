@@ -11,7 +11,7 @@
     (complete [^ConsoleReader reader ^java.util.List candidates pos]
       (let [buf (.getCursorBuffer reader)]
         (if (= 1 (.size candidates))
-          (let [value (:candidate (.get candidates 0))]
+          (let [value (.get candidates 0)]
             (if (= value (.toString buf))
               false
               (do (CandidateListCompletionHandler/setBuffer
@@ -24,11 +24,11 @@
               (CandidateListCompletionHandler/setBuffer
                 reader
                 (completion/get-unambiguous-completion
-                  (map :candidate candidates))
+                  candidates)
                 pos))
             (CandidateListCompletionHandler/printCandidates
               reader
-              (map :candidate candidates))
+              candidates)
             (.redrawLine reader)
             true))))))
 
@@ -38,17 +38,18 @@
       (let [buffer (or buffer "")
             prefix (or (completion/get-word-ending-at buffer cursor) "")
             prefix-length (.length prefix)
-            possible-completions (completion/get-candidates completions prefix)
-            get-full-completion (fn [candidate]
-                                  {:candidate candidate :buffer buffer})]
+            possible-completions (completion/get-candidates completions prefix)]
         (if (or (empty? possible-completions) (zero? prefix-length))
           -1
           (do
-            (.addAll candidates (map get-full-completion possible-completions))
+            (.addAll candidates possible-completions)
             (- cursor prefix-length)))))))
 
 (defn make-var-completer [ns]
-  (let [collections (concat (map keys ((juxt ns-publics ns-refers ns-imports) ns))
+  (let [collections (concat (map keys ((juxt ns-publics
+                                             ns-refers
+                                             ns-imports)
+                                       ns))
                             [(map str (all-ns))])]
     (make-completer
       (mapcat (comp sort (partial map str))
