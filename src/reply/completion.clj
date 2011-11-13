@@ -17,7 +17,7 @@
   (let [start (if (>= (.length input) index)
                 (.substring input 0 index)
                 "")
-        non-word-chars ["\\s" ","
+        non-word-chars ["\\s" "," "/"
                         "\\(" "\\)"
                         "\\[" "\\]"
                         "\\{" "\\}"]

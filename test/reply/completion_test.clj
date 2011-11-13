@@ -25,5 +25,6 @@
   (get-word-ending-at "(map " 5) => ""
   (get-word-ending-at "[*foo" 5) => "*foo"
   (get-word-ending-at "{*foo" 5) => "*foo"
+  (get-word-ending-at "str/split" 9) => "split"
   )
 
