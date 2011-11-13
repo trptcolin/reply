@@ -11,9 +11,11 @@ A fitter, happier, more productive REPL for Clojure.
 - CTRL-C doesn't bail out of the process; just cancels the current command
 - code completion for vars, namespaces, Java classes
 
-## Coming soon
+## Hopefully coming soon
 - code completion for:
   - Java packages
+  - namespace-qualified vars
+  - Java static methods
 
 ## Maybe one day
 - smart indentation
