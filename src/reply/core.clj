@@ -1,7 +1,7 @@
 (ns reply.core
   (:use [clojure.main :only [repl repl-read repl-exception]]
         [clojure.repl :only [set-break-handler!]])
-  (:require [reply.hacks.printing]
+  (:require [reply.hacks.printing :as hacks.printing]
             [reply.completion.jline :as completion.jline]
             [clojure.string :as str])
   (:import [reply JlineInputReader]
@@ -84,9 +84,11 @@
   (set-break-handler! handle-ctrl-c)
   (setup-reader!)
   (println "Clojure" (clojure-version))
-  (repl :read jline-read
-        :prompt (fn [] false)
-        :need-prompt (fn [] false))
+
+  (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential]
+    (repl :read jline-read
+          :prompt (fn [] false)
+          :need-prompt (fn [] false)))
 
   (.flush (.getHistory @jline-reader)))
 
