@@ -83,6 +83,7 @@
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
   (setup-reader!)
+  (println "Clojure" (clojure-version))
   (repl :read jline-read
         :prompt (fn [] false)
         :need-prompt (fn [] false))
