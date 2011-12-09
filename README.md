@@ -8,10 +8,11 @@ A fitter, happier, more productive REPL for Clojure.
   - jumping forward/back by word (not available in JLine versions before 2)
   - history searching
   - and much much more
-- CTRL-C doesn't bail out of the process; just cancels the current command
+- CTRL-C doesn't bail out of the process - stops interruption-friendly operations
 - code completion for vars, namespaces, Java classes
 
 ## Hopefully coming soon
+- CTRL-C kills the currently running command, breaks out of infinite loops, etc.
 - code completion for:
   - Java packages
   - namespace-qualified vars
