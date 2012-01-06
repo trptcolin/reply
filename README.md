@@ -10,9 +10,9 @@ A fitter, happier, more productive REPL for Clojure.
   - and much much more
 - CTRL-C doesn't bail out of the process - stops interruption-friendly operations
 - code completion for vars, namespaces, Java classes
+- CTRL-C kills the currently running command, breaks out of infinite loops, etc.
 
 ## Hopefully coming soon
-- CTRL-C kills the currently running command, breaks out of infinite loops, etc.
 - code completion for:
   - Java packages
   - namespace-qualified vars
