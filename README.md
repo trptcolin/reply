@@ -13,6 +13,7 @@ A fitter, happier, more productive REPL for Clojure.
 - CTRL-C kills the currently running command, breaks out of infinite loops, etc.
 
 ## Hopefully coming soon
+- better stacktraces, likely using one of the existing tools
 - code completion for:
   - Java packages
   - namespace-qualified vars

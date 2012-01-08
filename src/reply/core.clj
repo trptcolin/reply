@@ -39,25 +39,25 @@
       (.clear)))
 
 (def evaling-line (atom nil))
+(def printing-line (atom nil))
+
+(defn stop [action & {:keys [hard-kill-allowed]}]
+  (let [thread (:thread @action)]
+    (when thread (.interrupt thread))
+    (when hard-kill-allowed
+      (Thread/sleep 2000)
+      (when (and @action (not (:completed @action)) (.isAlive thread))
+        (println ";;;;;;;;;;")
+        (println "; Sorry, have to call Thread.stop on this command, because it's not dying.")
+        (println ";;;;;;;;;;")
+        (.stop thread)))))
 
 (defn handle-ctrl-c [signal]
   (print "^C")
   (flush)
 
-  ; for printing
-  (.interrupt main-thread)
-
-  ; for eval
-  (let [line @evaling-line
-        thread (:thread line)]
-    (when thread
-      (.interrupt thread)
-
-      ; wait a bit, then STOP HARD
-      (Thread/sleep 1000)
-      (if (and (not (:completed line)) (.isAlive thread))
-        (.stop thread))
-  ))
+  (stop printing-line)
+  (stop evaling-line :hard-kill-allowed true)
 
   (clear-jline-buffer))
 
@@ -72,6 +72,7 @@
 
 (defn jline-read [request-prompt request-exit]
   (reset! evaling-line nil)
+  (reset! printing-line nil)
   (try
     (.setPrompt @jline-reader (get-prompt *ns*))
     (let [completer (first (.getCompleters @jline-reader))]
@@ -106,12 +107,24 @@
          :set-empty-prompt set-empty-prompt})
       1)))
 
+(defn act-in-future [form action-atom base-action]
+  (try
+    (reset! action-atom {})
+    (let [act-on-form (fn []
+                        (swap! action-atom assoc :thread (Thread/currentThread))
+                        (let [result (base-action form)]
+                          (swap! action-atom assoc :completed true)
+                          result))]
+      @(future (act-on-form)))
+    (catch Throwable e
+      (println (repl-exception e))
+      (.printStackTrace e))))
+
 (defn reply-eval [form]
-  @(future
-    (reset! evaling-line {:thread (Thread/currentThread)})
-    (let [result (eval form)]
-      (swap! evaling-line assoc :completed true)
-      result)))
+  (act-in-future form evaling-line eval))
+
+(defn reply-print [form]
+  (act-in-future form printing-line prn))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
@@ -121,6 +134,7 @@
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential]
     (repl :read jline-read
           :eval reply-eval
+          :print reply-print
           :prompt (fn [] false)
           :need-prompt (fn [] false)))
 
