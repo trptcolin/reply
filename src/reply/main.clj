@@ -1,4 +1,4 @@
-(ns reply.core
+(ns reply.main
   (:use [clojure.main :only [repl repl-read repl-exception]]
         [clojure.repl :only [set-break-handler!]])
   (:require [reply.hacks.printing :as hacks.printing]
