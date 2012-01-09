@@ -1,4 +1,4 @@
-(ns reply.JlineInputReader
+(ns reply.reader.jline.JlineInputReader
   (:gen-class
    :extends java.io.Reader
    :state state

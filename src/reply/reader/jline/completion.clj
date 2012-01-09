@@ -1,4 +1,4 @@
-(ns reply.completion.jline
+(ns reply.reader.jline.completion
   (:require [reply.completion :as completion])
   (:import [scala.tools.jline.console.completer Completer]
            [scala.tools.jline.console ConsoleReader]

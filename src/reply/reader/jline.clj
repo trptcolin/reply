@@ -1,9 +1,9 @@
 (ns reply.reader.jline
   (:refer-clojure :exclude [read])
   (:use [clojure.main :only [repl-read repl-exception]])
-  (:require [reply.completion.jline :as completion.jline])
+  (:require [reply.reader.jline.completion :as jline.completion])
   (:import [java.io File IOException PrintStream ByteArrayOutputStream]
-           [reply JlineInputReader]
+           [reply.reader.jline JlineInputReader]
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
            [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.history FileHistory]
@@ -16,8 +16,8 @@
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))
-        completer (completion.jline/make-var-completer 'clojure.core)
-        completion-handler (completion.jline/make-completion-handler)]
+        completer (jline.completion/make-var-completer 'clojure.core)
+        completion-handler (jline.completion/make-completion-handler)]
     (doto reader
       (.setBellEnabled false)
       (.setHistory history)
@@ -59,7 +59,7 @@
     (.setPrompt @jline-reader (get-prompt *ns*))
     (let [completer (first (.getCompleters @jline-reader))]
       (.removeCompleter @jline-reader completer)
-      (.addCompleter @jline-reader (completion.jline/make-var-completer *ns*)))
+      (.addCompleter @jline-reader (jline.completion/make-var-completer *ns*)))
     (let [input-stream @jline-pushback-reader]
       (do
         (Thread/interrupted) ; just to clear the status

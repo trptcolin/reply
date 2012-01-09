@@ -4,5 +4,5 @@
                  [org.scala-lang/jline "2.9.1"]]
   :dev-dependencies [[midje "1.3-alpha4"]
                      [lein-midje "[1.0.0,)"]]
-  :aot [reply.JlineInputReader]
+  :aot [reply.reader.jline.JlineInputReader]
   :java-source-path "src")
