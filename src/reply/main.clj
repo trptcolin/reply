@@ -52,15 +52,6 @@
         (println ";;;;;;;;;;")
         (.stop thread)))))
 
-(defn handle-ctrl-c [signal]
-  (print "^C")
-  (flush)
-
-  (stop printing-line)
-  (stop evaling-line :hard-kill-allowed true)
-
-  (clear-jline-buffer))
-
 (defn set-empty-prompt []
   (.setPrompt
     @jline-reader
@@ -90,17 +81,6 @@
           request-prompt)
         (throw e)))))
 
-(defn setup-reader! []
-  (Log/setOutput (java.io.PrintStream. (java.io.ByteArrayOutputStream.)))
-
-  (reset! jline-reader (make-reader)) ; since construction is side-effect-y
-  (reset! jline-pushback-reader ; since this depends on jline-reader
-    (CustomizableBufferLineNumberingPushbackReader.
-      (JlineInputReader.
-        {:jline-reader @jline-reader
-         :set-empty-prompt set-empty-prompt})
-      1)))
-
 (defn act-in-future [form action-atom base-action]
   (try
     (reset! action-atom {})
@@ -119,6 +99,25 @@
 
 (defn reply-print [form]
   (act-in-future form printing-line prn))
+
+(defn handle-ctrl-c [signal]
+  (print "^C")
+  (flush)
+
+  (stop printing-line)
+  (stop evaling-line :hard-kill-allowed true)
+
+  (clear-jline-buffer))
+
+(defn setup-reader! []
+  (Log/setOutput (java.io.PrintStream. (java.io.ByteArrayOutputStream.)))
+  (reset! jline-reader (make-reader)) ; since construction is side-effect-y
+  (reset! jline-pushback-reader ; since this depends on jline-reader
+    (CustomizableBufferLineNumberingPushbackReader.
+      (JlineInputReader.
+        {:jline-reader @jline-reader
+         :set-empty-prompt set-empty-prompt})
+      1)))
 
 (defn -main [& args]
   (set-break-handler! handle-ctrl-c)
