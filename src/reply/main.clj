@@ -82,13 +82,7 @@
       (do
         (Thread/interrupted) ; just to clear the status
         (actual-read input-stream request-prompt request-exit)))
-    (catch InterruptedException e
-      (clear-jline-buffer)
-      request-prompt)
-    (catch IOException e
-      (clear-jline-buffer)
-      request-prompt)
-    ; NOTE: this weirdness is for wrapped exceptions in 1.3
+    ; NOTE: this indirection is for wrapped exceptions in 1.3
     (catch Throwable e
       (if (#{IOException InterruptedException} (type (repl-exception e)))
         (do
