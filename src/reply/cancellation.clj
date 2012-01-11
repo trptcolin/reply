@@ -1,25 +1,27 @@
 (ns reply.cancellation
   (:use [clojure.main :only [repl-exception]]))
 
-(def evaling-line (atom nil))
-(def printing-line (atom nil))
+(def actions (atom []))
 
 (defn starting-read! []
-  (reset! evaling-line nil)
-  (reset! printing-line nil))
+  (doall (map #(reset! % nil) @actions)))
 
-(defn act-in-future [form action-atom base-action]
-  (try
-    (reset! action-atom {})
-    (let [act-on-form (fn []
-                        (swap! action-atom assoc :thread (Thread/currentThread))
-                        (let [result (base-action form)]
-                          (swap! action-atom assoc :completed true)
-                          result))]
-      @(future (act-on-form)))
-    (catch Throwable e
-      (println (repl-exception e))
-      (.printStackTrace e))))
+(defn act-on-form [action-state act form]
+  (swap! action-state assoc :thread (Thread/currentThread))
+  (let [result (act form)]
+    (swap! action-state assoc :completed true)
+    result))
+
+(defn act-in-future [act]
+  (let [action-state (atom nil)]
+    (swap! actions conj action-state)
+    (fn [form]
+      (try
+        (reset! action-state {})
+        @(future (act-on-form action-state act form))
+        (catch Throwable e
+          (println (repl-exception e))
+          (.printStackTrace e))))))
 
 (defn stop [action & {:keys [hard-kill-allowed]}]
   (let [thread (:thread @action)]
@@ -33,6 +35,5 @@
         (.stop thread)))))
 
 (defn stop-running-actions []
-  (stop printing-line)
-  (stop evaling-line :hard-kill-allowed true))
+  (doall (map #(stop % :hard-kill-allowed true) @actions)))
 

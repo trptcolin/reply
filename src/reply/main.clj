@@ -3,16 +3,20 @@
         [clojure.repl :only [set-break-handler!]])
   (:require [reply.cancellation :as cancellation]
             [reply.hacks.printing :as hacks.printing]
-            [reply.reader.jline :as reader.jline]
-            [clojure.string :as str]))
+            [reply.reader.jline :as reader.jline]))
 
 (def main-thread (Thread/currentThread))
 
-(defn reply-eval [form]
-  (cancellation/act-in-future form cancellation/evaling-line eval))
+(def reply-read
+  (fn [prompt exit]
+    (cancellation/starting-read!)
+    (reader.jline/read prompt exit)))
 
-(defn reply-print [form]
-  (cancellation/act-in-future form cancellation/printing-line prn))
+(def reply-eval
+  (cancellation/act-in-future eval))
+
+(def reply-print
+  (cancellation/act-in-future prn))
 
 (defn handle-ctrl-c [signal]
   (print "^C")
@@ -25,9 +29,7 @@
   (println "Clojure" (clojure-version))
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential]
-    (repl :read (fn [prompt exit]
-                  (cancellation/starting-read!)
-                  (reader.jline/read prompt exit))
+    (repl :read reply-read
           :eval reply-eval
           :print reply-print
           :prompt (constantly false)
