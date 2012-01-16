@@ -29,7 +29,7 @@ A fitter, happier, more productive REPL for Clojure.
 ## Installation
 
 I'm hoping this will eventually be distributed with Russ Olsen's excellent
-[dejour](https://github.com/russolsen/dejour.git), and perhaps also with
+[dejour](https://github.com/russolsen/dejour), and perhaps also with
 Phil Hagelberg's [leiningen](https://github.com/technomancy/leiningen).
 
 Meantime (assuming you have
