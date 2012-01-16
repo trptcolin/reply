@@ -30,9 +30,7 @@
 (defn set-empty-prompt []
   (.setPrompt
     @jline-reader
-    (apply str
-           (concat (repeat (- (count (get-prompt *ns*)) 2) \space)
-                   [\| \space]))))
+    (apply str (repeat (count (get-prompt *ns*)) \space))))
 
 (defn setup-reader! []
   (Log/setOutput (PrintStream. (ByteArrayOutputStream.)))
