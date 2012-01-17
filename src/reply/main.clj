@@ -5,8 +5,6 @@
             [reply.hacks.printing :as hacks.printing]
             [reply.reader.jline :as reader.jline]))
 
-(def main-thread (Thread/currentThread))
-
 (def reply-read
   (fn [prompt exit]
     (cancellation/starting-read!)
