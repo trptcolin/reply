@@ -1,6 +1,7 @@
 (ns reply.main
   (:use [clojure.main :only [repl]])
   (:require [reply.cancellation :as cancellation]
+            [reply.eval-state :as eval-state]
             [reply.hacks.printing :as hacks.printing]
             [reply.reader.jline :as reader.jline]))
 
@@ -10,7 +11,13 @@
     (reader.jline/read prompt exit)))
 
 (def reply-eval
-  (cancellation/act-in-future eval))
+  (cancellation/act-in-future
+    (fn [form]
+      ; TODO: Fix other bindings. This was only the most annoying one.
+      (binding [*ns* (eval-state/get-ns)]
+        (let [result (eval form)]
+          (eval-state/set-ns)
+          result)))))
 
 (def reply-print
   (cancellation/act-in-future prn))

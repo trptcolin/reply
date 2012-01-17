@@ -1,7 +1,8 @@
 (ns reply.reader.jline
   (:refer-clojure :exclude [read])
   (:use [clojure.main :only [repl-read repl-exception]])
-  (:require [reply.reader.jline.completion :as jline.completion])
+  (:require [reply.reader.jline.completion :as jline.completion]
+            [reply.eval-state :as eval-state])
   (:import [java.io File IOException PrintStream ByteArrayOutputStream]
            [reply.reader.jline JlineInputReader]
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
@@ -30,7 +31,7 @@
 (defn set-empty-prompt []
   (.setPrompt
     @jline-reader
-    (apply str (repeat (count (get-prompt *ns*)) \space))))
+    (apply str (repeat (count (get-prompt (eval-state/get-ns))) \space))))
 
 (defn setup-reader! []
   (Log/setOutput (PrintStream. (ByteArrayOutputStream.)))
@@ -62,10 +63,10 @@
   (when-not @jline-reader (setup-reader!))
   (try
     (.flush (.getHistory @jline-reader))
-    (.setPrompt @jline-reader (get-prompt *ns*))
+    (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
     (let [completer (first (.getCompleters @jline-reader))]
       (.removeCompleter @jline-reader completer)
-      (.addCompleter @jline-reader (jline.completion/make-var-completer *ns*)))
+      (.addCompleter @jline-reader (jline.completion/make-var-completer (eval-state/get-ns))))
     (let [input-stream @jline-pushback-reader]
       (do
         (Thread/interrupted) ; just to clear the status
