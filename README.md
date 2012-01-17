@@ -8,16 +8,17 @@ A fitter, happier, more productive REPL for Clojure.
   - jumping forward/back by word (not available in JLine versions before 2)
   - history searching
   - and much much more
-- CTRL-C doesn't bail out of the process - stops interruption-friendly operations
-- code completion for vars, namespaces, Java classes
-- CTRL-C kills the currently running command, breaks out of infinite loops, etc.
-
-## Hopefully coming soon
-- better stacktraces, likely using one of the existing tools
+- CTRL-C:
+  - doesn't bail out of the process - stops interruption-friendly operations
+  - kills the currently running command, breaks out of infinite loops, etc.
 - code completion for:
+  - vars, namespaces, Java classes
   - Java packages
   - namespace-qualified vars
   - Java static methods
+
+## Hopefully coming soon
+- better stacktraces, likely using one of the existing tools
 
 ## Maybe one day
 - smart indentation
