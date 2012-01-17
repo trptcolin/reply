@@ -46,6 +46,11 @@
   (-> (.getCursorBuffer @jline-reader)
       (.clear)))
 
+(defn resume-reader []
+  (.init (.getTerminal @jline-reader))
+  (.redrawLine @jline-reader)
+  (.flush @jline-reader))
+
 (defn shutdown-reader []
   (.restore (.getTerminal @jline-reader)))
 

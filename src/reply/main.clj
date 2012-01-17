@@ -1,6 +1,5 @@
 (ns reply.main
-  (:use [clojure.main :only [repl]]
-        [clojure.repl :only [set-break-handler!]])
+  (:use [clojure.main :only [repl]])
   (:require [reply.cancellation :as cancellation]
             [reply.hacks.printing :as hacks.printing]
             [reply.reader.jline :as reader.jline]))
@@ -16,14 +15,26 @@
 (def reply-print
   (cancellation/act-in-future prn))
 
+(defn set-signal-handler! [signal f]
+  (sun.misc.Signal/handle
+    (sun.misc.Signal. signal)
+    (proxy [sun.misc.SignalHandler] []
+      (handle [signal] (f signal)))))
+
 (defn handle-ctrl-c [signal]
   (print "^C")
   (flush)
   (cancellation/stop-running-actions)
   (reader.jline/reset-reader))
 
+(defn handle-resume [signal]
+  (println "Welcome back!")
+  (reader.jline/resume-reader))
+
 (defn -main [& args]
-  (set-break-handler! handle-ctrl-c)
+  (set-signal-handler! "INT" handle-ctrl-c)
+  (set-signal-handler! "CONT" handle-resume)
+
   (println "Clojure" (clojure-version))
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential]
