@@ -1,6 +1,25 @@
 #!/bin/sh
 
-BASEDIR=$(dirname $0)
+
+# normalize $0 on certain BSDs
+if [ "$(dirname "$0")" = "." ]; then
+    SCRIPT="$(which $(basename "$0"))"
+else
+    SCRIPT="$0"
+fi
+
+# resolve symlinks to the script itself portably
+while [ -h "$SCRIPT" ] ; do
+    ls=`ls -ld "$SCRIPT"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        SCRIPT="$link"
+    else
+        SCRIPT="$(dirname "$SCRIPT"$)/$link"
+    fi
+done
+
+BASEDIR=$(dirname $SCRIPT)
 
 java -cp $BASEDIR/../lib/clojure-1.3.0.jar:\
 $BASEDIR/../lib/jline-2.9.1.jar:\
