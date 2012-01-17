@@ -44,9 +44,10 @@
   (set-signal-handler! "CONT" handle-resume)
 
   (println "Clojure" (clojure-version))
-  (println "Exit:   Control+D")
-  (println "Docs:   (doc function-name)")
-  (println "Source: (source function-name)")
+  (println "Exit:    Control+D")
+  (println "Docs:    (doc function-name)")
+  (println "Javadoc: (javadoc java-object-or-class)")
+  (println "Source:  (source function-name)")
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                 complete/resolve-class hacks.complete/resolve-class]
