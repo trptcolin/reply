@@ -2,6 +2,7 @@
   (:use [clojure.main :only [repl]])
   (:require [reply.cancellation :as cancellation]
             [reply.eval-state :as eval-state]
+            [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
             [reply.reader.jline :as reader.jline]))
 
@@ -47,7 +48,8 @@
   (println "Docs:   (doc function-name)")
   (println "Source: (source function-name)")
 
-  (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential]
+  (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
+                complete/resolve-class hacks.complete/resolve-class]
     (repl :read reply-read
           :eval reply-eval
           :print reply-print

@@ -1,5 +1,6 @@
 (ns reply.reader.jline.completion
-  (:require [reply.completion :as completion])
+  (:require [reply.completion :as completion]
+            [complete :as ninjudd.complete])
   (:import [scala.tools.jline.console.completer Completer]
            [scala.tools.jline.console ConsoleReader]
            [scala.tools.jline.console.completer
@@ -38,7 +39,7 @@
       (let [buffer (or buffer "")
             prefix (or (completion/get-word-ending-at buffer cursor) "")
             prefix-length (.length prefix)
-            possible-completions (completion/get-candidates completions prefix)]
+            possible-completions (sort (ninjudd.complete/completions prefix))]
         (if (or (empty? possible-completions) (zero? prefix-length))
           -1
           (do
