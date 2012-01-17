@@ -35,5 +35,6 @@
           :prompt (constantly false)
           :need-prompt (constantly false)))
 
-  (shutdown-agents))
+  (shutdown-agents)
+  (reader.jline/shutdown-reader))
 

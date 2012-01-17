@@ -46,6 +46,9 @@
   (-> (.getCursorBuffer @jline-reader)
       (.clear)))
 
+(defn shutdown-reader []
+  (.restore (.getTerminal @jline-reader)))
+
 (defn actual-read [input-reader request-prompt request-exit]
   (binding [*in* input-reader]
     (repl-read request-prompt request-exit)))
