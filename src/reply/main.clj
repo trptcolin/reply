@@ -36,6 +36,9 @@
   (set-signal-handler! "CONT" handle-resume)
 
   (println "Clojure" (clojure-version))
+  (println "Exit:   Control+D")
+  (println "Docs:   (doc function-name)")
+  (println "Source: (source function-name)")
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential]
     (repl :read reply-read
