@@ -1,9 +1,9 @@
 (ns reply.reader.jline.completion
   (:require [reply.completion :as completion]
             [complete :as ninjudd.complete])
-  (:import [scala.tools.jline.console.completer Completer]
-           [scala.tools.jline.console ConsoleReader]
-           [scala.tools.jline.console.completer
+  (:import [jline.console.completer Completer]
+           [jline.console ConsoleReader]
+           [jline.console.completer
              CandidateListCompletionHandler
              Completer]))
 
