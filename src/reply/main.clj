@@ -45,9 +45,10 @@
 
   (println "Clojure" (clojure-version))
   (println "Exit:    Control+D")
-  (println "Docs:    (doc function-name)")
-  (println "Javadoc: (javadoc java-object-or-class)")
-  (println "Source:  (source function-name)")
+  (println "Docs:    (doc function-name-here)")
+  (println "         (find-doc \"part-of-name-here\")")
+  (println "Javadoc: (javadoc java-object-or-class-here)")
+  (println "Source:  (source function-name-here)")
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                 complete/resolve-class hacks.complete/resolve-class]
