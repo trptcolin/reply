@@ -6,9 +6,9 @@
   (:import [java.io File IOException PrintStream ByteArrayOutputStream]
            [reply.reader.jline JlineInputReader]
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
-           [jline.console ConsoleReader]
-           [jline.console.history FileHistory]
-           [jline.internal Log]))
+           [scala.tools.jline.console ConsoleReader]
+           [scala.tools.jline.console.history FileHistory]
+           [scala.tools.jline.internal Log]))
 
 (def jline-reader (atom nil))
 (def jline-pushback-reader (atom nil))
@@ -19,17 +19,9 @@
         history (FileHistory. (File. home ".jline-reply.history"))
         completer (jline.completion/make-var-completer 'clojure.core)
         completion-handler (jline.completion/make-completion-handler)]
-
-    (-> reader (.getKeys)
-      (.bind "\4"
-        (proxy [java.awt.event.ActionListener] []
-          (actionPerformed [e]
-            (print "^D") (flush)
-            (System/exit 0)))))
-
     (doto reader
+      (.setBellEnabled false)
       (.setHistory history)
-      (.setPaginationEnabled true)
       (.setCompletionHandler completion-handler)
       (.addCompleter completer))))
 
