@@ -20,13 +20,6 @@
         completer (jline.completion/make-var-completer 'clojure.core)
         completion-handler (jline.completion/make-completion-handler)]
 
-    (-> reader (.getKeys)
-      (.bind "\4"
-        (proxy [java.awt.event.ActionListener] []
-          (actionPerformed [e]
-            (print "^D") (flush)
-            (System/exit 0)))))
-
     (doto reader
       (.setHistory history)
       (.setPaginationEnabled true)
