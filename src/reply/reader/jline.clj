@@ -17,7 +17,7 @@
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))
-        completer (jline.completion/make-var-completer 'clojure.core)
+        completer (jline.completion/make-completer (the-ns 'user))
         completion-handler (jline.completion/make-completion-handler)]
 
     (doto reader
@@ -67,7 +67,7 @@
     (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
     (let [completer (first (.getCompleters @jline-reader))]
       (.removeCompleter @jline-reader completer)
-      (.addCompleter @jline-reader (jline.completion/make-var-completer (eval-state/get-ns))))
+      (.addCompleter @jline-reader (jline.completion/make-completer (eval-state/get-ns))))
     (let [input-stream @jline-pushback-reader]
       (do
         (Thread/interrupted) ; just to clear the status

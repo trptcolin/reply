@@ -33,26 +33,16 @@
             (.redrawLine reader)
             true))))))
 
-(defn make-completer [completions]
+(defn make-completer [ns]
   (proxy [Completer] []
     (complete [^String buffer cursor ^java.util.List candidates]
       (let [buffer (or buffer "")
             prefix (or (completion/get-word-ending-at buffer cursor) "")
             prefix-length (.length prefix)
-            possible-completions (sort (ninjudd.complete/completions prefix))]
+            possible-completions (sort (ninjudd.complete/completions prefix ns))]
         (if (or (empty? possible-completions) (zero? prefix-length))
           -1
           (do
             (.addAll candidates possible-completions)
             (- cursor prefix-length)))))))
-
-(defn make-var-completer [ns]
-  (let [collections (concat (map keys ((juxt ns-publics
-                                             ns-refers
-                                             ns-imports)
-                                       ns))
-                            [(map str (all-ns))])]
-    (make-completer
-      (mapcat (comp sort (partial map str))
-              collections))))
 
