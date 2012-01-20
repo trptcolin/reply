@@ -14,11 +14,8 @@
 (def reply-eval
   (cancellation/act-in-future
     (fn [form]
-      ; TODO: Fix other bindings. This was only the most annoying one.
-      (binding [*ns* (eval-state/get-ns)]
-        (let [result (eval form)]
-          (eval-state/set-ns)
-          result)))))
+      (reply.eval-state/with-bindings
+        (partial eval form)))))
 
 (def reply-print
   (cancellation/act-in-future prn))
