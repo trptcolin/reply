@@ -58,6 +58,7 @@
   (set-signal-handler! "INT" handle-ctrl-c)
   (set-signal-handler! "CONT" handle-resume)
 
+  (println "Welcome to REPL-y!")
   (println "Clojure" (clojure-version))
   (help)
   (setup-conveniences)
