@@ -17,13 +17,11 @@
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))
-        completer (jline.completion/make-completer (the-ns 'user))
-        completion-handler (jline.completion/make-completion-handler)]
+        completer (jline.completion/make-completer (the-ns 'user))]
 
     (doto reader
       (.setHistory history)
       (.setPaginationEnabled true)
-      (.setCompletionHandler completion-handler)
       (.addCompleter completer))))
 
 (defn get-prompt [ns]
