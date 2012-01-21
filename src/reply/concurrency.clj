@@ -1,4 +1,4 @@
-(ns reply.cancellation
+(ns reply.concurrency
   (:use [clojure.main :only [repl-exception]]))
 
 (def actions (atom []))

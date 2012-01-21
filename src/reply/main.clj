@@ -1,6 +1,6 @@
 (ns reply.main
   (:use [clojure.main :only [repl]])
-  (:require [reply.cancellation :as cancellation]
+  (:require [reply.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
             [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
@@ -8,17 +8,17 @@
 
 (def reply-read
   (fn [prompt exit]
-    (cancellation/starting-read!)
+    (concurrency/starting-read!)
     (reader.jline/read prompt exit)))
 
 (def reply-eval
-  (cancellation/act-in-future
+  (concurrency/act-in-future
     (fn [form]
       (reply.eval-state/with-bindings
         (partial eval form)))))
 
 (def reply-print
-  (cancellation/act-in-future prn))
+  (concurrency/act-in-future prn))
 
 (defn set-signal-handler! [signal f]
   (sun.misc.Signal/handle
@@ -29,7 +29,7 @@
 (defn handle-ctrl-c [signal]
   (print "^C")
   (flush)
-  (cancellation/stop-running-actions)
+  (concurrency/stop-running-actions)
   (reader.jline/reset-reader))
 
 (defn handle-resume [signal]
