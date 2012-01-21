@@ -1,5 +1,4 @@
-(ns reply.completion
-  (:require [clojure.string :as str]))
+(ns reply.completion)
 
 (defn get-word-ending-at [input index]
   (let [start (if (>= (.length input) index)

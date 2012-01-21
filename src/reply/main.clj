@@ -14,7 +14,7 @@
 (def reply-eval
   (concurrency/act-in-future
     (fn [form]
-      (reply.eval-state/with-bindings
+      (eval-state/with-bindings
         (partial eval form)))))
 
 (def reply-print
