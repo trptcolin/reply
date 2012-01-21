@@ -5,6 +5,5 @@
   (try (let [val (resolve sym)]
     (when (class? val) val))
       (catch RuntimeException e
-        (if (= ClassNotFoundException (type (repl-exception e)))
-          nil
+        (when (not= ClassNotFoundException (class (repl-exception e)))
           (throw e)))))
