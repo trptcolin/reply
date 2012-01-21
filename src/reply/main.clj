@@ -36,16 +36,31 @@
   (println "Welcome back!")
   (reader.jline/resume-reader))
 
+(defn help []
+  (println "Exit:    Control+D")
+  (println "Docs:    (doc function-name-here)")
+  (println "         (find-doc \"part-of-name-here\")")
+  (println "Javadoc: (javadoc java-object-or-class-here)")
+  (println "Source:  (source function-name-here)"))
+
+(defn exit []
+  (shutdown-agents)
+  (reader.jline/shutdown-reader)
+  (println "Bye for now!")
+  (System/exit 0))
+
+(defn setup-conveniences []
+  (intern 'user 'exit exit)
+  (intern 'user 'quit exit)
+  (intern 'user 'help help))
+
 (defn -main [& args]
   (set-signal-handler! "INT" handle-ctrl-c)
   (set-signal-handler! "CONT" handle-resume)
 
   (println "Clojure" (clojure-version))
-  (println "Exit:    Control+D")
-  (println "Docs:    (doc function-name-here)")
-  (println "         (find-doc \"part-of-name-here\")")
-  (println "Javadoc: (javadoc java-object-or-class-here)")
-  (println "Source:  (source function-name-here)")
+  (help)
+  (setup-conveniences)
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                 complete/resolve-class hacks.complete/resolve-class]
@@ -55,6 +70,5 @@
           :prompt (constantly false)
           :need-prompt (constantly false)))
 
-  (shutdown-agents)
-  (reader.jline/shutdown-reader))
+  (exit))
 
