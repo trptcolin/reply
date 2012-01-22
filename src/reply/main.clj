@@ -4,7 +4,8 @@
             [reply.eval-state :as eval-state]
             [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
-            [reply.reader.jline :as reader.jline]))
+            [reply.reader.jline :as reader.jline]
+            [cd-client.core :as cd]))
 
 (def reply-read
   (fn [prompt exit]
@@ -37,11 +38,15 @@
   (reader.jline/resume-reader))
 
 (defn help []
-  (println "Exit:    Control+D")
-  (println "Docs:    (doc function-name-here)")
-  (println "         (find-doc \"part-of-name-here\")")
-  (println "Javadoc: (javadoc java-object-or-class-here)")
-  (println "Source:  (source function-name-here)"))
+  (println "    Exit: Control+D or (exit) or (quit)")
+  (println "Commands: (help)")
+  (println "    Docs: (doc function-name-here)")
+  (println "          (find-doc \"part-of-name-here\")")
+  (println "  Source: (source function-name-here)")
+  (println " Javadoc: (javadoc java-object-or-class-here)")
+  (println "Examples from clojuredocs.org:")
+  (println "          (clojuredocs name-here)")
+  (println "          (clojuredocs \"ns-here\" \"name-here\")"))
 
 (defn exit []
   (shutdown-agents)
@@ -49,10 +54,16 @@
   (println "Bye for now!")
   (System/exit 0))
 
+(defn intern-with-meta [ns sym value-var]
+  (intern ns
+          (with-meta sym (assoc (meta value-var) :ns (the-ns ns)))
+          @value-var))
+
 (defn setup-conveniences []
   (intern 'user 'exit exit)
   (intern 'user 'quit exit)
-  (intern 'user 'help help))
+  (intern 'user 'help help)
+  (intern-with-meta 'user 'clojuredocs #'cd/pr-examples))
 
 (defn -main [& args]
   (set-signal-handler! "INT" handle-ctrl-c)

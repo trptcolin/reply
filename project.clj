@@ -2,6 +2,7 @@
   :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojars.trptcolin/jline "2.6-SNAPSHOT"]
+                 [org.thnetos/cd-client "0.3.1"]
                  [clojure-complete "0.1.4"]]
   :dev-dependencies [[midje "1.3-alpha4"]
                      [lein-midje "[1.0.0,)"]]
