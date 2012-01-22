@@ -35,6 +35,10 @@ Meantime (assuming you have
 
 Run `bin/reply.sh`. This will get friendlier for non-Cygwin Windows users.
 
+And if you want to really live the high life:
+
+    ln -s /path/to/reply/bin/reply.sh ~/bin/reply
+
 ## Thanks
 
 Thanks to the Clojure and JLine developers for their work on the
