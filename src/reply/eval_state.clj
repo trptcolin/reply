@@ -21,14 +21,22 @@
 (defn get-ns []
   (@bindings #'*ns*))
 
+(defn set-bindings! []
+  (doseq [k (keys @bindings)]
+    (swap! bindings assoc k (deref k))))
+
 (defn with-bindings [f]
   (with-bindings* @bindings
     (fn []
-      (let [result (f)]
-        (set! *3 *2)
-        (set! *2 *1)
-        (set! *1 result)
-        (doseq [k (keys @bindings)]
-          (swap! bindings assoc k (deref k)))
-        result))))
+      (try
+        (let [result (f)]
+          (set! *3 *2)
+          (set! *2 *1)
+          (set! *1 result)
+          (set-bindings!)
+          result)
+        (catch Throwable e
+          (set! *e e)
+          (set-bindings!)
+          (throw e))))))
 
