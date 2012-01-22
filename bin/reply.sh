@@ -28,3 +28,6 @@ for j in $BASEDIR/../lib/*.jar; do
 done
 java -cp $CP clojure.main -m reply.main
 
+# For jline debugging:
+# java -Djline.internal.Log.debug=true -cp $CP clojure.main -m reply.main
+
