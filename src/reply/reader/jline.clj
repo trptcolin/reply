@@ -21,6 +21,7 @@
 
     (doto reader
       (.setHistory history)
+      (.setExpandEvents false)
       (.setPaginationEnabled true)
       (.addCompleter completer))))
 
