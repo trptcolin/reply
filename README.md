@@ -16,16 +16,7 @@ A fitter, happier, more productive REPL for Clojure.
   - Java packages
   - namespace-qualified vars
   - Java static methods
-
-## Hopefully coming soon
-- better stacktraces, likely using one of the existing tools
-
-## Maybe one day
-- smart indentation
-- colorization
-- code completion for:
-  - Java methods (maybe based on type-hinted clojure vars?)
-- hold full source code in metadata? (for in-repl defns)
+- ClojureDocs support
 
 ## Installation
 
