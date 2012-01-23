@@ -1,10 +1,12 @@
 (ns reply.main
-  (:use [clojure.main :only [repl]])
   (:require [reply.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
             [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
             [reply.reader.jline :as reader.jline]
+            [clojure.main]
+            [clojure.repl]
+            [clj-stacktrace.repl]
             [cd-client.core :as cd]))
 
 (def reply-read
@@ -72,13 +74,14 @@
   (println "Welcome to REPL-y!")
   (println "Clojure" (clojure-version))
   (help)
-  (setup-conveniences)
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
-                complete/resolve-class hacks.complete/resolve-class]
-    (repl :read reply-read
+                complete/resolve-class hacks.complete/resolve-class
+                clojure.repl/pst clj-stacktrace.repl/pst]
+    (clojure.main/repl :read reply-read
           :eval reply-eval
           :print reply-print
+          :init setup-conveniences
           :prompt (constantly false)
           :need-prompt (constantly false)))
 

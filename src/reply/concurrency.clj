@@ -1,6 +1,5 @@
 (ns reply.concurrency
-  (:require [clj-stacktrace.repl :as stacktrace])
-  (:use [clojure.main :only [repl-exception]]))
+  (:require [clojure.main]))
 
 (def actions (atom []))
 
@@ -21,7 +20,7 @@
         (reset! action-state {})
         @(future (act-on-form action-state act form))
         (catch Throwable e
-          (stacktrace/pst (repl-exception e)))))))
+          (clojure.main/repl-caught e))))))
 
 (defn stop [action & {:keys [hard-kill-allowed]}]
   (let [thread (:thread @action)]
