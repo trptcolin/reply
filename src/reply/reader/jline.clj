@@ -1,8 +1,8 @@
 (ns reply.reader.jline
   (:refer-clojure :exclude [read])
-  (:use [clojure.main :only [repl-read repl-exception]])
   (:require [reply.reader.jline.completion :as jline.completion]
-            [reply.eval-state :as eval-state])
+            [reply.eval-state :as eval-state]
+            [clojure.main])
   (:import [java.io File IOException PrintStream ByteArrayOutputStream]
            [reply.reader.jline JlineInputReader]
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
@@ -57,7 +57,7 @@
 
 (defn actual-read [input-reader request-prompt request-exit]
   (binding [*in* input-reader]
-    (repl-read request-prompt request-exit)))
+    (clojure.main/repl-read request-prompt request-exit)))
 
 (defn read [request-prompt request-exit]
   (when-not @jline-reader (setup-reader!))
@@ -73,7 +73,7 @@
         (actual-read input-stream request-prompt request-exit)))
     ; NOTE: this indirection is for wrapped exceptions in 1.3
     (catch Throwable e
-      (if (#{IOException InterruptedException} (type (repl-exception e)))
+      (if (#{IOException InterruptedException} (type (clojure.main/repl-exception e)))
         (do
           (reset-reader)
           request-prompt)

@@ -1,9 +1,10 @@
 (ns reply.hacks.complete
-  (:use [clojure.main :only [repl-exception]]))
+  (:require [clojure.main]))
 
 (defn resolve-class [sym]
   (try (let [val (resolve sym)]
     (when (class? val) val))
       (catch RuntimeException e
-        (when (not= ClassNotFoundException (class (repl-exception e)))
+        (when (not= ClassNotFoundException
+                    (class (clojure.main/repl-exception e)))
           (throw e)))))
