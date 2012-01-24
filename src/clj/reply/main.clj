@@ -67,7 +67,7 @@
   (intern 'user 'help help)
   (intern-with-meta 'user 'clojuredocs #'cd/pr-examples))
 
-(defn -main [& args]
+(defn launch [args]
   (set-signal-handler! "INT" handle-ctrl-c)
   (set-signal-handler! "CONT" handle-resume)
 

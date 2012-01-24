@@ -8,4 +8,6 @@
   :dev-dependencies [[midje "1.3-alpha4"]
                      [lein-midje "[1.0.0,)"]]
   :aot [reply.reader.jline.JlineInputReader]
-  :java-source-path "src")
+  :main reply.ReplyMain
+  :source-path "src/clj"
+  :java-source-path "src/java")
