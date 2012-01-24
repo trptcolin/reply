@@ -21,13 +21,13 @@ done
 
 BASEDIR=$(dirname $SCRIPT)
 
-CP=$BASEDIR/../src/:\
+CP=$BASEDIR/../src/clj/:\
 $BASEDIR/../classes/
 for j in $BASEDIR/../lib/*.jar; do
   CP=$CP:$j
 done
-java -cp $CP clojure.main -m reply.main
+java -cp $CP reply.ReplyMain
 
 # For jline debugging:
-# java -Djline.internal.Log.debug=true -cp $CP clojure.main -m reply.main
+# java -Djline.internal.Log.debug=true -cp $CP reply.ReplyMain
 
