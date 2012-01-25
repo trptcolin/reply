@@ -64,29 +64,30 @@
           (with-meta sym (assoc (meta value-var) :ns (the-ns ns)))
           @value-var))
 
-(def startup-code
+(def default-init-code
   '(do
+    (println "Welcome to REPL-y!")
+    (println "Clojure" (clojure-version))
+    (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
+    (use '[clojure.java.javadoc :only (javadoc)])
+    (use '[clojure.pprint :only (pp pprint)])
+    (require '[cd-client.core])
     (def exit reply.main/exit)
     (def quit reply.main/exit)
     (def help reply.main/help)
+    (help)
     (reply.main/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples)))
 
-(defn setup-conveniences []
-  (in-ns 'user)
-  (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
-  (use '[clojure.java.javadoc :only (javadoc)])
-  (use '[clojure.pprint :only (pp pprint)])
-  (require '[cd-client.core])
-  (eval startup-code)
-  (in-ns 'reply.main))
+(defn setup-conveniences
+  ([& {:keys [skip-default-init custom-init] :as options}]
+    (in-ns 'user)
+    (when-not skip-default-init (eval default-init-code))
+    (when custom-init (eval custom-init))
+    (in-ns 'reply.main)))
 
 (defn launch [args]
   (set-signal-handler! "INT" handle-ctrl-c)
   (set-signal-handler! "CONT" handle-resume)
-
-  (println "Welcome to REPL-y!")
-  (println "Clojure" (clojure-version))
-  (help)
 
   (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                 complete/resolve-class hacks.complete/resolve-class
@@ -94,7 +95,7 @@
     (clojure.main/repl :read reply-read
           :eval reply-eval
           :print reply-print
-          :init setup-conveniences
+          :init #(setup-conveniences :skip-default-init false :custom-init '())
           :prompt (constantly false)
           :need-prompt (constantly false)))
 
