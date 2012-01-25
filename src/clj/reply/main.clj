@@ -85,7 +85,7 @@
     (when custom-init (eval custom-init))
     (in-ns 'reply.main)))
 
-(defn launch [args]
+(defn launch [& args]
   (set-signal-handler! "INT" handle-ctrl-c)
   (set-signal-handler! "CONT" handle-resume)
 
