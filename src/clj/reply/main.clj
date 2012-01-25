@@ -6,8 +6,7 @@
             [reply.reader.jline :as reader.jline]
             [clojure.main]
             [clojure.repl]
-            [clj-stacktrace.repl]
-            [cd-client.core :as cd]))
+            [clj-stacktrace.repl]))
 
 (def reply-read
   (fn [prompt exit]
@@ -39,7 +38,9 @@
   (println "Welcome back!")
   (reader.jline/resume-reader))
 
-(defn help []
+(defn help
+  "Prints a list of helpful commands."
+  []
   (println "    Exit: Control+D or (exit) or (quit)")
   (println "Commands: (help)")
   (println "    Docs: (doc function-name-here)")
@@ -50,7 +51,9 @@
   (println "          (clojuredocs name-here)")
   (println "          (clojuredocs \"ns-here\" \"name-here\")"))
 
-(defn exit []
+(defn exit
+  "Exits the REPL."
+  []
   (shutdown-agents)
   (reader.jline/shutdown-reader)
   (println "Bye for now!")
@@ -66,9 +69,7 @@
     (def exit reply.main/exit)
     (def quit reply.main/exit)
     (def help reply.main/help)
-    (defmacro clojuredocs
-      ([sym] `(cd-client.core/pr-examples ~sym))
-      ([ns sym] `(cd-client.core/pr-examples ~ns ~sym)))))
+    (reply.main/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples)))
 
 (defn setup-conveniences []
   (in-ns 'user)
@@ -78,8 +79,6 @@
   (require '[cd-client.core])
   (eval startup-code)
   (in-ns 'reply.main))
-
-  ;(intern-with-meta 'user 'clojuredocs #'cd/pr-examples))
 
 (defn launch [args]
   (set-signal-handler! "INT" handle-ctrl-c)
