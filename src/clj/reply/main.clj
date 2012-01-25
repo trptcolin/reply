@@ -61,11 +61,25 @@
           (with-meta sym (assoc (meta value-var) :ns (the-ns ns)))
           @value-var))
 
+(def startup-code
+  '(do
+    (def exit reply.main/exit)
+    (def quit reply.main/exit)
+    (def help reply.main/help)
+    (defmacro clojuredocs
+      ([sym] `(cd-client.core/pr-examples ~sym))
+      ([ns sym] `(cd-client.core/pr-examples ~ns ~sym)))))
+
 (defn setup-conveniences []
-  (intern 'user 'exit exit)
-  (intern 'user 'quit exit)
-  (intern 'user 'help help)
-  (intern-with-meta 'user 'clojuredocs #'cd/pr-examples))
+  (in-ns 'user)
+  (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
+  (use '[clojure.java.javadoc :only (javadoc)])
+  (use '[clojure.pprint :only (pp pprint)])
+  (require '[cd-client.core])
+  (eval startup-code)
+  (in-ns 'reply.main))
+
+  ;(intern-with-meta 'user 'clojuredocs #'cd/pr-examples))
 
 (defn launch [args]
   (set-signal-handler! "INT" handle-ctrl-c)
