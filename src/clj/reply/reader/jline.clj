@@ -44,16 +44,19 @@
       1)))
 
 (defn reset-reader []
-  (-> (.getCursorBuffer @jline-reader)
-      (.clear)))
+  (when @jline-reader
+    (-> (.getCursorBuffer @jline-reader)
+        (.clear))))
 
 (defn resume-reader []
-  (.init (.getTerminal @jline-reader))
-  (.redrawLine @jline-reader)
-  (.flush @jline-reader))
+  (when @jline-reader
+    (.init (.getTerminal @jline-reader))
+    (.redrawLine @jline-reader)
+    (.flush @jline-reader)))
 
 (defn shutdown-reader []
-  (.restore (.getTerminal @jline-reader)))
+  (when @jline-reader
+    (.restore (.getTerminal @jline-reader))))
 
 (defmacro with-jline-in [& body]
   `(do
