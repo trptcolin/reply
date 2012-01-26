@@ -85,19 +85,42 @@
     (when custom-init (eval custom-init))
     (in-ns 'reply.main)))
 
-(defn launch [& args]
-  (set-signal-handler! "INT" handle-ctrl-c)
-  (set-signal-handler! "CONT" handle-resume)
+(defn parse-args [args]
+  (loop [[option arg & more :as args] args
+         arg-map {}]
+    (case option
+      "-i" (recur more (assoc arg-map "-i" (read-string arg)))
+      "--init" (recur more (assoc arg-map "-i" (read-string arg)))
+      "--skip-default-init" (recur (cons arg more)
+                                   (assoc arg-map "--skip-default-init" true))
+      arg-map)))
 
-  (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
-                complete/resolve-class hacks.complete/resolve-class
-                clojure.repl/pst clj-stacktrace.repl/pst]
-    (clojure.main/repl :read reply-read
-          :eval reply-eval
-          :print reply-print
-          :init #(setup-conveniences :skip-default-init false :custom-init '())
-          :prompt (constantly false)
-          :need-prompt (constantly false)))
+(defn launch
+  "Launches a REPL. Customizations available:
+  -i: provide code to evaluate in the user ns
+  --skip-default-init: skip the default initialization code"
+  [& args]
+  (try
+    (set-signal-handler! "INT" handle-ctrl-c)
+    (set-signal-handler! "CONT" handle-resume)
+
+    (let [arg-map (parse-args args)
+          custom-init (or (arg-map "-i") '())
+          skip-default-init (arg-map "--skip-default-init")]
+
+      (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
+                    complete/resolve-class hacks.complete/resolve-class
+                    clojure.repl/pst clj-stacktrace.repl/pst]
+        (clojure.main/repl :read reply-read
+              :eval reply-eval
+              :print reply-print
+              :init #(setup-conveniences :skip-default-init skip-default-init
+                                         :custom-init custom-init)
+              :prompt (constantly false)
+            :need-prompt (constantly false))))
+    (catch Throwable e
+      (println "Oh noez!")
+      (clj-stacktrace.repl/pst e)))
 
   (exit))
 
