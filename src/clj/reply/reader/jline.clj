@@ -55,26 +55,23 @@
 (defn shutdown-reader []
   (.restore (.getTerminal @jline-reader)))
 
-(defn actual-read [input-reader request-prompt request-exit]
-  (binding [*in* input-reader]
-    (clojure.main/repl-read request-prompt request-exit)))
+(defmacro with-jline-in [& body]
+  `(do
+    (when-not @jline-reader (setup-reader!))
+    (try
+      (.flush (.getHistory @jline-reader))
+      (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
+      (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
+      (.addCompleter @jline-reader (jline.completion/make-completer (eval-state/get-ns)))
+      (binding [*in* @jline-pushback-reader]
+        (Thread/interrupted) ; just to clear the status
+        ~@body)
+      ; NOTE: this indirection is for wrapped exceptions in 1.3
+      (catch Throwable e#
+        (if (#{IOException InterruptedException} (type (clojure.main/repl-exception e#)))
+          (do (reset-reader) nil)
+          (throw e#))))))
 
 (defn read [request-prompt request-exit]
-  (when-not @jline-reader (setup-reader!))
-  (try
-    (.flush (.getHistory @jline-reader))
-    (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
-    (let [completer (first (.getCompleters @jline-reader))]
-      (.removeCompleter @jline-reader completer)
-      (.addCompleter @jline-reader (jline.completion/make-completer (eval-state/get-ns))))
-    (let [input-stream @jline-pushback-reader]
-      (do
-        (Thread/interrupted) ; just to clear the status
-        (actual-read input-stream request-prompt request-exit)))
-    ; NOTE: this indirection is for wrapped exceptions in 1.3
-    (catch Throwable e
-      (if (#{IOException InterruptedException} (type (clojure.main/repl-exception e)))
-        (do
-          (reset-reader)
-          request-prompt)
-        (throw e)))))
+  (with-jline-in
+    (clojure.main/repl-read request-prompt request-exit)))
