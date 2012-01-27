@@ -2,13 +2,13 @@
   (:require [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
             [reply.concurrency]
+            [reply.eval-state]
             [reply.initialization]))
 
 (def current-command (atom (fn ([]) ([x]))))
 
-(defn execute-with-connection [port form]
-  (let [connection (nrepl/connect "localhost" port)
-        response-fn ((:send connection) form)]
+(defn execute-with-connection [connection form]
+  (let [response-fn ((:send connection) form)]
     (reset! current-command response-fn)
     (for [{:keys [ns] :as res} (nrepl/response-seq response-fn)]
       (do
@@ -29,14 +29,15 @@
       (loop [ns "user"]
         (prompt ns)
         (flush)
-        (recur (last (execute-with-connection port (pr-str (read)))))))))
+        (recur (last (execute-with-connection connection (pr-str (read)))))))))
 
 (defn main
   "Ripped directly from nREPL. The only changes are in namespacing, running of
 initial code, and options."
   [options]
   (let [[ssocket _] (nrepl/start-server (Integer/parseInt (or (options "--port") "0")))
-        local-port (.getLocalPort ssocket)]
+        local-port (.getLocalPort ssocket)
+        connection (nrepl/connect "localhost" local-port)]
     (reply.concurrency/set-signal-handler! "INT" (fn [sig] (println "^C") (@current-command :interrupt)))
     (when-let [ack-port (options "--ack")]
       (binding [*out* *err*]
@@ -44,7 +45,7 @@ initial code, and options."
                    local-port ack-port)
           (:status (#'clojure.tools.nrepl/send-ack local-port (Integer/parseInt ack-port))))))
     (doall (execute-with-connection
-             local-port
+             connection
              (pr-str (reply.initialization/construct-init-code options))))
     (if (options "--interactive")
       (run-repl local-port
