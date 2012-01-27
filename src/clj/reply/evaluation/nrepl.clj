@@ -10,11 +10,12 @@
 (defn execute-with-connection [connection form]
   (let [response-fn ((:send connection) form)]
     (reset! current-command response-fn)
-    (for [{:keys [ns] :as res} (nrepl/response-seq response-fn)]
+    (for [{:keys [ns value out err] :as res} (nrepl/response-seq response-fn)]
       (do
-        (when (:value res) (print (:value res)))
-        (when (:out res) (print (:out res)))
-        (when (:err res) (print (:err res)))
+        (when value (print value))
+        (when out (print out))
+        (when err (print err))
+        (flush)
         ns))))
 
 (defn run-repl
