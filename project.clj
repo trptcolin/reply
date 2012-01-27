@@ -8,6 +8,8 @@
                  [org.clojure/tools.nrepl "0.0.6-SNAPSHOT"]]
   :dev-dependencies [[midje "1.3-alpha4" :exclusions [org.clojure/clojure]]
                      [lein-midje "[1.0.0,)"]]
+  :repositories {
+    "sonatype" {:url "http://oss.sonatype.org/content/repositories/snapshots" } }
   :aot [reply.reader.jline.JlineInputReader]
   :source-path "src/clj"
   :java-source-path "src/java")
