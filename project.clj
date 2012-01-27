@@ -9,6 +9,5 @@
   :dev-dependencies [[midje "1.3-alpha4" :exclusions [org.clojure/clojure]]
                      [lein-midje "[1.0.0,)"]]
   :aot [reply.reader.jline.JlineInputReader]
-  :main reply.ReplyMain
   :source-path "src/clj"
   :java-source-path "src/java")

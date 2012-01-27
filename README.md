@@ -17,6 +17,7 @@ A fitter, happier, more productive REPL for Clojure.
   - namespace-qualified vars
   - Java static methods
 - ClojureDocs support
+- nREPL integration
 
 ## Installation
 
@@ -38,6 +39,25 @@ Run `bin/reply.sh`. This will get friendlier for non-Cygwin Windows users.
 And if you want to really live the high life:
 
     ln -s /path/to/reply/bin/reply.sh ~/bin/reply
+
+Examples of fancy options:
+
+- No options; standalone execution:
+
+    $ reply
+
+- Launch [nREPL](https://github.com/clojure/tools.nrepl) in interactive mode:
+
+    $ reply --nrepl
+
+- Skip all the bells-and-whistles initialization and provide your own:
+
+    $ reply --skip-default-init -i '(println "OHAI WORLD")'
+
+For details on the latest and greatest:
+
+    $ reply --help
+
 
 ## Thanks
 

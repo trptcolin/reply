@@ -48,8 +48,9 @@
     (case option
       "-i" (recur more (assoc arg-map :custom-init (read-string arg)))
       "--init" (recur more (assoc arg-map :custom-init (read-string arg)))
-      "--nrepl" (recur (cons arg more)
-                       (assoc arg-map :nrepl true))
+      "-h" (recur (cons arg more) (assoc arg-map :help true))
+      "--help" (recur (cons arg more) (assoc arg-map :help true))
+      "--nrepl" (recur (cons arg more) (assoc arg-map :nrepl true))
       "--skip-default-init" (recur (cons arg more)
                                    (assoc arg-map :skip-default-init true))
       arg-map)))
@@ -76,9 +77,10 @@
 
 (defn launch
   "Launches a REPL. Customizations available:
-  -i: provide code to evaluate in the user ns
-  --skip-default-init: skip the default initialization code
-  --nrepl: hook up to nREPL (clojure.tools.nrepl)"
+  -h/--help:           Show this help screen
+  -i/--init:           Provide custom code to evaluate in the user ns
+  --skip-default-init: Skip the default initialization code
+  --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode"
   [& args]
   (try
     (concurrency/set-signal-handler! "CONT" handle-resume)
@@ -86,9 +88,9 @@
       (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                     complete/resolve-class hacks.complete/resolve-class
                     clojure.repl/pst clj-stacktrace.repl/pst]
-        (if (:nrepl arg-map)
-          (launch-nrepl arg-map)
-          (launch-standalone arg-map))))
+        (cond (:help arg-map) (println (:doc (meta #'launch)))
+              (:nrepl arg-map) (launch-nrepl arg-map)
+              :else (launch-standalone arg-map))))
     (catch Throwable e
       (when (not= (.getMessage e) "EOF while reading")
         (println "Oh noez!")
