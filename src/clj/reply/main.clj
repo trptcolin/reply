@@ -1,8 +1,10 @@
 (ns reply.main
   (:require [reply.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
+            [reply.evaluation.nrepl :as evaluation.nrepl]
             [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
+            [reply.initialization :as initialization]
             [reply.reader.jline :as reader.jline]
             [clojure.main]
             [clojure.repl]
@@ -38,19 +40,6 @@
   (println "Welcome back!")
   (reader.jline/resume-reader))
 
-(defn help
-  "Prints a list of helpful commands."
-  []
-  (println "    Exit: Control+D or (exit) or (quit)")
-  (println "Commands: (help)")
-  (println "    Docs: (doc function-name-here)")
-  (println "          (find-doc \"part-of-name-here\")")
-  (println "  Source: (source function-name-here)")
-  (println " Javadoc: (javadoc java-object-or-class-here)")
-  (println "Examples from clojuredocs.org:")
-  (println "          (clojuredocs name-here)")
-  (println "          (clojuredocs \"ns-here\" \"name-here\")"))
-
 (defn exit
   "Exits the REPL."
   []
@@ -59,68 +48,57 @@
   (println "Bye for now!")
   (System/exit 0))
 
-(defn intern-with-meta [ns sym value-var]
-  (intern ns
-          (with-meta sym (assoc (meta value-var) :ns (the-ns ns)))
-          @value-var))
-
-(def default-init-code
-  '(do
-    (println "Welcome to REPL-y!")
-    (println "Clojure" (clojure-version))
-    (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
-    (use '[clojure.java.javadoc :only (javadoc)])
-    (use '[clojure.pprint :only (pp pprint)])
-    (require '[cd-client.core])
-    (def exit reply.main/exit)
-    (def quit reply.main/exit)
-    (def help reply.main/help)
-    (help)
-    (reply.main/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples)))
-
-(defn setup-conveniences
-  ([& {:keys [skip-default-init custom-init] :as options}]
-    (in-ns 'user)
-    (when-not skip-default-init (eval default-init-code))
-    (when custom-init (eval custom-init))
-    (in-ns 'reply.main)))
-
 (defn parse-args [args]
   (loop [[option arg & more :as args] args
-         arg-map {}]
+         arg-map {:custom-init '()}]
     (case option
-      "-i" (recur more (assoc arg-map "-i" (read-string arg)))
-      "--init" (recur more (assoc arg-map "-i" (read-string arg)))
+      "-i" (recur more (assoc arg-map :custom-init (read-string arg)))
+      "--init" (recur more (assoc arg-map :custom-init (read-string arg)))
+      "--nrepl" (recur (cons arg more)
+                       (assoc arg-map :nrepl true))
       "--skip-default-init" (recur (cons arg more)
-                                   (assoc arg-map "--skip-default-init" true))
+                                   (assoc arg-map :skip-default-init true))
       arg-map)))
+
+(defn launch-nrepl [options]
+  (reader.jline/with-jline-in
+    (evaluation.nrepl/main
+      (assoc options
+        :prompt (fn [ns]
+                  (binding [*ns* (symbol ns)]
+                    (reply.eval-state/set-bindings!))
+                  (reader.jline/prepare-for-read))
+        "--interactive" true))))
+
+(defn launch-standalone [options]
+  (set-signal-handler! "INT" handle-ctrl-c)
+  (set-signal-handler! "CONT" handle-resume)
+  (clojure.main/repl :read reply-read
+        :eval reply-eval
+        :print reply-print
+        :init #(initialization/eval-in-user-ns
+                (initialization/construct-init-code options))
+        :prompt (constantly false)
+        :need-prompt (constantly false)))
 
 (defn launch
   "Launches a REPL. Customizations available:
   -i: provide code to evaluate in the user ns
-  --skip-default-init: skip the default initialization code"
+  --skip-default-init: skip the default initialization code
+  --nrepl: hook up to nREPL (clojure.tools.nrepl)"
   [& args]
   (try
-    (set-signal-handler! "INT" handle-ctrl-c)
-    (set-signal-handler! "CONT" handle-resume)
-
-    (let [arg-map (parse-args args)
-          custom-init (or (arg-map "-i") '())
-          skip-default-init (arg-map "--skip-default-init")]
-
+    (let [arg-map (parse-args args)]
       (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                     complete/resolve-class hacks.complete/resolve-class
                     clojure.repl/pst clj-stacktrace.repl/pst]
-        (clojure.main/repl :read reply-read
-              :eval reply-eval
-              :print reply-print
-              :init #(setup-conveniences :skip-default-init skip-default-init
-                                         :custom-init custom-init)
-              :prompt (constantly false)
-            :need-prompt (constantly false))))
+        (if (:nrepl arg-map)
+          (launch-nrepl arg-map)
+          (launch-standalone arg-map))))
     (catch Throwable e
-      (println "Oh noez!")
-      (clj-stacktrace.repl/pst e)))
+      (when (not= (.getMessage e) "EOF while reading")
+        (println "Oh noez!")
+        (clj-stacktrace.repl/pst e))))
 
   (exit))
 

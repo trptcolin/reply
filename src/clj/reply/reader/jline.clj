@@ -58,14 +58,17 @@
   (when @jline-reader
     (.restore (.getTerminal @jline-reader))))
 
+(defn prepare-for-read []
+  (when-not @jline-reader (setup-reader!))
+  (.flush (.getHistory @jline-reader))
+  (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
+  (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
+  (.addCompleter @jline-reader (jline.completion/make-completer (eval-state/get-ns))))
+
 (defmacro with-jline-in [& body]
   `(do
-    (when-not @jline-reader (setup-reader!))
     (try
-      (.flush (.getHistory @jline-reader))
-      (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
-      (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
-      (.addCompleter @jline-reader (jline.completion/make-completer (eval-state/get-ns)))
+      (prepare-for-read)
       (binding [*in* @jline-pushback-reader]
         (Thread/interrupted) ; just to clear the status
         ~@body)
