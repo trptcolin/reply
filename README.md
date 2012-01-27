@@ -40,17 +40,17 @@ And if you want to really live the high life:
 
     ln -s /path/to/reply/bin/reply.sh ~/bin/reply
 
-Examples of fancy options:
+### Examples of fancy options:
 
-- No options; standalone execution:
+No options; standalone execution:
 
     $ reply
 
-- Launch [nREPL](https://github.com/clojure/tools.nrepl) in interactive mode:
+Launch [nREPL](https://github.com/clojure/tools.nrepl) in interactive mode:
 
     $ reply --nrepl
 
-- Skip all the bells-and-whistles initialization and provide your own:
+Skip all the bells-and-whistles initialization and provide your own:
 
     $ reply --skip-default-init -i '(println "OHAI WORLD")'
 
