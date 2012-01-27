@@ -36,3 +36,9 @@
 (defn stop-running-actions []
   (doall (map #(stop % :hard-kill-allowed true) @actions)))
 
+(defn set-signal-handler! [signal f]
+  (sun.misc.Signal/handle
+    (sun.misc.Signal. signal)
+    (proxy [sun.misc.SignalHandler] []
+      (handle [signal] (f signal)))))
+

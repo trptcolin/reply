@@ -24,12 +24,6 @@
 (def reply-print
   (concurrency/act-in-future prn))
 
-(defn set-signal-handler! [signal f]
-  (sun.misc.Signal/handle
-    (sun.misc.Signal. signal)
-    (proxy [sun.misc.SignalHandler] []
-      (handle [signal] (f signal)))))
-
 (defn handle-ctrl-c [signal]
   (print "^C")
   (flush)
@@ -71,8 +65,7 @@
         "--interactive" true))))
 
 (defn launch-standalone [options]
-  (set-signal-handler! "INT" handle-ctrl-c)
-  (set-signal-handler! "CONT" handle-resume)
+  (concurrency/set-signal-handler! "INT" handle-ctrl-c)
   (clojure.main/repl :read reply-read
         :eval reply-eval
         :print reply-print
@@ -88,6 +81,7 @@
   --nrepl: hook up to nREPL (clojure.tools.nrepl)"
   [& args]
   (try
+    (concurrency/set-signal-handler! "CONT" handle-resume)
     (let [arg-map (parse-args args)]
       (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                     complete/resolve-class hacks.complete/resolve-class
