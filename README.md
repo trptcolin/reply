@@ -2,22 +2,21 @@
 
 A fitter, happier, more productive REPL for Clojure.
 
-## Improvements over the existing REPL
-- allows a number of readline commands:
-  - jumping to the start/end of lines
-  - jumping forward/back by word (not available in JLine versions before 2)
-  - history searching
+## Improvements over the existing REPL that comes in clojure.jar
+- A number of readline commands, some not available in earlier JLine versions:
+  - navigation to the start/end of lines, and forward/back by word
+  - history navigation and search
   - and much much more
 - CTRL-C:
+  - kills the currently running command, breaks out of infinite loops, etc.  
   - doesn't bail out of the process - stops interruption-friendly operations
-  - kills the currently running command, breaks out of infinite loops, etc.
-- code completion for:
-  - vars, namespaces, Java classes
-  - Java packages
-  - namespace-qualified vars
-  - Java static methods
-- ClojureDocs support
-- nREPL integration
+- Code completion for:
+  - Clojure vars and namespaces
+  - Clojure namespace-qualified vars  
+  - Java classes, packages
+  - Java package-qualified classes, static methods
+- ClojureDocs support via a `clojuredocs` command
+- Optional nREPL integration
 
 ## Installation
 
