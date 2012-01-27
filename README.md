@@ -61,10 +61,13 @@ For details on the latest and greatest:
 
 ## Thanks
 
-Thanks to the Clojure and JLine developers for their work on the
-excellent projects that this project depends upon.
+Thanks to the developers of [Clojure](https://github.com/clojure/clojure), 
+[JLine](https://github.com/jline/jline2), [nREPL](https://github.com/clojure/tools.nrepl),
+[clojure-complete](https://github.com/ninjudd/clojure-complete),
+[ClojureDocs](http://clojuredocs.org), and [clojuredocs-client](https://github.com/dakrone/clojuredocs-client),
+for their work on the excellent projects that this project depends upon.
 
-Special thanks to [8th Light](http://8thlight.com) for paying me to work on
+Special thanks to [8th Light](http://8thlight.com) for allowing me to work on
 this during our open-source Friday afternoons.
 
 
