@@ -1,4 +1,15 @@
-(ns reply.initialization)
+(ns reply.initialization
+  (:require [clojure.pprint]))
+
+(defmacro repl-defn [sym & args]
+  (let [no-meta-source (with-out-str (clojure.pprint/pprint `(defn ~sym ~@args)))
+        meta-source `(clojure.core/defn ~(with-meta sym {:source no-meta-source}) ~@args)]
+    meta-source))
+
+(defmacro sourcery [name]
+  `(if-let [s# (:source (meta (var ~name)))]
+    (do (print s#) (flush))
+    (clojure.repl/source ~name)))
 
 (defn help
   "Prints a list of helpful commands."
@@ -8,6 +19,7 @@
   (println "    Docs: (doc function-name-here)")
   (println "          (find-doc \"part-of-name-here\")")
   (println "  Source: (source function-name-here)")
+  (println "          (sourcery function-name-here)")
   (println " Javadoc: (javadoc java-object-or-class-here)")
   (println "Examples from clojuredocs.org:")
   (println "          (clojuredocs name-here)")
@@ -15,10 +27,10 @@
 
 (defn intern-with-meta [ns sym value-var]
   (intern ns
-          (with-meta sym (assoc (meta value-var) :ns (the-ns ns)))
+          (with-meta sym (meta value-var))
           @value-var))
 
-(def default-init-code
+(defn default-init-code []
   '(do
     (println "Welcome to REPL-y!")
     (println "Clojure" (clojure-version))
@@ -29,8 +41,12 @@
     (def exit reply.main/exit)
     (def quit reply.main/exit)
     (def help reply.initialization/help)
+
     (help)
     (reply.initialization/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples)
+    (binding [*err* (java.io.StringWriter.)]
+      (reply.initialization/intern-with-meta 'user 'defn #'reply.initialization/repl-defn))
+    (reply.initialization/intern-with-meta 'user 'sourcery #'reply.initialization/sourcery)
     nil))
 
 (defn eval-in-user-ns [code]
@@ -43,7 +59,7 @@
   [{:keys [skip-default-init
            custom-init] :as options}]
   `(do
-    ~(when-not skip-default-init default-init-code)
+    ~(when-not skip-default-init (default-init-code))
     ~(when custom-init custom-init)
     nil))
 
