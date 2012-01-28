@@ -2,7 +2,6 @@
   (:require [reply.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
             [reply.evaluation.nrepl :as evaluation.nrepl]
-            [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
             [reply.initialization :as initialization]
             [reply.reader.jline :as reader.jline]
@@ -86,7 +85,6 @@
     (concurrency/set-signal-handler! "CONT" handle-resume)
     (let [arg-map (parse-args args)]
       (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
-                    complete/resolve-class hacks.complete/resolve-class
                     clojure.repl/pst clj-stacktrace.repl/pst]
         (cond (:help arg-map) (println (:doc (meta #'launch)))
               (:nrepl arg-map) (launch-nrepl arg-map)
