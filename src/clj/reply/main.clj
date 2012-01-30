@@ -75,7 +75,7 @@
         :prompt (constantly false)
         :need-prompt (constantly false)))
 
-(defn launch
+(defn -main
   "Launches a REPL. Customizations available:
   -h/--help:           Show this help screen
   -i/--init:           Provide custom code to evaluate in the user ns
@@ -88,7 +88,7 @@
       (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                     complete/resolve-class hacks.complete/resolve-class
                     clojure.repl/pst clj-stacktrace.repl/pst]
-        (cond (:help arg-map) (println (:doc (meta #'launch)))
+        (cond (:help arg-map) (println (clojure.repl/doc -main))
               (:nrepl arg-map) (launch-nrepl arg-map)
               :else (launch-standalone arg-map))))
     (catch Throwable e

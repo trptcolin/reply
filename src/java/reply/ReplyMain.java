@@ -7,6 +7,6 @@ public class ReplyMain {
   public static void main(String... args) {
     Symbol ns = Symbol.create("reply.main");
     RT.var("clojure.core", "require").invoke(ns);
-    RT.var("reply.main", "launch").applyTo(RT.seq(args));
+    RT.var("reply.main", "-main").applyTo(RT.seq(args));
   }
 }
