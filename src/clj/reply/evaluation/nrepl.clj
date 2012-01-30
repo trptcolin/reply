@@ -7,51 +7,50 @@
 
 (def current-command (atom (fn ([]) ([x]))))
 
-(defn execute-with-connection [connection form]
+(defn execute-with-connection [connection options form]
   (let [response-fn ((:send connection) form)]
     (reset! current-command response-fn)
     (for [{:keys [ns value out err] :as res} (nrepl/response-seq response-fn)]
       (do
-        (when value (print value))
-        (when out (print out))
-        (when err (print err))
+        (when value ((:value options print) value))
+        (when out ((:out options print) out))
+        (when err ((:err options print) err))
         (flush)
         ns))))
 
 (defn run-repl
-  ([port] (run-repl port nil))
-  ([port {:keys [prompt err out value]
-          :or {prompt #(print (str % "=> "))
-               err print
-               out print
-               value print}}]
-    (let [connection (nrepl/connect "localhost" port)
-          {:keys [major minor incremental qualifier]} *clojure-version*]
+  ([connection] (run-repl connection nil))
+  ([connection {:keys [prompt]
+                :or {prompt #(print (str % "=> "))}
+                :as options}]
+    (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns "user"]
         (prompt ns)
         (flush)
-        (recur (last (execute-with-connection connection (pr-str (read)))))))))
+        (recur (last (execute-with-connection
+                       connection
+                       options
+                       (pr-str (read)))))))))
+
+(defn get-connection [options]
+  (let [port (if-let [attach-port (:attach options)]
+               (Integer/parseInt attach-port)
+               (let [[ssocket _] (nrepl/start-server (Integer/parseInt (or (:port options) "0")))]
+                 (.getLocalPort ssocket)))]
+    (nrepl/connect "localhost" port)))
 
 (defn main
-  "Ripped directly from nREPL. The only changes are in namespacing, running of
-initial code, and options."
+  "Ripped from nREPL. The only changes are in namespacing, running of initial
+code, and options."
   [options]
-  (let [[ssocket _] (nrepl/start-server (Integer/parseInt (or (options "--port") "0")))
-        local-port (.getLocalPort ssocket)
-        connection (nrepl/connect "localhost" local-port)]
+  (let [connection (get-connection options)]
     (reply.concurrency/set-signal-handler! "INT" (fn [sig] (println "^C") (@current-command :interrupt)))
-    (when-let [ack-port (options "--ack")]
-      (binding [*out* *err*]
-        (println (format "ack'ing my port %d to other server running on port %s"
-                   local-port ack-port)
-          (:status (#'clojure.tools.nrepl/send-ack local-port (Integer/parseInt ack-port))))))
-    (doall (execute-with-connection
-             connection
-             (pr-str (reply.initialization/construct-init-code options))))
-    (if (options "--interactive")
-      (run-repl local-port
-        (if (options "--color")
-          nrepl.cmdline/colored-output
-          options))
-      (Thread/sleep Long/MAX_VALUE))))
+    (let [options (if (:color options)
+                    (merge options nrepl.cmdline/colored-output)
+                    options)]
+      (doall (execute-with-connection
+               connection
+               options
+               (pr-str (reply.initialization/construct-init-code options))))
+      (run-repl connection options))))
 

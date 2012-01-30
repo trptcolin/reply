@@ -48,9 +48,16 @@
     (case option
       "-i" (recur more (assoc arg-map :custom-init (read-string arg)))
       "--init" (recur more (assoc arg-map :custom-init (read-string arg)))
+
+      "--attach" (recur more (assoc arg-map :attach arg))
+      "--port" (recur more (assoc arg-map :port arg))
+
       "-h" (recur (cons arg more) (assoc arg-map :help true))
       "--help" (recur (cons arg more) (assoc arg-map :help true))
+
       "--nrepl" (recur (cons arg more) (assoc arg-map :nrepl true))
+      "--color" (recur (cons arg more) (assoc arg-map :color true))
+
       "--skip-default-init" (recur (cons arg more)
                                    (assoc arg-map :skip-default-init true))
       arg-map)))
