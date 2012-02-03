@@ -46,8 +46,11 @@
   (loop [[option arg & more :as args] args
          arg-map {:custom-init '()}]
     (case option
-      "-i" (recur more (assoc arg-map :custom-init (read-string arg)))
-      "--init" (recur more (assoc arg-map :custom-init (read-string arg)))
+      "-e" (recur more (assoc arg-map :custom-init (read-string arg)))
+      "--eval" (recur more (assoc arg-map :custom-init (read-string arg)))
+
+      "-i" (recur more (assoc arg-map :custom-init (read-string (slurp arg))))
+      "--init" (recur more (assoc arg-map :custom-init (read-string (slurp arg))))
 
       "--attach" (recur more (assoc arg-map :attach arg))
       "--port" (recur more (assoc arg-map :port arg))
@@ -82,10 +85,12 @@
         :prompt (constantly false)
         :need-prompt (constantly false)))
 
+
 (defn -main
   "Launches a REPL. Customizations available:
   -h/--help:           Show this help screen
-  -i/--init:           Provide custom code to evaluate in the user ns
+  -i/--init:           Provide a Clojure file to evaluate in the user ns
+  -e/--eval:           Provide custom code to evaluate in the user ns
   --skip-default-init: Skip the default initialization code
   --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode"
   [& args]
@@ -102,6 +107,4 @@
       (when (not= (.getMessage e) "EOF while reading")
         (println "Oh noez!")
         (clj-stacktrace.repl/pst e))))
-
   (exit))
-
