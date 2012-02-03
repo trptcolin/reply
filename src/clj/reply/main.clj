@@ -35,7 +35,7 @@
   (reader.jline/resume-reader))
 
 (defn exit
-  "Exits the REPL."
+  "Exits the REPL. This is fairly brutal, does (System/exit 0)."
   []
   (shutdown-agents)
   (reader.jline/shutdown-reader)
@@ -66,6 +66,8 @@
       arg-map)))
 
 (defn launch-nrepl [options]
+  "Launches the nREPL version of REPL-y, with options already
+  parsed out"
   (reader.jline/with-jline-in
     (evaluation.nrepl/main
       (assoc options
@@ -75,7 +77,10 @@
                   (reader.jline/prepare-for-read))
         "--interactive" true))))
 
-(defn launch-standalone [options]
+(defn launch-standalone
+  "Launches the streamed (non-nREPL) version of REPL-y, with options already
+  parsed out"
+  [options]
   (concurrency/set-signal-handler! "INT" handle-ctrl-c)
   (clojure.main/repl :read reply-read
         :eval reply-eval
