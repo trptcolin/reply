@@ -21,13 +21,17 @@ done
 
 BASEDIR=$(dirname "$SCRIPT")
 
+if [ -z "$USER_CP" ]; then
+  USER_CP=""
+fi
+
 CP="$BASEDIR"/../src/clj/:\
 "$BASEDIR"/../classes/
 for j in "$BASEDIR"/../lib/*.jar; do
   CP=$CP:$j
 done
 
-java -cp "$CP" reply.ReplyMain "$@"
+java -cp "$CP":"$USER_CP" reply.ReplyMain "$@"
 
 # For jline debugging:
 # java -Djline.internal.Log.debug=true -cp $CP reply.ReplyMain "$@"

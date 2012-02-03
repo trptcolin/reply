@@ -8,11 +8,11 @@ A fitter, happier, more productive REPL for Clojure.
   - history navigation and search
   - and much much more
 - CTRL-C:
-  - kills the currently running command, breaks out of infinite loops, etc.  
+  - kills the currently running command, breaks out of infinite loops, etc.
   - doesn't bail out of the process - stops interruption-friendly operations
 - Code completion for:
   - Clojure vars and namespaces
-  - Clojure namespace-qualified vars  
+  - Clojure namespace-qualified vars
   - Java classes, packages
   - Java package-qualified classes, static methods
 - ClojureDocs support via a `clojuredocs` command
@@ -39,6 +39,11 @@ And if you want to really live the high life:
 
     ln -s /path/to/reply/bin/reply.sh ~/bin/reply
 
+If you want additional stuff on the classpath, you can set `$USER_CP`. For
+instance:
+
+    USER_CP=`lein classpath` reply
+
 ### Examples of fancy options:
 
 No options; standalone execution:
@@ -60,7 +65,7 @@ For details on the latest and greatest:
 
 ## Thanks
 
-Thanks to the developers of [Clojure](https://github.com/clojure/clojure), 
+Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
 [JLine](https://github.com/jline/jline2), [nREPL](https://github.com/clojure/tools.nrepl),
 [clojure-complete](https://github.com/ninjudd/clojure-complete),
 [ClojureDocs](http://clojuredocs.org), and [clojuredocs-client](https://github.com/dakrone/clojuredocs-client),
