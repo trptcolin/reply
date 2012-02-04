@@ -63,6 +63,7 @@
 
       "--skip-default-init" (recur (cons arg more)
                                    (assoc arg-map :skip-default-init true))
+      "--no-clojuredocs" (recur (cons arg more) (assoc arg-map :no-clojuredocs true))
       arg-map)))
 
 (defn launch-nrepl [options]
@@ -97,6 +98,7 @@
   -i/--init:           Provide a Clojure file to evaluate in the user ns
   -e/--eval:           Provide custom code to evaluate in the user ns
   --skip-default-init: Skip the default initialization code
+  --no-clojuredocs     Do not include clojuredocs client dependencies
   --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode"
   [& args]
   (try

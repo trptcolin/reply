@@ -30,24 +30,26 @@
           (with-meta sym (meta value-var))
           @value-var))
 
-(defn default-init-code []
-  '(do
-    (println "Welcome to REPL-y!")
-    (println "Clojure" (clojure-version))
-    (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
-    (use '[clojure.java.javadoc :only (javadoc)])
-    (use '[clojure.pprint :only (pp pprint)])
-    (require '[cd-client.core])
-    (def exit reply.main/exit)
-    (def quit reply.main/exit)
-    (def help reply.initialization/help)
+(defn default-init-code [no-clojuredocs?]
+  (list 'do
+        '(println "Welcome to REPL-y!")
+        '(println "Clojure" (clojure-version))
+        '(use '[clojure.repl :only (source apropos dir pst doc find-doc)])
+        '(use '[clojure.java.javadoc :only (javadoc)])
+        '(use '[clojure.pprint :only (pp pprint)])
+        (when-not no-clojuredocs?
+          '(require '[cd-client.core]))
+        '(def exit reply.main/exit)
+        '(def quit reply.main/exit)
+        '(def help reply.initialization/help)
 
-    (help)
-    (reply.initialization/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples)
-    (binding [*err* (java.io.StringWriter.)]
-      (reply.initialization/intern-with-meta 'user 'defn #'reply.initialization/repl-defn))
-    (reply.initialization/intern-with-meta 'user 'sourcery #'reply.initialization/sourcery)
-    nil))
+        '(help)
+        (when-not no-clojuredocs?
+          '(reply.initialization/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples))
+        '(binding [*err* (java.io.StringWriter.)]
+           (reply.initialization/intern-with-meta 'user 'defn #'reply.initialization/repl-defn))
+        '(reply.initialization/intern-with-meta 'user 'sourcery #'reply.initialization/sourcery)
+        nil))
 
 (defn eval-in-user-ns [code]
   (let [original-ns (symbol (str *ns*))]
@@ -57,9 +59,10 @@
 
 (defn construct-init-code
   [{:keys [skip-default-init
-           custom-init] :as options}]
+           custom-init
+           no-clojuredocs] :as options}]
   `(do
-    ~(when-not skip-default-init (default-init-code))
-    ~(when custom-init custom-init)
-    nil))
+     ~(when-not skip-default-init (default-init-code no-clojuredocs))
+     ~(when custom-init custom-init)
+     nil))
 
