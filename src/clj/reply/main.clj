@@ -90,6 +90,28 @@
         :prompt (constantly false)
         :need-prompt (constantly false)))
 
+(declare -main) ; for --help
+(defn launch
+  "Entry point for tools which may prefer to send a map of options rather than a
+varargs list of arguments.
+Available options: [:help :custom-init :skip-default-init :nrepl :attach :port :color]
+See -main for descriptions."
+  [options]
+  (print "options: ") (prn options)
+  (try
+    (concurrency/set-signal-handler! "CONT" handle-resume)
+    (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
+                  complete/resolve-class hacks.complete/resolve-class
+                  clojure.repl/pst clj-stacktrace.repl/pst]
+      (cond (:help options) (println (clojure.repl/doc -main))
+            (:nrepl options) (launch-nrepl options)
+            :else (launch-standalone options)))
+  (catch Throwable e
+    (when (not= (.getMessage e) "EOF while reading")
+      (println "Oh noez!")
+      (clj-stacktrace.repl/pst e)))
+  (finally
+    (exit))))
 
 (defn -main
   "Launches a REPL. Customizations available:
@@ -97,19 +119,9 @@
   -i/--init:           Provide a Clojure file to evaluate in the user ns
   -e/--eval:           Provide custom code to evaluate in the user ns
   --skip-default-init: Skip the default initialization code
-  --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode"
+  --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode
+  --attach:            Attach to an existing nrepl session on this port, when used with --nrepl
+  --port:              Start a new nrepl session on this port, when used with --nrepl
+  --color:             Use color; currently only available with --nrepl"
   [& args]
-  (try
-    (concurrency/set-signal-handler! "CONT" handle-resume)
-    (let [arg-map (parse-args args)]
-      (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
-                    complete/resolve-class hacks.complete/resolve-class
-                    clojure.repl/pst clj-stacktrace.repl/pst]
-        (cond (:help arg-map) (println (clojure.repl/doc -main))
-              (:nrepl arg-map) (launch-nrepl arg-map)
-              :else (launch-standalone arg-map))))
-    (catch Throwable e
-      (when (not= (.getMessage e) "EOF while reading")
-        (println "Oh noez!")
-        (clj-stacktrace.repl/pst e))))
-  (exit))
+  (launch (parse-args args)))
