@@ -106,10 +106,6 @@ See -main for descriptions."
       (cond (:help options) (println (clojure.repl/doc -main))
             (:nrepl options) (launch-nrepl options)
             :else (launch-standalone options)))
-  (catch Throwable e
-    (when (not= (.getMessage e) "EOF while reading")
-      (println "Oh noez!")
-      (clj-stacktrace.repl/pst e)))
   (finally
     (exit))))
 

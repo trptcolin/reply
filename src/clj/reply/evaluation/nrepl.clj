@@ -27,10 +27,17 @@
       (loop [ns "user"]
         (prompt ns)
         (flush)
-        (recur (last (execute-with-connection
+        (let [done (Object.)
+              read-result (try (read)
+                            (catch Exception e
+                              (if (= (.getMessage e) "EOF while reading")
+                                done
+                                (prn e))))]
+          (if (= done read-result) nil
+              (recur (last (execute-with-connection
                        connection
                        options
-                       (pr-str (read)))))))))
+                       (pr-str read-result))))))))))
 
 (defn get-connection [options]
   (let [port (if-let [attach-port (:attach options)]
