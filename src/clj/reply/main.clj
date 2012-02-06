@@ -97,7 +97,6 @@ varargs list of arguments.
 Available options: [:help :custom-init :skip-default-init :nrepl :attach :port :color]
 See -main for descriptions."
   [options]
-  (print "options: ") (prn options)
   (try
     (concurrency/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
