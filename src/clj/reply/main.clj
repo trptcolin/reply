@@ -104,8 +104,8 @@ See -main for descriptions."
       (cond (:help options) (println (clojure.repl/doc -main))
             (:nrepl options) (launch-nrepl options)
             :else (launch-standalone options)))
-  (finally
-    (exit))))
+  (catch Exception e (clojure.repl/pst e))
+  (finally (exit))))
 
 (defn -main
   "Launches a REPL. Customizations available:
