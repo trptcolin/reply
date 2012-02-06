@@ -3,7 +3,8 @@
             [clojure.tools.nrepl :as nrepl]
             [reply.concurrency]
             [reply.eval-state]
-            [reply.initialization]))
+            [reply.initialization]
+            [reply.reader.jline :as reader.jline]))
 
 (def current-command (atom (fn ([]) ([x]))))
 
@@ -20,9 +21,7 @@
 
 (defn run-repl
   ([connection] (run-repl connection nil))
-  ([connection {:keys [prompt]
-                :or {prompt #(print (str % "=> "))}
-                :as options}]
+  ([connection {:keys [prompt] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns "user"]
         (prompt ns)
@@ -46,13 +45,29 @@
                  (.getLocalPort ssocket)))]
     (nrepl/connect "localhost" port)))
 
+(defn adhoc-eval [connection form]
+  (let [results (atom [])]
+    (doall (execute-with-connection
+      connection
+      {:value (partial reset! results)
+       :out identity
+       :err identity}
+      (pr-str form)))
+    (read-string @results)))
+
 (defn main
   "Ripped from nREPL. The only changes are in namespacing, running of initial
 code, and options."
   [options]
   (let [connection (get-connection options)]
     (reply.concurrency/set-signal-handler! "INT" (fn [sig] (println "^C") (@current-command :interrupt)))
-    (let [options (if (:color options)
+    (let [options (assoc options :prompt
+                    (fn [ns]
+                      (binding [*ns* (the-ns (symbol ns))]
+                        (reply.eval-state/set-bindings!))
+                      (reader.jline/prepare-for-read
+                        (partial adhoc-eval connection))))
+          options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)]
       (doall (execute-with-connection

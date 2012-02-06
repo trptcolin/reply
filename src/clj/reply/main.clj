@@ -69,12 +69,7 @@
   "Launches the nREPL version of REPL-y, with options already
   parsed out"
   (reader.jline/with-jline-in
-    (evaluation.nrepl/main
-      (assoc options
-        :prompt (fn [ns]
-                  (binding [*ns* (symbol ns)]
-                    (reply.eval-state/set-bindings!))
-                  (reader.jline/prepare-for-read))))))
+    (evaluation.nrepl/main options)))
 
 (defn launch-standalone
   "Launches the streamed (non-nREPL) version of REPL-y, with options already

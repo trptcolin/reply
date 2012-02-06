@@ -4,13 +4,14 @@
             [complete :as ninjudd.complete])
   (:import [jline.console.completer Completer]))
 
-(defn make-completer []
+(defn make-completer [eval-fn]
   (proxy [Completer] []
     (complete [^String buffer cursor ^java.util.List candidates]
       (let [buffer (or buffer "")
             prefix (or (completion/get-word-ending-at buffer cursor) "")
             prefix-length (.length prefix)
-            possible-completions (sort (ninjudd.complete/completions prefix (eval-state/get-ns)))]
+            possible-completions-form `(sort (ninjudd.complete/completions (str ~prefix) *ns*))
+            possible-completions (eval-fn possible-completions-form)]
         (if (or (empty? possible-completions) (zero? prefix-length))
           -1
           (do
