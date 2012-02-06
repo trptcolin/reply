@@ -74,8 +74,7 @@
         :prompt (fn [ns]
                   (binding [*ns* (symbol ns)]
                     (reply.eval-state/set-bindings!))
-                  (reader.jline/prepare-for-read))
-        "--interactive" true))))
+                  (reader.jline/prepare-for-read))))))
 
 (defn launch-standalone
   "Launches the streamed (non-nREPL) version of REPL-y, with options already
