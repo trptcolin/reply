@@ -38,7 +38,6 @@
   "Exits the REPL. This is fairly brutal, does (System/exit 0)."
   []
   (shutdown-agents)
-  (reader.jline/shutdown-reader)
   (println "Bye for now!")
   (System/exit 0))
 
@@ -92,6 +91,7 @@ Available options: [:help :custom-init :skip-default-init :nrepl :attach :port :
 See -main for descriptions."
   [options]
   (try
+    (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
     (concurrency/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                   complete/resolve-class hacks.complete/resolve-class
