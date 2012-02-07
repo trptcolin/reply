@@ -2,7 +2,6 @@
   (:require [reply.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
             [reply.evaluation.nrepl :as evaluation.nrepl]
-            [reply.hacks.complete :as hacks.complete]
             [reply.hacks.printing :as hacks.printing]
             [reply.initialization :as initialization]
             [reply.reader.jline :as reader.jline]
@@ -94,7 +93,6 @@ See -main for descriptions."
     (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
     (concurrency/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
-                  complete/resolve-class hacks.complete/resolve-class
                   clojure.repl/pst clj-stacktrace.repl/pst]
       (cond (:help options) (println (clojure.repl/doc -main))
             (:nrepl options) (launch-nrepl options)

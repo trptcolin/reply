@@ -46,12 +46,12 @@
     (nrepl/connect "localhost" port)))
 
 (defn adhoc-eval [connection form]
-  (let [results (atom [])]
+  (let [results (atom "nil")]
     (doall (execute-with-connection
       connection
       {:value (partial reset! results)
-       :out identity
-       :err identity}
+       :out print
+       :err print}
       (pr-str form)))
     (read-string @results)))
 
