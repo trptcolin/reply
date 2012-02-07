@@ -1,5 +1,6 @@
 (ns reply.initialization
-  (:require [clojure.pprint]))
+  (:require [clojure.pprint]
+            [clojure.repl]))
 
 (defmacro repl-defn [sym & args]
   (let [no-meta-source (with-out-str (clojure.pprint/pprint `(defn ~sym ~@args)))
@@ -30,23 +31,36 @@
           (with-meta sym (meta value-var))
           @value-var))
 
+(defn export-definition [s]
+  (read-string (clojure.repl/source-fn s)))
+
 (defn default-init-code []
-  '(do
+  `(do
     (println "Welcome to REPL-y!")
     (println "Clojure" (clojure-version))
-    (use '[clojure.repl :only (source apropos dir pst doc find-doc)])
-    (use '[clojure.java.javadoc :only (javadoc)])
-    (use '[clojure.pprint :only (pp pprint)])
+    (use '[clojure.repl :only ~'[source apropos dir pst doc find-doc]])
+    (use '[clojure.java.javadoc :only ~'[javadoc]])
+    (use '[clojure.pprint :only ~'[pp pprint]])
+
+    ~(export-definition 'reply.initialization/help)
+
+    (ns reply.exports)
+    ~(export-definition 'reply.initialization/intern-with-meta)
+
+    (binding [*err* (java.io.StringWriter.)]
+      ~(export-definition 'reply.initialization/repl-defn)
+      (~'intern-with-meta '~'user '~'defn #'repl-defn))
+
+    ~(export-definition 'reply.initialization/sourcery)
+    (~'intern-with-meta '~'user '~'sourcery #'sourcery)
+
+    (in-ns '~'user)
+
+    ; assumes cd-client is on the execution classpath by now
     (require '[cd-client.core])
-    (def exit reply.main/exit)
-    (def quit reply.main/exit)
-    (def help reply.initialization/help)
+    (~'reply.exports/intern-with-meta '~'user '~'clojuredocs #'cd-client.core/pr-examples)
 
     (help)
-    (reply.initialization/intern-with-meta 'user 'clojuredocs #'cd-client.core/pr-examples)
-    (binding [*err* (java.io.StringWriter.)]
-      (reply.initialization/intern-with-meta 'user 'defn #'reply.initialization/repl-defn))
-    (reply.initialization/intern-with-meta 'user 'sourcery #'reply.initialization/sourcery)
     nil))
 
 (defn eval-in-user-ns [code]
