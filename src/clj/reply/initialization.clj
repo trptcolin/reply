@@ -34,7 +34,9 @@
 (defn export-definition [s]
   (read-string (clojure.repl/source-fn s)))
 
-(defn default-init-code []
+(defn default-init-code
+  "Assumes cd-client will be on the classpath when this is evaluated."
+  []
   `(do
     (println "Welcome to REPL-y!")
     (println "Clojure" (clojure-version))
@@ -43,16 +45,20 @@
     (use '[clojure.pprint :only ~'[pp pprint]])
 
     ~(export-definition 'reply.initialization/help)
+    ~(export-definition 'reply.main/exit)
+    (def ~'quit ~'exit)
 
     (ns reply.exports)
     ~(export-definition 'reply.initialization/intern-with-meta)
 
+    (~'intern-with-meta '~'user '~'quit #'user/exit)
+
     (binding [*err* (java.io.StringWriter.)]
       ~(export-definition 'reply.initialization/repl-defn)
-      (~'intern-with-meta '~'user '~'defn #'repl-defn))
+      (~'intern-with-meta '~'user '~'defn ~'#'repl-defn))
 
     ~(export-definition 'reply.initialization/sourcery)
-    (~'intern-with-meta '~'user '~'sourcery #'sourcery)
+    (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
 
     (in-ns '~'user)
 
@@ -60,7 +66,7 @@
     (require '[cd-client.core])
     (~'reply.exports/intern-with-meta '~'user '~'clojuredocs #'cd-client.core/pr-examples)
 
-    (help)
+    (~'help)
     nil))
 
 (defn eval-in-user-ns [code]
