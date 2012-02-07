@@ -17,7 +17,7 @@
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))
-        completer (jline.completion/make-completer eval)]
+        completer (jline.completion/make-completer reply.initialization/eval-in-user-ns)]
 
     (doto reader
       (.setHistory history)
@@ -68,7 +68,7 @@
 (defmacro with-jline-in [& body]
   `(do
     (try
-      (prepare-for-read eval)
+      (prepare-for-read reply.initialization/eval-in-user-ns)
       (binding [*in* @jline-pushback-reader]
         (Thread/interrupted) ; just to clear the status
         ~@body)

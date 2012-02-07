@@ -72,8 +72,9 @@
 (defn eval-in-user-ns [code]
   (let [original-ns (symbol (str *ns*))]
     (in-ns 'user)
-    (eval code)
-    (in-ns original-ns)))
+    (let [result (eval code)]
+      (in-ns original-ns)
+      result)))
 
 (defn construct-init-code
   [{:keys [skip-default-init
