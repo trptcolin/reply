@@ -63,24 +63,36 @@
                                    (assoc arg-map :skip-default-init true))
       arg-map)))
 
+(defmacro with-launching-context [& body]
+  `(try
+    (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
+    (concurrency/set-signal-handler! "CONT" handle-resume)
+    (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
+                  clojure.repl/pst clj-stacktrace.repl/pst]
+      ~@body)
+    (catch Exception e# (clojure.repl/pst e#))
+    (finally (exit))))
+
 (defn launch-nrepl [options]
   "Launches the nREPL version of REPL-y, with options already
   parsed out"
-  (reader.jline/with-jline-in
-    (evaluation.nrepl/main options)))
+  (with-launching-context
+    (reader.jline/with-jline-in
+      (evaluation.nrepl/main options))))
 
 (defn launch-standalone
   "Launches the streamed (non-nREPL) version of REPL-y, with options already
   parsed out"
   [options]
-  (concurrency/set-signal-handler! "INT" handle-ctrl-c)
-  (clojure.main/repl :read reply-read
-        :eval reply-eval
-        :print reply-print
-        :init #(initialization/eval-in-user-ns
-                (initialization/construct-init-code options))
-        :prompt (constantly false)
-        :need-prompt (constantly false)))
+  (with-launching-context
+    (concurrency/set-signal-handler! "INT" handle-ctrl-c)
+    (clojure.main/repl :read reply-read
+          :eval reply-eval
+          :print reply-print
+          :init #(initialization/eval-in-user-ns
+                  (initialization/construct-init-code options))
+          :prompt (constantly false)
+          :need-prompt (constantly false))))
 
 (declare -main) ; for --help
 (defn launch
@@ -89,16 +101,9 @@ varargs list of arguments.
 Available options: [:help :custom-init :skip-default-init :nrepl :attach :port :color]
 See -main for descriptions."
   [options]
-  (try
-    (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
-    (concurrency/set-signal-handler! "CONT" handle-resume)
-    (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
-                  clojure.repl/pst clj-stacktrace.repl/pst]
-      (cond (:help options) (println (clojure.repl/doc -main))
-            (:nrepl options) (launch-nrepl options)
-            :else (launch-standalone options)))
-  (catch Exception e (clojure.repl/pst e))
-  (finally (exit))))
+  (cond (:help options) (do (println (clojure.repl/doc -main)) (exit))
+        (:nrepl options) (launch-nrepl options)
+        :else (launch-standalone options)))
 
 (defn -main
   "Launches a REPL. Customizations available:
