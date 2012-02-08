@@ -63,7 +63,7 @@ code, and options."
     (reply.concurrency/set-signal-handler! "INT" (fn [sig] (println "^C") (@current-command :interrupt)))
     (let [options (assoc options :prompt
                     (fn [ns]
-                      (binding [*ns* (the-ns (symbol ns))]
+                      (binding [*ns* (create-ns (symbol ns))]
                         (reply.eval-state/set-bindings!))
                       (reader.jline/prepare-for-read
                         (partial adhoc-eval connection))))
