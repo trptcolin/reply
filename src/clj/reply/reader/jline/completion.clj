@@ -6,14 +6,15 @@
 
 (defn construct-possible-completions-form [prefix]
   `(sort
-    (with-redefs [ninjudd.complete/resolve-class
-                    (fn [sym#]
-                      (try (let [val# (resolve sym#)]
-                        (when (class? val#) val#))
-                          (catch RuntimeException e#
-                            (when (not= ClassNotFoundException
-                                        (class (clojure.main/repl-exception e#)))
-                              (throw e#)))))]
+    ((if (ns-resolve 'clojure.core 'with-redefs) 'with-redefs 'binding)
+      [ninjudd.complete/resolve-class
+        (fn [sym#]
+          (try (let [val# (resolve sym#)]
+            (when (class? val#) val#))
+              (catch RuntimeException e#
+                (when (not= ClassNotFoundException
+                            (class (clojure.main/repl-exception e#)))
+                  (throw e#)))))]
       (ninjudd.complete/completions (str ~prefix) *ns*))))
 
 (defn make-completer [eval-fn]

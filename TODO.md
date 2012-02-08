@@ -15,7 +15,6 @@
     - worse in the standalone case (!)
 - can we have a minimal version without needing all cd-client's dependencies?
   - 11 of the 15 dependencies are from cd-client (understandably of course)
-- what will it take to hook up to leiningen?
 
 # UPSTREAM
 - submitted
