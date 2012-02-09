@@ -56,7 +56,7 @@ Launch [nREPL](https://github.com/clojure/tools.nrepl) in interactive mode:
 
 Skip all the bells-and-whistles initialization and provide your own:
 
-    $ reply --skip-default-init -i '(println "OHAI WORLD")'
+    $ reply --skip-default-init -e '(println "OHAI WORLD")'
 
 For details on the latest and greatest:
 
