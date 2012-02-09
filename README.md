@@ -79,4 +79,5 @@ this during our open-source Friday afternoons.
 
 Copyright (C) 2011 Colin Jones
 
-Distributed under the Eclipse Public License, the same as Clojure.
+Distributed under the Eclipse Public License, the same as Clojure. See the
+LICENSE file for details.

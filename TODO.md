@@ -3,7 +3,6 @@
 
 # UPCOMING
 - more tests
-- add a license
 - make things configurable:
   - hard-kills in standalone mode - that's dangerous & should be opt-out
 
