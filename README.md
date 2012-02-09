@@ -77,7 +77,7 @@ this during our open-source Friday afternoons.
 
 ## License
 
-Copyright (C) 2011 Colin Jones
+Copyright (C) 2011-2012 Colin Jones
 
 Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.
