@@ -11,5 +11,5 @@
   :repositories {
     "sonatype" {:url "http://oss.sonatype.org/content/repositories/snapshots" } }
   :aot [reply.reader.jline.JlineInputReader]
-  :source-path ["src/clj"]
-  :java-source-path ["src/java"])
+  :source-path "src/clj"
+  :java-source-path "src/java")
