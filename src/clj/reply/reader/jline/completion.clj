@@ -5,17 +5,9 @@
   (:import [jline.console.completer Completer]))
 
 (defn construct-possible-completions-form [prefix]
-  `(sort
-    ((if (ns-resolve 'clojure.core 'with-redefs) 'with-redefs 'binding)
-      [ninjudd.complete/resolve-class
-        (fn [sym#]
-          (try (let [val# (resolve sym#)]
-            (when (class? val#) val#))
-              (catch RuntimeException e#
-                (when (not= ClassNotFoundException
-                            (class (clojure.main/repl-exception e#)))
-                  (throw e#)))))]
-      (ninjudd.complete/completions (str ~prefix) *ns*))))
+  `(do
+    (~'require '[~'complete :as ~'ninjudd.complete])
+    (~'sort (~'ninjudd.complete/completions (~'str ~prefix) ~'*ns*))))
 
 (defn make-completer [eval-fn]
   (proxy [Completer] []
