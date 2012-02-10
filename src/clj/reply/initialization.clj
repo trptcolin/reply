@@ -32,13 +32,13 @@
           @value-var))
 
 (def resolve-class
-  (fn [sym#]
-    (try (let [val# (resolve sym#)]
-      (when (class? val#) val#))
-        (catch Exception e#
+  (fn [sym]
+    (try (let [val (resolve sym)]
+      (when (class? val) val))
+        (catch Exception e
           (when (not= ClassNotFoundException
-                      (class (clojure.main/repl-exception e#)))
-            (throw e#))))))
+                      (class (clojure.main/repl-exception e)))
+            (throw e))))))
 
 (defn export-definition [s]
   (read-string (clojure.repl/source-fn s)))
