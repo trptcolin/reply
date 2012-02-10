@@ -8,11 +8,19 @@
 
 (def current-command (atom (fn ([]) ([x]))))
 
+(defn handle-client-interruption! []
+  (reply.concurrency/set-signal-handler!
+    "INT"
+    (fn [sig] (println "^C")
+      (@current-command :interrupt))))
+
 (defn execute-with-connection [connection options form]
   (let [response-fn ((:send connection) form)]
     (reset! current-command response-fn)
     (for [{:keys [ns value out err] :as res} (nrepl/response-seq response-fn)]
       (do
+        (when (= "done" (:status res))
+          (reset! current-command {}))
         (when value ((:value options print) value))
         (when out ((:out options print) out))
         (when err ((:err options print) err))
@@ -60,7 +68,6 @@
 code, and options."
   [options]
   (let [connection (get-connection options)]
-    (reply.concurrency/set-signal-handler! "INT" (fn [sig] (println "^C") (@current-command :interrupt)))
     (let [options (assoc options :prompt
                     (fn [ns]
                       (binding [*ns* (create-ns (symbol ns))]
@@ -73,6 +80,12 @@ code, and options."
       (doall (execute-with-connection
                connection
                options
-               (pr-str (reply.initialization/construct-init-code options))))
+               (pr-str (list 'do
+                         (reply.initialization/construct-init-code options)
+                         (reply.initialization/export-definition 'reply.concurrency/set-signal-handler!)
+                         '(set-signal-handler! "INT" (fn [s]))
+                         nil))))
+
+      (handle-client-interruption!)
       (run-repl connection options))))
 
