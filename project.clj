@@ -1,11 +1,11 @@
-(defproject reply "0.1.0-SNAPSHOT"
+(defproject reply "0.1.0-alpha1"
   :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
   :dependencies [[org.clojure/clojure "1.3.0"]
-                 [jline/jline "2.6-SNAPSHOT"]
+                 [org.clojars.trptcolin/jline "2.6-alpha1"]
                  [org.thnetos/cd-client "0.3.1" :exclusions [org.clojure/clojure]]
                  [clj-stacktrace "0.2.4"]
                  [clojure-complete "0.1.4" :exclusions [org.clojure/clojure]]
-                 [org.clojure/tools.nrepl "0.0.6-SNAPSHOT"]]
+                 [org.clojure/tools.nrepl "0.0.5"]]
   :dev-dependencies [[midje "1.3-alpha4" :exclusions [org.clojure/clojure]]
                      [lein-midje "[1.0.0,)"]]
   :repositories {
