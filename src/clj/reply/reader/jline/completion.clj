@@ -9,7 +9,7 @@
     (~'require '[~'complete :as ~'ninjudd.complete])
     (~'sort (~'ninjudd.complete/completions (~'str ~prefix) ~'*ns*))))
 
-(defn make-completer [eval-fn]
+(defn make-completer [eval-fn redraw-line-fn]
   (proxy [Completer] []
     (complete [^String buffer cursor ^java.util.List candidates]
       (let [buffer (or buffer "")
@@ -21,5 +21,6 @@
           -1
           (do
             (.addAll candidates possible-completions)
+            (redraw-line-fn)
             (- cursor prefix-length)))))))
 

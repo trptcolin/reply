@@ -17,7 +17,7 @@
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))
-        completer (jline.completion/make-completer reply.initialization/eval-in-user-ns)]
+        completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
 
     (doto reader
       (.setHistory history)
@@ -63,7 +63,12 @@
   (.flush (.getHistory @jline-reader))
   (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
   (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
-  (.addCompleter @jline-reader (jline.completion/make-completer eval-fn)))
+  (.addCompleter @jline-reader
+    (jline.completion/make-completer
+      eval-fn
+      (fn []
+        (.redrawLine @jline-reader)
+        (.flush @jline-reader)))))
 
 (defmacro with-jline-in [& body]
   `(do
