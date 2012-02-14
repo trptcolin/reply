@@ -25,7 +25,7 @@
         response-seq (nrepl/message client {:op "eval" :code form :id command-id :session @current-session})]
     (reset! current-command-id command-id)
     (doall (for [{:keys [ns value out err] :as res}
-                   (take-while #(not (some #{"done" "interrupted" "error" "eval-error"} (:status %)))
+                   (take-while #(not (some #{"done" "interrupted" "error"} (:status %)))
                                response-seq)]
       (do
         (when value ((:value options print) value))
