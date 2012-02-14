@@ -1,37 +1,12 @@
 (ns reply.main
-  (:require [reply.concurrency :as concurrency]
-            [reply.eval-state :as eval-state]
-            [reply.evaluation.nrepl :as evaluation.nrepl]
+  (:require [reply.eval-modes.nrepl :as eval-modes.nrepl]
+            [reply.eval-modes.standalone :as eval-modes.standalone]
             [reply.hacks.printing :as hacks.printing]
-            [reply.initialization :as initialization]
             [reply.reader.jline :as reader.jline]
+            [reply.signals :as signals]
             [clojure.main]
             [clojure.repl]
             [clj-stacktrace.repl]))
-
-(def reply-read
-  (fn [prompt exit]
-    (concurrency/starting-read!)
-    (reader.jline/read prompt exit)))
-
-(def reply-eval
-  (concurrency/act-in-future
-    (fn [form]
-      (eval-state/with-bindings
-        (partial eval form)))))
-
-(def reply-print
-  (concurrency/act-in-future prn))
-
-(defn handle-ctrl-c [signal]
-  (print "^C")
-  (flush)
-  (concurrency/stop-running-actions)
-  (reader.jline/reset-reader))
-
-(defn handle-resume [signal]
-  (println "Welcome back!")
-  (reader.jline/resume-reader))
 
 (defn exit
   "Exits the REPL. This is fairly brutal, does (System/exit 0)."
@@ -63,10 +38,14 @@
                                    (assoc arg-map :skip-default-init true))
       arg-map)))
 
+(defn handle-resume [signal]
+  (println "Welcome back!")
+  (reader.jline/resume-reader))
+
 (defmacro with-launching-context [& body]
   `(try
     (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
-    (concurrency/set-signal-handler! "CONT" handle-resume)
+    (signals/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                   clojure.repl/pst clj-stacktrace.repl/pst]
       ~@body)
@@ -78,21 +57,14 @@
   parsed out"
   (with-launching-context
     (reader.jline/with-jline-in
-      (evaluation.nrepl/main options))))
+      (eval-modes.nrepl/main options))))
 
 (defn launch-standalone
   "Launches the streamed (non-nREPL) version of REPL-y, with options already
   parsed out"
   [options]
   (with-launching-context
-    (concurrency/set-signal-handler! "INT" handle-ctrl-c)
-    (clojure.main/repl :read reply-read
-          :eval reply-eval
-          :print reply-print
-          :init #(initialization/eval-in-user-ns
-                  (initialization/construct-init-code options))
-          :prompt (constantly false)
-          :need-prompt (constantly false))))
+    (eval-modes.standalone/main options)))
 
 (declare -main) ; for --help
 (defn launch

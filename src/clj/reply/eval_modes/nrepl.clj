@@ -1,20 +1,19 @@
-(ns reply.evaluation.nrepl
+(ns reply.eval-modes.nrepl
   (:require [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
             [clojure.tools.nrepl.misc :as nrepl.misc]
             [clojure.tools.nrepl.server :as nrepl.server]
             [clojure.tools.nrepl.transport :as nrepl.transport]
-            [reply.concurrency]
-            [reply.eval-state]
             [reply.initialization]
-            [reply.reader.jline :as reader.jline]))
+            [reply.reader.jline :as reader.jline]
+            [reply.signals :as signals]))
 
 (def current-command-id (atom nil))
 (def current-session (atom nil))
 (def current-ns (atom (str *ns*)))
 
 (defn handle-client-interruption! [client]
-  (reply.concurrency/set-signal-handler!
+  (signals/set-signal-handler!
     "INT"
     (fn [sig] (print "^C") (flush)
       (when-let [command-id @current-command-id]
@@ -76,8 +75,7 @@
     (read-string @results)))
 
 (defn main
-  "Ripped from nREPL. The only changes are in namespacing, running of initial
-code, and options."
+  "Mostly ripped from nREPL's cmdline namespace."
   [options]
   (let [connection (get-connection options)
         client (nrepl/client connection 10000)
@@ -85,8 +83,6 @@ code, and options."
     (reset! current-session session)
     (let [options (assoc options :prompt
                     (fn [ns]
-                      (binding [*ns* (create-ns (symbol ns))]
-                        (reply.eval-state/set-bindings!))
                       (reader.jline/prepare-for-read
                         (partial adhoc-eval client))))
           options (if (:color options)
@@ -97,7 +93,7 @@ code, and options."
                options
                (pr-str (list 'do
                          (reply.initialization/construct-init-code options)
-                         (reply.initialization/export-definition 'reply.concurrency/set-signal-handler!)
+                         (reply.initialization/export-definition 'reply.signals/set-signal-handler!)
                          '(set-signal-handler! "INT" (fn [s]))
                          nil)))
 
