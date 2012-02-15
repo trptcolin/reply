@@ -1,12 +1,12 @@
 (ns reply.reader.jline.completion
   (:require [reply.completion :as completion]
             [reply.eval-state :as eval-state]
-            [complete :as ninjudd.complete])
+            [complete.core :as ninjudd.complete])
   (:import [jline.console.completer Completer]))
 
 (defn construct-possible-completions-form [prefix]
   `(do
-    (~'require '[~'complete :as ~'ninjudd.complete])
+    (~'require '[~'complete.core :as ~'ninjudd.complete])
     (~'sort (~'ninjudd.complete/completions (~'str ~prefix) ~'*ns*))))
 
 (defn make-completer [eval-fn redraw-line-fn]

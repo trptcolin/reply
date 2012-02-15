@@ -4,7 +4,7 @@
                  [org.clojars.trptcolin/jline "2.6-alpha1"]
                  [org.thnetos/cd-client "0.3.1" :exclusions [org.clojure/clojure]]
                  [clj-stacktrace "0.2.4"]
-                 [clojure-complete "0.1.4" :exclusions [org.clojure/clojure]]
+                 [clojure-complete "0.2.1" :exclusions [org.clojure/clojure]]
                  [org.clojure/tools.nrepl "0.2.0-beta1"]]
   :dev-dependencies [[midje "1.3-alpha4" :exclusions [org.clojure/clojure]]
                      [lein-midje "[1.0.0,)"]]
