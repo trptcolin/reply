@@ -32,7 +32,6 @@
         (when err ((:err options print) err))
         (flush)
         (when ns (reset! current-ns ns)))))
-    (println)
     (reset! current-command-id nil)
     @current-ns))
 
@@ -41,6 +40,7 @@
   ([connection {:keys [prompt] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns "user"]
+        (println)
         (prompt ns)
         (flush)
         (let [done (Object.)
