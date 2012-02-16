@@ -27,6 +27,12 @@
                    (take-while #(not (some #{"done" "interrupted" "error"} (:status %)))
                                response-seq)]
       (do
+        (when (some #{"need-input"} (:status res))
+          (.readLine *in*) ; pop off leftover newline from pushback
+          (let [input-result (.readLine *in*)]
+            (nrepl/message client
+              {:op "stdin" :stdin (str input-result "\n")
+               :id (nrepl.misc/uuid) :session @current-session})))
         (when value ((:value options print) value))
         (when out ((:out options print) out))
         (when err ((:err options print) err))
