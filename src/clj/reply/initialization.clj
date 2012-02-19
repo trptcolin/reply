@@ -34,6 +34,16 @@
 (defn export-definition [s]
   (read-string (clojure.repl/source-fn s)))
 
+(def resolve-class
+  (fn [sym]
+    (try (let [val (resolve sym)]
+      (when (class? val) val))
+        (catch Exception e
+          (when (not= ClassNotFoundException
+                      (class (clojure.main/repl-exception e)))
+            (throw e))))))
+
+
 (defn default-init-code
   "Assumes cd-client will be on the classpath when this is evaluated."
   []
@@ -64,6 +74,10 @@
 
     ~(export-definition 'reply.initialization/sourcery)
     (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
+
+    (require '[complete.core])
+    ~(export-definition 'reply.initialization/resolve-class)
+    (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
 
     (in-ns '~'user)
 
