@@ -60,7 +60,7 @@
       (eval-modes.nrepl/main options))))
 
 (defn launch-standalone
-  "Launches the streamed (non-nREPL) version of REPL-y, with options already
+  "Launches the standalone (non-nREPL) version of REPL-y, with options already
   parsed out"
   [options]
   (with-launching-context
