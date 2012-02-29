@@ -84,7 +84,7 @@ See -main for descriptions."
   -e/--eval:           Provide custom code to evaluate in the user ns
   --skip-default-init: Skip the default initialization code
   --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode
-  --attach:            Attach to an existing nrepl session on this port, when used with --nrepl
+  --attach:            Attach to an existing nrepl session on this port or host:port, when used with --nrepl
   --port:              Start a new nrepl session on this port, when used with --nrepl
   --color:             Use color; currently only available with --nrepl"
   [& args]
