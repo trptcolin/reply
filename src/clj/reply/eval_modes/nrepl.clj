@@ -62,13 +62,18 @@
                        (pr-str read-result)))))))))
 
 (defn get-connection [options]
-  (let [port (if-let [attach-port (:attach options)]
+  (let [attach (:attach options)
+        [attach-port attach-host] (and attach
+                                       (reverse (.split attach ":")))
+        port (if attach-port
                (Integer/parseInt attach-port)
                (-> (nrepl.server/start-server :port (Integer/parseInt (or (:port options) "0")))
                    deref
                    :ss
-                   .getLocalPort))]
-    (nrepl/connect :host (or (:host options) "localhost") :port port)))
+                   .getLocalPort))
+        host (or attach-host
+                 (:host options "localhost"))]
+    (nrepl/connect :host host :port port)))
 
 (defn adhoc-eval [client form]
   (let [results (atom "nil")]
