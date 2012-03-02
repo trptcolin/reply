@@ -55,7 +55,8 @@
                               (if (= (.getMessage e) "EOF while reading")
                                 done
                                 (prn e))))]
-          (if (= done read-result) nil
+          (if (= done read-result)
+              nil
               (recur (execute-with-client
                        connection
                        options

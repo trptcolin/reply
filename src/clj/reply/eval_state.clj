@@ -13,7 +13,7 @@
      #'clojure.core/*command-line-args* *command-line-args*
      #'clojure.core/*unchecked-math* *unchecked-math*
      #'clojure.core/*assert* *assert*
-     #'clojure.core/*1 "foo"
+     #'clojure.core/*1 nil
      #'clojure.core/*2 nil
      #'clojure.core/*3 nil
      #'clojure.core/*e nil}))
