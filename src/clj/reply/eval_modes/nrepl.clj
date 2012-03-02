@@ -21,7 +21,8 @@
 
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
-        response-seq (nrepl/message client {:op "eval" :code form :id command-id :session @current-session})]
+        session (or (:session options) @current-session)
+        response-seq (nrepl/message client {:op "eval" :code form :id command-id :session session})]
     (reset! current-command-id command-id)
     (doall (for [{:keys [ns value out err] :as res}
                    (take-while #(not (some #{"done" "interrupted" "error"} (:status %)))
@@ -32,7 +33,7 @@
           (let [input-result (.readLine *in*)]
             (nrepl/message client
               {:op "stdin" :stdin (str input-result "\n")
-               :id (nrepl.misc/uuid) :session @current-session})))
+               :id (nrepl.misc/uuid) :session session})))
         (when value ((:value options print) value))
         (when out ((:out options print) out))
         (when err ((:err options print) err))
@@ -76,13 +77,14 @@
                  (:host options "localhost"))]
     (nrepl/connect :host host :port port)))
 
-(defn adhoc-eval [client form]
+(defn adhoc-eval [client session form]
   (let [results (atom "nil")]
     (execute-with-client
       client
       {:value (partial reset! results)
        :out print
-       :err print}
+       :err print
+       :session session}
       (pr-str form))
     (read-string @results)))
 
@@ -91,12 +93,13 @@
   [options]
   (let [connection (get-connection options)
         client (nrepl/client connection 10000)
-        session (nrepl/new-session client)]
+        session (nrepl/new-session client)
+        completion-session (nrepl/new-session client) ]
     (reset! current-session session)
     (let [options (assoc options :prompt
                     (fn [ns]
                       (reader.jline/prepare-for-read
-                        (partial adhoc-eval client)
+                        (partial adhoc-eval client completion-session)
                         ns)))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
