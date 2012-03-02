@@ -25,8 +25,11 @@
       (.setPaginationEnabled true)
       (.addCompleter completer))))
 
-(defn get-prompt [ns]
-  (format "%s=> " (ns-name ns)))
+(defmulti get-prompt type :default :default)
+(defmethod get-prompt :default [ns]
+  (format "%s=> " ns))
+(defmethod get-prompt clojure.lang.Namespace [ns]
+  (get-prompt (ns-name ns)))
 
 (defn set-empty-prompt []
   (.setPrompt
@@ -58,10 +61,10 @@
   (when @jline-reader
     (.restore (.getTerminal @jline-reader))))
 
-(defn prepare-for-read [eval-fn]
+(defn prepare-for-read [eval-fn ns]
   (when-not @jline-reader (setup-reader!))
   (.flush (.getHistory @jline-reader))
-  (.setPrompt @jline-reader (get-prompt (eval-state/get-ns)))
+  (.setPrompt @jline-reader (get-prompt ns))
   (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
   (.addCompleter @jline-reader
     (jline.completion/make-completer
@@ -73,7 +76,7 @@
 (defmacro with-jline-in [& body]
   `(do
     (try
-      (prepare-for-read reply.initialization/eval-in-user-ns)
+      (prepare-for-read reply.initialization/eval-in-user-ns (eval-state/get-ns))
       (binding [*in* @jline-pushback-reader]
         (Thread/interrupted) ; just to clear the status
         ~@body)

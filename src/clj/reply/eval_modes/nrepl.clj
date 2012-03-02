@@ -96,7 +96,8 @@
     (let [options (assoc options :prompt
                     (fn [ns]
                       (reader.jline/prepare-for-read
-                        (partial adhoc-eval client))))
+                        (partial adhoc-eval client)
+                        ns)))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)]
