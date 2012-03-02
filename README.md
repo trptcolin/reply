@@ -46,13 +46,13 @@ instance:
 
 ### Examples of fancy options:
 
-No options; standalone execution:
+Launch in [nREPL](https://github.com/clojure/tools.nrepl) mode:
 
     $ reply
 
-Launch [nREPL](https://github.com/clojure/tools.nrepl) in interactive mode:
+Standalone execution (no nREPL):
 
-    $ reply --nrepl
+    $ reply --standalone
 
 Skip all the bells-and-whistles initialization and provide your own:
 

@@ -31,7 +31,7 @@
       "-h" (recur (cons arg more) (assoc arg-map :help true))
       "--help" (recur (cons arg more) (assoc arg-map :help true))
 
-      "--nrepl" (recur (cons arg more) (assoc arg-map :nrepl true))
+      "--standalone" (recur (cons arg more) (assoc arg-map :standalone true))
       "--color" (recur (cons arg more) (assoc arg-map :color true))
 
       "--skip-default-init" (recur (cons arg more)
@@ -70,12 +70,12 @@
 (defn launch
   "Entry point for tools which may prefer to send a map of options rather than a
 varargs list of arguments.
-Available options: [:help :custom-init :skip-default-init :nrepl :attach :port :color]
+Available options: [:help :custom-init :skip-default-init :standalone :attach :port :color]
 See -main for descriptions."
   [options]
   (cond (:help options) (do (println (clojure.repl/doc -main)) (exit))
-        (:nrepl options) (launch-nrepl options)
-        :else (launch-standalone options)))
+        (:standalone options) (launch-standalone options)
+        :else (launch-nrepl options)))
 
 (defn -main
   "Launches a REPL. Customizations available:
@@ -83,9 +83,9 @@ See -main for descriptions."
   -i/--init:           Provide a Clojure file to evaluate in the user ns
   -e/--eval:           Provide custom code to evaluate in the user ns
   --skip-default-init: Skip the default initialization code
-  --nrepl:             Launch nREPL (clojure.tools.nrepl) in interactive mode
-  --attach:            Attach to an existing nrepl session on this port or host:port, when used with --nrepl
-  --port:              Start a new nrepl session on this port, when used with --nrepl
-  --color:             Use color; currently only available with --nrepl"
+  --standalone:        Launch standalone mode instead of the default nREPL
+  --attach:            Attach to an existing nREPL session on this port or host:port, when used with nREPL
+  --port:              Start a new nREPL session on this port, when used with nREPL
+  --color:             Use color; currently only available with nREPL"
   [& args]
   (launch (parse-args args)))
