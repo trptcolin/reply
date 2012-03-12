@@ -61,7 +61,8 @@
               (recur (execute-with-client
                        connection
                        options
-                       (pr-str read-result)))))))))
+                       (binding [*print-meta* true]
+                         (pr-str read-result))))))))))
 
 (defn get-connection [options]
   (let [attach (:attach options)
