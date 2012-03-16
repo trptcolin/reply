@@ -87,7 +87,7 @@
        :out print
        :err print
        :session session}
-      (pr-str form))
+      (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form)))
     (read-string @results)))
 
 (defn main
