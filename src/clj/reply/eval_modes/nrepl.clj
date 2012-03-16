@@ -38,7 +38,8 @@
         (when out ((:out options print) out))
         (when err ((:err options print) err))
         (flush)
-        (when ns (reset! current-ns ns)))))
+        (when (and ns (not (:session options)))
+          (reset! current-ns ns)))))
     (reset! current-command-id nil)
     @current-ns))
 
