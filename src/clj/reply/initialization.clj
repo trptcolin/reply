@@ -3,8 +3,9 @@
             [clojure.repl]))
 
 (defmacro repl-defn [sym & args]
-  (let [no-meta-source (with-out-str (clojure.pprint/pprint `(defn ~sym ~@args)))
-        meta-source `(clojure.core/defn ~(with-meta sym {:source no-meta-source}) ~@args)]
+  (let [no-meta-source (binding [*print-meta* true]
+                         (with-out-str (clojure.pprint/pprint `(defn ~sym ~@args))))
+        meta-source `(clojure.core/defn ~(vary-meta sym assoc :source no-meta-source) ~@args)]
     meta-source))
 
 (defmacro sourcery [name]
