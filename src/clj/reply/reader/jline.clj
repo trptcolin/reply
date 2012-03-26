@@ -25,16 +25,21 @@
       (.setPaginationEnabled true)
       (.addCompleter completer))))
 
+
 (defmulti get-prompt type :default :default)
 (defmethod get-prompt :default [ns]
   (format "%s=> " ns))
 (defmethod get-prompt clojure.lang.Namespace [ns]
   (get-prompt (ns-name ns)))
 
+(def prompt-fn (atom get-prompt))
+(defn set-prompt-fn! [f]
+  (when f (reset! prompt-fn f)))
+
 (defn set-empty-prompt []
   (.setPrompt
     @jline-reader
-    (apply str (repeat (count (get-prompt (eval-state/get-ns))) \space))))
+    (apply str (repeat (count (@prompt-fn (eval-state/get-ns))) \space))))
 
 (defn setup-reader! []
   (Log/setOutput (PrintStream. (ByteArrayOutputStream.)))
@@ -64,7 +69,7 @@
 (defn prepare-for-read [eval-fn ns]
   (when-not @jline-reader (setup-reader!))
   (.flush (.getHistory @jline-reader))
-  (.setPrompt @jline-reader (get-prompt ns))
+  (.setPrompt @jline-reader (@prompt-fn ns))
   (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
   (.addCompleter @jline-reader
     (jline.completion/make-completer

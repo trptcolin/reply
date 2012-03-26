@@ -25,6 +25,8 @@
       "-i" (recur more (assoc arg-map :custom-init (read-string (slurp arg))))
       "--init" (recur more (assoc arg-map :custom-init (read-string (slurp arg))))
 
+      "--prompt" (recur more (assoc arg-map :custom-prompt (read-string arg)))
+
       "--attach" (recur more (assoc arg-map :attach arg))
       "--port" (recur more (assoc arg-map :port arg))
 
@@ -52,11 +54,16 @@
     (catch Exception e# (clojure.repl/pst e#))
     (finally (exit))))
 
+(defn set-prompt [options]
+  (when-let [prompt-form (:custom-prompt options)]
+    (reader.jline/set-prompt-fn! (eval prompt-form))))
+
 (defn launch-nrepl [options]
   "Launches the nREPL version of REPL-y, with options already
   parsed out"
   (with-launching-context
     (reader.jline/with-jline-in
+      (set-prompt options)
       (eval-modes.nrepl/main options))))
 
 (defn launch-standalone
@@ -64,6 +71,7 @@
   parsed out"
   [options]
   (with-launching-context
+    (set-prompt options)
     (eval-modes.standalone/main options)))
 
 (declare -main) ; for --help
@@ -82,6 +90,7 @@ See -main for descriptions."
   -h/--help:           Show this help screen
   -i/--init:           Provide a Clojure file to evaluate in the user ns
   -e/--eval:           Provide a custom form on the command line to evaluate in the user ns
+  --prompt:            Provide a custom prompt function
   --skip-default-init: Skip the default initialization code
   --standalone:        Launch standalone mode instead of the default nREPL
   --attach:            Attach to an existing nREPL session on this port or host:port, when used with nREPL
