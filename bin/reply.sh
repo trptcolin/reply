@@ -33,6 +33,8 @@ done
 
 java -cp "$CP":"$USER_CP" reply.ReplyMain "$@"
 
-# For jline debugging:
-# java -Djline.internal.Log.debug=true -cp $CP reply.ReplyMain "$@"
+# for debugging:
+# java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n \
+#      -Djline.internal.Log.debug=true \
+#      -cp $CP reply.ReplyMain "$@"
 
