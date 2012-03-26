@@ -47,7 +47,7 @@
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
-      (loop [ns "user"]
+      (loop [ns (execute-with-client connection options "")]
         (println)
         (prompt ns)
         (flush)
@@ -110,9 +110,9 @@
                client
                options
                (pr-str (list 'do
-                         (reply.initialization/construct-init-code options)
                          (reply.initialization/export-definition 'reply.signals/set-signal-handler!)
                          '(set-signal-handler! "INT" (fn [s]))
+                         (reply.initialization/construct-init-code options)
                          nil)))
 
       (handle-client-interruption! client)
