@@ -82,9 +82,13 @@
 
     (in-ns '~'user)
 
-    ; assumes cd-client is on the execution classpath by now
-    (require '[cd-client.core])
-    (~'reply.exports/intern-with-meta '~'user '~'clojuredocs #'cd-client.core/pr-examples)
+    (try
+      (require '[cd-client.core])
+      (let [pr-exes# (ns-resolve '~'cd-client.core '~'pr-examples)]
+        (~'reply.exports/intern-with-meta '~'user '~'clojuredocs pr-exes#))
+      (catch Exception e#
+        (println "Warning: Could not load the ClojureDocs client, so `clojuredocs` will be unavailable")
+        (println "  Details:" e# "\n")))
 
     (~'help)
     nil))
