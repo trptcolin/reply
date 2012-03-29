@@ -1,19 +1,13 @@
 (ns reply.main
   (:require [reply.eval-modes.nrepl :as eval-modes.nrepl]
             [reply.eval-modes.standalone :as eval-modes.standalone]
+            [reply.exit :as exit]
             [reply.hacks.printing :as hacks.printing]
             [reply.reader.jline :as reader.jline]
             [reply.signals :as signals]
             [clojure.main]
             [clojure.repl]
             [clj-stacktrace.repl]))
-
-(defn exit
-  "Exits the REPL. This is fairly brutal, does (System/exit 0)."
-  []
-  (shutdown-agents)
-  (println "Bye for now!")
-  (System/exit 0))
 
 (defn parse-args [args]
   (loop [[option arg & more :as args] args
@@ -52,7 +46,7 @@
                   clojure.repl/pst clj-stacktrace.repl/pst]
       ~@body)
     (catch Exception e# (clojure.repl/pst e#))
-    (finally (exit))))
+    (finally (exit/exit))))
 
 (defn set-prompt [options]
   (when-let [prompt-form (:custom-prompt options)]
@@ -81,7 +75,7 @@ varargs list of arguments.
 Available options: [:help :custom-init :skip-default-init :standalone :attach :port :color]
 See -main for descriptions."
   [options]
-  (cond (:help options) (do (println (clojure.repl/doc -main)) (exit))
+  (cond (:help options) (do (println (clojure.repl/doc -main)) (exit/exit))
         (:standalone options) (launch-standalone options)
         :else (launch-nrepl options)))
 

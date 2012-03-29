@@ -61,13 +61,13 @@
     (use '[clojure.pprint :only ~'[pp pprint]])
 
     ~(export-definition 'reply.initialization/help)
-    ~(export-definition 'reply.main/exit)
-    (def ~'quit ~'exit)
+    ;~(export-definition 'reply.exit/exit)
+    ;(def ~'quit ~'exit)
 
     (ns reply.exports)
     ~(export-definition 'reply.initialization/intern-with-meta)
 
-    (~'intern-with-meta '~'user '~'quit #'user/exit)
+    ;(~'intern-with-meta '~'user '~'quit #'user/exit)
 
     (binding [*err* (java.io.StringWriter.)]
       ~(export-definition 'reply.initialization/repl-defn)

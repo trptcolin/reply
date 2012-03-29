@@ -4,6 +4,7 @@
             [clojure.tools.nrepl.misc :as nrepl.misc]
             [clojure.tools.nrepl.server :as nrepl.server]
             [clojure.tools.nrepl.transport :as nrepl.transport]
+            [reply.exit]
             [reply.initialization]
             [reply.reader.jline :as reader.jline]
             [reply.signals :as signals]))
@@ -51,13 +52,13 @@
         (println)
         (prompt ns)
         (flush)
-        (let [done (Object.)
+        (let [eof (Object.)
               read-result (try (read)
                             (catch Exception e
                               (if (= (.getMessage e) "EOF while reading")
-                                done
+                                eof
                                 (prn e))))]
-          (if (= done read-result)
+          (if (reply.exit/done? eof read-result)
               nil
               (recur (execute-with-client
                        connection
