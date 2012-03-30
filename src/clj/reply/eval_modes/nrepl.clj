@@ -66,19 +66,20 @@
                        (binding [*print-meta* true]
                          (pr-str read-result))))))))))
 
-(defn get-connection [options]
-  (let [attach (:attach options)
-        [attach-port attach-host] (and attach
-                                       (reverse (.split attach ":")))
-        port (if attach-port
-               (Integer/parseInt attach-port)
-               (-> (nrepl.server/start-server :port (Integer/parseInt (or (:port options) "0")))
-                   deref
-                   :ss
-                   .getLocalPort))
-        host (or attach-host
-                 (:host options "localhost"))]
-    (nrepl/connect :host host :port port)))
+;; TODO: this could be less convoluted if we could break backwards-compat
+(defn- url-for [attach host port]
+  (if (and attach (re-find #"^\w+://" attach))
+    attach
+    (let [[port host] (if attach
+                        (reverse (.split attach ":"))
+                        [port host])]
+      (format "nrepl://%s:%s" (or host "localhost") port))))
+
+(defn get-connection [{:keys [attach host port]}]
+  (let [port (if-not attach
+               (-> (nrepl.server/start-server :port (Integer. (or port 0)))
+                   deref :ss .getLocalPort))]
+    (nrepl/url-connect (url-for attach host port))))
 
 (defn adhoc-eval [client session form]
   (let [results (atom "nil")]
