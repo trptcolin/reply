@@ -4,6 +4,5 @@
 
 (fact "correct quoting in completions form request"
   (construct-possible-completions-form "clojure.core/map-") =>
-    '(do (require '[complete.core :as ninjudd.complete])
-         (sort (ninjudd.complete/completions (str "clojure.core/map-") *ns*)))
-)
+    '(complete.core/completions (str "clojure.core/map-") *ns*))
+
