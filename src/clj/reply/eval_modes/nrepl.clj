@@ -9,6 +9,11 @@
             [reply.reader.jline :as reader.jline]
             [reply.signals :as signals]))
 
+(try
+  ; get the HTTP/HTTPS multimethods registered if Drawbridge is available
+  (require '[cemerick.drawbridge])
+  (catch Exception e))
+
 (def current-command-id (atom nil))
 (def current-session (atom nil))
 (def current-ns (atom (str *ns*)))
