@@ -44,6 +44,47 @@
                       (class (clojure.main/repl-exception e)))
             (throw e))))))
 
+(def clojuredocs-available?
+  (delay
+   (try
+     (println "Loading clojuredocs-client...")
+     (require '[cd-client.core])
+     true
+     (catch Exception e#
+       (println "Warning: Could not load the ClojureDocs client, so `clojuredocs` will be unavailable")
+       (println "  Details:" e# "\n")
+       false))))
+
+(defn call-with-ns-and-name
+  [f v]
+  (let [m (meta v)
+        ns (str (.name (:ns m)))
+        name (str (:name m))]
+    (f ns name)))
+
+(defmacro handle-fns-etc
+  [name fn]
+  (if (special-symbol? `~name)
+    `(~fn "clojure.core" (str '~name))
+    (let [nspace (find-ns name)]
+      (if nspace
+        `(println "No usage examples for namespaces as a whole like" '~name
+                  "\nTry a particular symbol in a namespace,"
+                  "e.g. clojure.string/join")
+        `(reply.initialization/call-with-ns-and-name ~fn (var ~name))))))
+
+(defmacro lazy-clojuredocs
+  "Lazily checks if the clojuredocs client is available, and uses it to
+  retrieve examples if it is."
+  ([v]
+     `(when (deref reply.initialization/clojuredocs-available?)
+        (reply.initialization/handle-fns-etc
+         ~v (ns-resolve (symbol "cd-client.core")
+                        (symbol "pr-examples-core")))))
+  ([ns-str var-str]
+     `(when (deref reply.initialization/clojuredocs-available?)
+        ((ns-resolve (symbol "cd-client.core") (symbol "pr-examples-core"))
+         ~ns-str ~var-str))))
 
 (defn default-init-code
   "Assumes cd-client will be on the classpath when this is evaluated."
@@ -76,19 +117,14 @@
     ~(export-definition 'reply.initialization/sourcery)
     (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
 
+    ~(export-definition 'reply.initialization/lazy-clojuredocs)
+    (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
+
     (require '[complete.core])
     ~(export-definition 'reply.initialization/resolve-class)
     (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
 
     (in-ns '~'user)
-
-    (try
-      (require '[cd-client.core])
-      (let [pr-exes# (ns-resolve '~'cd-client.core '~'pr-examples)]
-        (~'reply.exports/intern-with-meta '~'user '~'clojuredocs pr-exes#))
-      (catch Exception e#
-        (println "Warning: Could not load the ClojureDocs client, so `clojuredocs` will be unavailable")
-        (println "  Details:" e# "\n")))
 
     (~'help)
     nil))
