@@ -14,4 +14,4 @@
   :java-source-path "src/java"
   :source-paths ["src/clj"]
   :java-source-paths ["src/java"]
-  :main ^:skip-aot reply.main)
+  :main ^{:skip-aot true} reply.main)
