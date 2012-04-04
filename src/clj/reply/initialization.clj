@@ -120,9 +120,12 @@
     ~(export-definition 'reply.initialization/lazy-clojuredocs)
     (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
 
-    (require '[complete.core])
-    ~(export-definition 'reply.initialization/resolve-class)
-    (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
+    (try
+      (require '[complete.core])
+      ~(export-definition 'reply.initialization/resolve-class)
+      (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
+      (catch Exception e#
+        (println "Unable to initialize completion.")))
 
     (in-ns '~'user)
 
