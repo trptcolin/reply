@@ -9,11 +9,6 @@
             [reply.reader.jline :as reader.jline]
             [reply.signals :as signals]))
 
-(try
-  ; get the HTTP/HTTPS multimethods registered if Drawbridge is available
-  (require '[cemerick.drawbridge])
-  (catch Exception e))
-
 (def current-command-id (atom nil))
 (def current-session (atom nil))
 (def current-ns (atom (str *ns*)))
@@ -80,11 +75,22 @@
                         [port host])]
       (format "nrepl://%s:%s" (or host "localhost") port))))
 
+(defn- load-drawbridge
+  "Load Drawbridge (and therefore get its HTTP/HTTPS multimethods
+   registered) if it's available."
+  []
+  (try
+    (require '[cemerick.drawbridge])
+    (catch Exception e)))
+
 (defn get-connection [{:keys [attach host port]}]
   (let [port (if-not attach
                (-> (nrepl.server/start-server :port (Integer. (or port 0)))
-                   deref :ss .getLocalPort))]
-    (nrepl/url-connect (url-for attach host port))))
+                   deref :ss .getLocalPort))
+        url (url-for attach host port)]
+    (when (-> url java.net.URI. .getScheme .toLowerCase #{"http" "https"})
+      (load-drawbridge))
+    (nrepl/url-connect url)))
 
 (defn adhoc-eval [client session form]
   (let [results (atom "nil")]
