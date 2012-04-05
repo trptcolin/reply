@@ -4,6 +4,7 @@
                  [org.clojars.trptcolin/jline "2.7-alpha1"]
                  [org.thnetos/cd-client "0.3.4"]
                  [clj-stacktrace "0.2.4"]
+                 [clj-http "0.3.6"]
                  [org.clojure/tools.nrepl "0.2.0-beta5"]
                  [com.cemerick/drawbridge "0.0.2"]
                  [clojure-complete "0.2.1"]]
