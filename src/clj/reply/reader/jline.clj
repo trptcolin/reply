@@ -58,7 +58,7 @@
 
 (defn resume-reader []
   (when @jline-reader
-    (.init (.getTerminal @jline-reader))
+    (.reset (.getTerminal @jline-reader))
     (.redrawLine @jline-reader)
     (.flush @jline-reader)))
 
