@@ -33,11 +33,10 @@ Meantime (assuming you have
 
 ## Usage
 
-Run `bin/reply.sh`. This will get friendlier for non-Cygwin Windows users.
+Run `bin/reply.sh` on Mac/Linux, or `bin\reply.bat` on Windows.
 
-And if you want to really live the high life:
-
-    ln -s /path/to/reply/bin/reply.sh ~/bin/reply
+And if you want to really live the high life, add the bin directory to
+your $PATH.
 
 If you want additional stuff on the classpath, you can set `$USER_CP`. For
 instance:
