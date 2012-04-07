@@ -92,13 +92,13 @@
       (load-drawbridge))
     (nrepl/url-connect url)))
 
-(defn adhoc-eval [client session form]
+(defn completion-eval [client session form]
   (let [results (atom "nil")]
     (execute-with-client
       client
       {:value (partial reset! results)
        :out print
-       :err print
+       :err (constantly nil)
        :session session}
       (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form)))
     (read-string @results)))
@@ -114,7 +114,7 @@
     (let [options (assoc options :prompt
                     (fn [ns]
                       (reader.jline/prepare-for-read
-                        (partial adhoc-eval client completion-session)
+                        (partial completion-eval client completion-session)
                         ns)))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
