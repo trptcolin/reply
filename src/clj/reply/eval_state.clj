@@ -21,6 +21,9 @@
 (defn get-ns []
   (@bindings #'*ns*))
 
+(defn set-ns [ns]
+  (swap! bindings assoc #'*ns* ns))
+
 (defn set-bindings! []
   (doseq [k (keys @bindings)]
     (swap! bindings assoc k (deref k))))

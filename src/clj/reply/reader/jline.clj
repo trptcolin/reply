@@ -70,6 +70,7 @@
   (when-not @jline-reader (setup-reader!))
   (.flush (.getHistory @jline-reader))
   (.setPrompt @jline-reader (@prompt-fn ns))
+  (eval-state/set-ns ns)
   (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
   (.addCompleter @jline-reader
     (jline.completion/make-completer
