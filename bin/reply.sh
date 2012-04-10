@@ -31,7 +31,7 @@ for j in "$BASEDIR"/../lib/*.jar; do
   CP=$CP:$j
 done
 
-java -cp "$CP":"$USER_CP" reply.ReplyMain "$@"
+java -cp "$USER_CP":"$CP" reply.ReplyMain "$@"
 
 # for debugging:
 # java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n \
