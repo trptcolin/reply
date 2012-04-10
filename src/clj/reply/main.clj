@@ -92,7 +92,7 @@
   --attach:            Attach to an existing nREPL session on this port or host:port, when used with nREPL
   --port:              Start a new nREPL session on this port, when used with nREPL
   --color:             Use color; currently only available with nREPL
-  --timeout:           Specify the network timeout, when used with nREPL"
+  --timeout:           Specify the network timeout in ms, when used with nREPL"
 
   [& args]
   (launch (parse-args args)))
