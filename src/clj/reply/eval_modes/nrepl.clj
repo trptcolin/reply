@@ -106,9 +106,11 @@
 (defn main
   "Mostly ripped from nREPL's cmdline namespace."
   [options]
-  (let [connection (get-connection options)
-        client (nrepl/client connection 10000)
-        session (nrepl/new-session client)
+  (let [connection         (get-connection options)
+        default-timeout    30000
+        timeout            (Integer. (or (:timeout options) default-timeout))
+        client             (nrepl/client connection timeout)
+        session            (nrepl/new-session client)
         completion-session (nrepl/new-session client) ]
     (reset! current-session session)
     (let [options (assoc options :prompt
@@ -130,4 +132,3 @@
 
       (handle-client-interruption! client)
       (run-repl client options))))
-
