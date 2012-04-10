@@ -85,12 +85,14 @@
   "Launches a REPL. Customizations available:
   -h/--help:           Show this help screen
   -i/--init:           Provide a Clojure file to evaluate in the user ns
-  -e/--eval:           Provide a custom form on the command line to evaluate in the user ns
+  -e/--eval:           Provide a custom form on the command line to evaluate in
+                         the user ns
   --prompt:            Provide a custom prompt function
   --skip-default-init: Skip the default initialization code
   --standalone:        Launch standalone mode instead of the default nREPL
-  --attach:            Attach to an existing nREPL session on this port or host:port, when used with nREPL
-  --port:              Start a new nREPL session on this port, when used with nREPL
+  --attach:            Attach to an existing nREPL session on this port or
+                         host:port, when used with nREPL
+  --port:              Start new nREPL server on this port
   --color:             Use color; currently only available with nREPL
   --timeout:           Specify the network timeout in ms, when used with nREPL"
 
