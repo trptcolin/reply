@@ -107,9 +107,7 @@
   "Mostly ripped from nREPL's cmdline namespace."
   [options]
   (let [connection         (get-connection options)
-        default-timeout    Long/MAX_VALUE
-        timeout            (Long. (or (:timeout options) default-timeout))
-        client             (nrepl/client connection timeout)
+        client             (nrepl/client connection Long/MAX_VALUE)
         session            (nrepl/new-session client)
         completion-session (nrepl/new-session client) ]
     (reset! current-session session)

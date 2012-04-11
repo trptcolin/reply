@@ -33,7 +33,6 @@
       "--skip-default-init" (recur (cons arg more)
                                    (assoc arg-map :skip-default-init true))
 
-      "--timeout" (recur more (assoc arg-map :timeout arg))
       arg-map)))
 
 (defn handle-resume [signal]
@@ -74,9 +73,9 @@
 (defn launch
   "Entry point for tools which may prefer to send a map of options
   rather than a varargs list of arguments.  Available options:
-  [:help :custom-init :skip-default-init :standalone :attach :port
-   :color :timeout]
-  See -main for descriptions."  [options]
+  [:help :custom-init :skip-default-init :standalone :attach :port :color]
+  See -main for descriptions."
+  [options]
   (cond (:help options) (do (println (clojure.repl/doc -main)) (exit/exit))
         (:standalone options) (launch-standalone options)
         :else (launch-nrepl options)))
@@ -93,8 +92,7 @@
   --attach:            Attach to an existing nREPL session on this port or
                          host:port, when used with nREPL
   --port:              Start new nREPL server on this port
-  --color:             Use color; currently only available with nREPL
-  --timeout:           Specify the network timeout in ms, when used with nREPL"
+  --color:             Use color; currently only available with nREPL"
 
   [& args]
   (launch (parse-args args)))
