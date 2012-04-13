@@ -18,23 +18,28 @@
     "INT"
     (fn [sig] (print "^C") (flush)
       (when-let [command-id @current-command-id]
-        (client {:op "interrupt" :session @current-session :interrupt-id command-id})))))
+        (client {:op "interrupt"
+                 :session @current-session
+                 :interrupt-id command-id})))))
 
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
-        response-seq (nrepl/message client {:op "eval" :code form :id command-id :session session})]
+        session-sender (nrepl/client-session client :session session)
+        response-seq (session-sender {:op "eval" :code form :id command-id})]
     (reset! current-command-id command-id)
     (doall (for [{:keys [ns value out err] :as res}
-                   (take-while #(not (some #{"done" "interrupted" "error"} (:status %)))
-                               response-seq)]
+                   (#'nrepl/take-until
+                     #(and (= command-id (:id %))
+                           (some #{"done" "interrupted" "error"} (:status %)))
+                                     response-seq)]
       (do
         (when (some #{"need-input"} (:status res))
           (.readLine *in*) ; pop off leftover newline from pushback
           (let [input-result (.readLine *in*)]
-            (nrepl/message client
+            (session-sender
               {:op "stdin" :stdin (str input-result "\n")
-               :id (nrepl.misc/uuid) :session session})))
+               :id (nrepl.misc/uuid)})))
         (when value ((:value options print) value))
         (when out ((:out options print) out))
         (when err ((:err options print) err))
@@ -123,10 +128,12 @@
                client
                options
                (pr-str (list 'do
-                         (reply.initialization/export-definition 'reply.signals/set-signal-handler!)
+                         (reply.initialization/export-definition
+                           'reply.signals/set-signal-handler!)
                          '(set-signal-handler! "INT" (fn [s]))
                          (reply.initialization/construct-init-code options)
                          nil)))
 
       (handle-client-interruption! client)
       (run-repl client options))))
+
