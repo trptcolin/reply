@@ -28,24 +28,25 @@
         session-sender (nrepl/client-session client :session session)
         response-seq (session-sender {:op "eval" :code form :id command-id})]
     (reset! current-command-id command-id)
-    (doall (for [{:keys [ns value out err] :as res}
-                   (#'nrepl/take-until
-                     #(and (= command-id (:id %))
-                           (some #{"done" "interrupted" "error"} (:status %)))
-                                     response-seq)]
-      (do
-        (when (some #{"need-input"} (:status res))
-          (.readLine *in*) ; pop off leftover newline from pushback
-          (let [input-result (.readLine *in*)]
-            (session-sender
-              {:op "stdin" :stdin (str input-result "\n")
-               :id (nrepl.misc/uuid)})))
-        (when value ((:value options print) value))
-        (when out ((:out options print) out))
-        (when err ((:err options print) err))
-        (flush)
-        (when (and ns (not (:session options)))
-          (reset! current-ns ns)))))
+    (doall
+      (for [{:keys [ns value out err] :as res}
+              (#'nrepl/take-until
+                #(and (= command-id (:id %))
+                      (some #{"done" "interrupted" "error"} (:status %)))
+                response-seq)]
+        (do
+          (when (some #{"need-input"} (:status res))
+            (.readLine *in*) ; pop off leftover newline from pushback
+            (let [input-result (.readLine *in*)]
+              (session-sender
+                {:op "stdin" :stdin (str input-result "\n")
+                 :id (nrepl.misc/uuid)})))
+          (when value ((:value options print) value))
+          (when out ((:out options print) out))
+          (when err ((:err options print) err))
+          (flush)
+          (when (and ns (not (:session options)))
+            (reset! current-ns ns)))))
     (reset! current-command-id nil)
     @current-ns))
 
