@@ -42,8 +42,6 @@
                 {:op "stdin" :stdin (str input-result "\n")
                  :id (nrepl.misc/uuid)})))
           (when value ((:value options print) value))
-          (when out ((:out options print) out))
-          (when err ((:err options print) err))
           (flush)
           (when (and ns (not (:session options)))
             (reset! current-ns ns)))))
@@ -124,7 +122,14 @@
                         ns)))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
-                    options)]
+                    options)
+          session-sender (nrepl/client-session client :session session)
+          responses (session-sender {:op :eval :code ""})]
+      (future
+        (doseq [{:keys [out err] :as resp} responses]
+          (when err (print err))
+          (when out (print out))
+          (flush)))
       (execute-with-client
                client
                options
