@@ -23,7 +23,7 @@
   (println "  Source: (source function-name-here)")
   (println "          (sourcery function-name-here)")
   (println " Javadoc: (javadoc java-object-or-class-here)")
-  (println "Examples from clojuredocs.org:")
+  (println "Examples from clojuredocs.org: [clojuredocs or cdoc]")
   (println "          (clojuredocs name-here)")
   (println "          (clojuredocs \"ns-here\" \"name-here\")"))
 
@@ -115,6 +115,7 @@
 
     ~(export-definition 'reply.initialization/lazy-clojuredocs)
     (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
+    (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
 
     (try
       (require '[complete.core])
