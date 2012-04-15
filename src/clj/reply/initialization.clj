@@ -17,15 +17,15 @@
   "Prints a list of helpful commands."
   []
   (println "    Exit: Control+D or (exit) or (quit)")
-  (println "Commands: (help)")
+  (println "Commands: (user/help)")
   (println "    Docs: (doc function-name-here)")
   (println "          (find-doc \"part-of-name-here\")")
   (println "  Source: (source function-name-here)")
-  (println "          (sourcery function-name-here)")
+  (println "          (user/sourcery function-name-here)")
   (println " Javadoc: (javadoc java-object-or-class-here)")
   (println "Examples from clojuredocs.org: [clojuredocs or cdoc]")
-  (println "          (clojuredocs name-here)")
-  (println "          (clojuredocs \"ns-here\" \"name-here\")"))
+  (println "          (user/clojuredocs name-here)")
+  (println "          (user/clojuredocs \"ns-here\" \"name-here\")"))
 
 (defn intern-with-meta [ns sym value-var]
   (intern ns
