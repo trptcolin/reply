@@ -71,18 +71,18 @@
         `(println "No usage examples for namespaces as a whole like" '~name
                   "\nTry a particular symbol in a namespace,"
                   "e.g. clojure.string/join")
-        `(reply.initialization/call-with-ns-and-name ~fn (var ~name))))))
+        `(reply.exports/call-with-ns-and-name ~fn (var ~name))))))
 
 (defmacro lazy-clojuredocs
   "Lazily checks if the clojuredocs client is available, and uses it to
   retrieve examples if it is."
   ([v]
-     `(when (deref reply.initialization/clojuredocs-available?)
-        (reply.initialization/handle-fns-etc
+     `(when (deref reply.exports/clojuredocs-available?)
+        (reply.exports/handle-fns-etc
          ~v (ns-resolve (symbol "cd-client.core")
                         (symbol "pr-examples-core")))))
   ([ns-str var-str]
-     `(when (deref reply.initialization/clojuredocs-available?)
+     `(when (deref reply.exports/clojuredocs-available?)
         ((ns-resolve (symbol "cd-client.core") (symbol "pr-examples-core"))
          ~ns-str ~var-str))))
 
@@ -113,6 +113,9 @@
     ~(export-definition 'reply.initialization/sourcery)
     (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
 
+    ~(export-definition 'reply.initialization/clojuredocs-available?)
+    ~(export-definition 'reply.initialization/call-with-ns-and-name)
+    ~(export-definition 'reply.initialization/handle-fns-etc)
     ~(export-definition 'reply.initialization/lazy-clojuredocs)
     (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
     (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
