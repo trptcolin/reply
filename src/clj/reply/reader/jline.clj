@@ -18,7 +18,7 @@
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))
         completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
-
+    (.setBlinkMatchingParen (.getKeys reader) true)
     (doto reader
       (.setHistory history)
       (.setExpandEvents false)
