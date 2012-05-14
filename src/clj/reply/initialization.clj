@@ -1,6 +1,7 @@
 (ns reply.initialization
   (:require [clojure.pprint]
-            [clojure.repl]))
+            [clojure.repl])
+  (:import (java.io File)))
 
 (defmacro repl-defn [sym & args]
   (let [no-meta-source (binding [*print-meta* true]
@@ -92,7 +93,8 @@
   `(do
     (println "Welcome to REPL-y!")
     (println "Clojure" (clojure-version))
-
+    
+                                                                                              
     (use '[clojure.repl :only ~'[source apropos dir]])
     ; doc and find-doc live in clojure.core in 1.2
     (when (ns-resolve '~'clojure.repl '~'pst)
@@ -128,6 +130,7 @@
         (println "Unable to initialize completion.")))
 
     (in-ns '~'user)
+    (if (.exists (File. (str (System/getProperty "user.home") "/.reply_profile"))) (load-file (str (System/getProperty "user.home") "/.reply_profile")))
 
     (~'help)
     nil))
