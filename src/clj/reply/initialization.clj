@@ -3,8 +3,6 @@
             [clojure.repl])
   (:import (java.io File)))
 
-(declare eval-in-user-ns)
-
 (defmacro repl-defn [sym & args]
   (let [no-meta-source (binding [*print-meta* true]
                          (with-out-str (clojure.pprint/pprint `(defn ~sym ~@args))))
@@ -132,7 +130,7 @@
         (println "Unable to initialize completion.")))
 
     (in-ns '~'user)
-    (eval-in-user-ns (if (.exists (File. (str (System/getProperty "user.home") "/.reply_profile"))) (load-file (str (System/getProperty "user.home") "/.reply_profile"))))
+    (if (.exists (File. (str (System/getProperty "user.home") "/.reply_profile"))) (load-file (str (System/getProperty "user.home") "/.reply_profile")))
 
     (~'help)
     nil))
