@@ -132,13 +132,12 @@
           (flush)))
       (execute-with-client
                client
-               options
+               (assoc options :value (constantly nil))
                (pr-str (list 'do
                          (reply.initialization/export-definition
                            'reply.signals/set-signal-handler!)
                          '(set-signal-handler! "INT" (fn [s]))
-                         (reply.initialization/construct-init-code options)
-                         nil)))
+                         (reply.initialization/construct-init-code options))))
 
       (handle-client-interruption! client)
       (run-repl client options))))
