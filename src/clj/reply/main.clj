@@ -9,6 +9,9 @@
             [clojure.repl]
             [clj-stacktrace.repl]))
 
+(defn- formify-file [f]
+  (read-string (str "(do " (slurp f) ")")))
+
 (defn parse-args [args]
   (loop [[option arg & more :as args] args
          arg-map {:custom-init '()}]
@@ -16,8 +19,8 @@
       "-e" (recur more (assoc arg-map :custom-init (read-string arg)))
       "--eval" (recur more (assoc arg-map :custom-init (read-string arg)))
 
-      "-i" (recur more (assoc arg-map :custom-init (read-string (slurp arg))))
-      "--init" (recur more (assoc arg-map :custom-init (read-string (slurp arg))))
+      "-i" (recur more (assoc arg-map :custom-init (formify-file arg)))
+      "--init" (recur more (assoc arg-map :custom-init (formify-file arg)))
 
       "--prompt" (recur more (assoc arg-map :custom-prompt (read-string arg)))
 
