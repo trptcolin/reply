@@ -31,10 +31,10 @@ for j in "$BASEDIR"/../lib/*.jar; do
   CP=$CP:$j
 done
 
-java -cp "$USER_CP":"$CP" reply.ReplyMain "$@"
+java -Dfile.encoding=UTF-8 -cp "$USER_CP":"$CP" reply.ReplyMain "$@"
 
 # for debugging:
 # java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n \
 #      -Djline.internal.Log.debug=true \
-#      -cp $CP reply.ReplyMain "$@"
+#      -Dfile.encoding=UTF-8 -cp $CP reply.ReplyMain "$@"
 
