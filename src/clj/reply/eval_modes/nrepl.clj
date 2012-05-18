@@ -1,4 +1,5 @@
 (ns reply.eval-modes.nrepl
+  (:import [java.util.concurrent ConcurrentLinkedQueue])
   (:require [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
             [clojure.tools.nrepl.misc :as nrepl.misc]
@@ -22,6 +23,13 @@
                  :session @current-session
                  :interrupt-id command-id})))))
 
+(def response-queues (atom {}))
+
+(defn session-responses [session]
+  (lazy-seq
+    (cons (.poll (@response-queues session))
+          (session-responses session))))
+
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
@@ -33,7 +41,7 @@
               (#'nrepl/take-until
                 #(and (= command-id (:id %))
                       (some #{"done" "interrupted" "error"} (:status %)))
-                response-seq)]
+                (session-responses session))]
         (do
           (when (some #{"need-input"} (:status res))
             (.readLine *in*) ; pop off leftover newline from pushback
@@ -111,8 +119,10 @@
   (let [connection         (get-connection options)
         client             (nrepl/client connection Long/MAX_VALUE)
         session            (nrepl/new-session client)
-        completion-session (nrepl/new-session client) ]
+        completion-session (nrepl/new-session client)]
     (reset! current-session session)
+    (swap! response-queues assoc session (ConcurrentLinkedQueue.))
+    (swap! response-queues assoc completion-session (ConcurrentLinkedQueue.))
     (let [options (assoc options :prompt
                     (fn [ns]
                       (reader.jline/prepare-for-read
@@ -120,14 +130,17 @@
                         ns)))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
-                    options)
-          session-sender (nrepl/client-session client :session session)
-          responses (session-sender {:op :eval :code ""})]
-      (future
-        (doseq [{:keys [out err] :as resp} responses]
-          (when err (print err))
-          (when out (print out))
-          (flush)))
+                    options)]
+      (.start (Thread.
+        (fn []
+          (when-let [{:keys [out err] :as resp}
+                  (nrepl.transport/recv connection 100)]
+            (when err (print err))
+            (when out (print out))
+            (when-not (or err out)
+              (.offer (@response-queues (:session resp)) resp))
+            (flush))
+          (recur))))
       (execute-with-client
                client
                (assoc options :value (constantly nil))
