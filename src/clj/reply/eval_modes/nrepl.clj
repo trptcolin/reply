@@ -101,8 +101,6 @@
     (execute-with-client
       client
       {:value (partial reset! results)
-       :out print
-       :err (constantly nil)
        :session session}
       (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form)))
     (read-string @results)))
