@@ -25,8 +25,7 @@
       (.setPaginationEnabled true)
       (.addCompleter completer))))
 
-
-(defmulti get-prompt type :default :default)
+(defmulti get-prompt type)
 (defmethod get-prompt :default [ns]
   (format "%s=> " ns))
 (defmethod get-prompt clojure.lang.Namespace [ns]
