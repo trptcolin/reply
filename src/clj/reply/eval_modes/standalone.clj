@@ -9,10 +9,11 @@
 (def reply-read
   (fn [prompt exit]
     (concurrency/starting-read!)
-    (let [read-result (reader.jline/read prompt exit)]
-      (if (exit/done? exit read-result)
-        exit
-        read-result))))
+    (binding [*ns* (eval-state/get-ns)]
+      (let [read-result (reader.jline/read prompt exit)]
+        (if (exit/done? exit read-result)
+          exit
+          read-result)))))
 
 (def reply-eval
   (concurrency/act-in-future

@@ -6,6 +6,7 @@
             [clojure.tools.nrepl.server :as nrepl.server]
             [clojure.tools.nrepl.transport :as nrepl.transport]
             [reply.exit]
+            [reply.eval-state :as eval-state]
             [reply.initialization]
             [reply.reader.jline :as reader.jline]
             [reply.signals :as signals]))
@@ -65,7 +66,9 @@
         (prompt ns)
         (flush)
         (let [eof (Object.)
-              read-result (try (read)
+              read-result (try
+                            (binding [*ns* (eval-state/get-ns)]
+                              (read))
                             (catch Exception e
                               (if (= (.getMessage e) "EOF while reading")
                                 eof
