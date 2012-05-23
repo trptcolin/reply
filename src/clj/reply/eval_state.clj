@@ -21,17 +21,9 @@
 (defn get-ns []
   (@bindings #'*ns*))
 
-(defn ensure-ns-present [ns]
-  (try
-    (the-ns (symbol ns))
-    (catch Exception e
-      (let [original-ns *ns*]
-        (in-ns ns)
-        (in-ns original-ns)))))
-
 (defmulti set-ns type)
 (defmethod set-ns :default [ns]
-  (ensure-ns-present ns)
+  (create-ns (symbol ns))
   (set-ns (the-ns (symbol ns))))
 
 (defmethod set-ns clojure.lang.Namespace [ns]
