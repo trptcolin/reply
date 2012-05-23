@@ -125,6 +125,8 @@
       ~(export-definition 'reply.initialization/resolve-class)
       (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
       (catch Exception e#
+        (intern (create-ns '~'complete.core) '~'completions
+          (fn [prefix# ns#] []))
         (println "Unable to initialize completion.")))
 
     (in-ns '~'user)
