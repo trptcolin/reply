@@ -3,14 +3,12 @@
             [reply.eval-modes.standalone :as eval-modes.standalone]
             [reply.exit :as exit]
             [reply.hacks.printing :as hacks.printing]
+            [reply.initialization :as initialization]
             [reply.reader.jline :as reader.jline]
             [reply.signals :as signals]
             [clojure.main]
             [clojure.repl]
             [clj-stacktrace.repl]))
-
-(defn- formify-file [f]
-  (read-string (str "(do " (slurp f) ")")))
 
 (defn parse-args [args]
   (loop [[option arg & more :as args] args
@@ -19,8 +17,8 @@
       "-e" (recur more (assoc arg-map :custom-init (read-string arg)))
       "--eval" (recur more (assoc arg-map :custom-init (read-string arg)))
 
-      "-i" (recur more (assoc arg-map :custom-init (formify-file arg)))
-      "--init" (recur more (assoc arg-map :custom-init (formify-file arg)))
+      "-i" (recur more (assoc arg-map :custom-init (initialization/formify-file arg)))
+      "--init" (recur more (assoc arg-map :custom-init (initialization/formify-file arg)))
 
       "--prompt" (recur more (assoc arg-map :custom-prompt (read-string arg)))
 

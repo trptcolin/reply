@@ -86,6 +86,9 @@
         ((ns-resolve (symbol "cd-client.core") (symbol "pr-examples-core"))
          ~ns-str ~var-str))))
 
+(defn formify-file [f]
+  (read-string (str "(do " (slurp f) ")")))
+
 (defn default-init-code
   "Assumes cd-client will be on the classpath when this is evaluated."
   []
@@ -122,12 +125,18 @@
 
     (try
       (require '[complete.core])
+      ; hack for 1.2 support until we release the next clojure-complete version
       ~(export-definition 'reply.initialization/resolve-class)
       (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
+
       (catch Exception e#
-        (intern (create-ns '~'complete.core) '~'completions
-          (fn [prefix# ns#] []))
-        (println "Unable to initialize completion.")))
+        (try
+          (eval '~(formify-file
+                  (ClassLoader/getSystemResource "complete/core.clj")))
+          (catch Exception f#
+            (intern (create-ns '~'complete.core) '~'completions
+              (fn [prefix# ns#] []))
+            (println "Unable to initialize completions.")))))
 
     (in-ns '~'user)
 
