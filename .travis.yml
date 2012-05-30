@@ -1,3 +1,7 @@
 language: clojure
 before_script: "lein compile"
 script: "lein test"
+jdk:
+  - openjdk6
+  - openjdk7
+  - oraclejdk7
