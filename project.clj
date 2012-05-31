@@ -1,5 +1,5 @@
 (defproject reply "0.1.0-SNAPSHOT"
-  :description "REPL-y: A fitter, happier, more productive REPL for Clojure." 
+  :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojars.trptcolin/jline "2.7-alpha5"]
                  [org.thnetos/cd-client "0.3.4"]
