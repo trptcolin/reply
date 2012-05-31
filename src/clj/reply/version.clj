@@ -1,3 +1,19 @@
-(ns reply.version)
+(ns reply.version
+  (:import java.util.Properties))
 
-(def ^:dynamic *reply-version* "0.1.0-SNAPSHOT")
+(defn load-pom-properties 
+  "this loads a config file from the classpath"
+  []
+  (try 
+    (let [file-reader (.. (Thread/currentThread)
+                          (getContextClassLoader)
+                          (getResourceAsStream "META-INF/maven/reply/reply/pom.properties"))
+          props (Properties.)]
+      (.load props file-reader)
+      (into {} props))
+    (catch Exception e nil)))
+
+(defn get-version []
+  (or (System/getenv "reply.version")
+      (get (load-pom-properties) "version")
+      "version unknown"))
