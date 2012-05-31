@@ -91,7 +91,7 @@
   "Assumes cd-client will be on the classpath when this is evaluated."
   []
   `(do
-    (println "REPL-y" (reply.version/get-version))
+    (println "REPL-y" ~(reply.version/get-version))
     (println "Clojure" (clojure-version))
 
     (use '[clojure.repl :only ~'[source apropos dir]])
