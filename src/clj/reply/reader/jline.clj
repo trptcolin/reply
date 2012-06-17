@@ -8,12 +8,19 @@
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
            [jline.console ConsoleReader]
            [jline.console.history FileHistory]
-           [jline.internal Log]))
+           [jline.internal Configuration Log]))
 
 (def jline-reader (atom nil))
 (def jline-pushback-reader (atom nil))
 
+(defn print-interruption []
+  (when-not (#{"none" "off" "false"} (.getProperty (Configuration/getProperties) "jline.terminal"))
+    (print "^C")
+    (flush)))
+
 (defn make-reader []
+  (when (= "dumb" (System/getenv "TERM"))
+    (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
         history (FileHistory. (File. home ".jline-reply.history"))

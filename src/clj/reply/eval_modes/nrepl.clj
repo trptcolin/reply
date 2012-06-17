@@ -18,7 +18,8 @@
 (defn handle-client-interruption! [client]
   (signals/set-signal-handler!
     "INT"
-    (fn [sig] (print "^C") (flush)
+    (fn [sig]
+      (reader.jline/print-interruption)
       (when-let [command-id @current-command-id]
         (client {:op "interrupt"
                  :session @current-session

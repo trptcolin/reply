@@ -25,8 +25,7 @@
   (concurrency/act-in-future prn))
 
 (defn handle-ctrl-c [signal]
-  (print "^C")
-  (flush)
+  (reader.jline/print-interruption)
   (concurrency/stop-running-actions)
   (reader.jline/reset-reader))
 
