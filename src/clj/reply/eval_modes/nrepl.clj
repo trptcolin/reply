@@ -1,6 +1,7 @@
 (ns reply.eval-modes.nrepl
   (:import [java.util.concurrent ConcurrentLinkedQueue])
-  (:require [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
+  (:require [clojure.main]
+            [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
             [clojure.tools.nrepl.misc :as nrepl.misc]
             [clojure.tools.nrepl.server :as nrepl.server]
@@ -67,20 +68,24 @@
         (prompt ns)
         (flush)
         (let [eof (Object.)
+              request-prompt (Object.)
               read-result (try
                             (binding [*ns* (eval-state/get-ns)]
-                              (read))
+                              (clojure.main/repl-read request-prompt eof))
                             (catch Exception e
                               (if (= (.getMessage e) "EOF while reading")
                                 eof
-                                (prn e))))]
-          (if (reply.exit/done? eof read-result)
-              nil
-              (recur (execute-with-client
-                       connection
-                       options
-                       (binding [*print-meta* true]
-                         (pr-str read-result))))))))))
+                                (do (print "ohai") (prn e)))))]
+          (cond (reply.exit/done? eof read-result)
+                  nil
+                (= request-prompt read-result)
+                  (recur ns)
+                :else
+                  (recur (execute-with-client
+                           connection
+                           options
+                           (binding [*print-meta* true]
+                             (pr-str read-result))))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
 (defn- url-for [attach host port]
