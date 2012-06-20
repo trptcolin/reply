@@ -48,7 +48,8 @@
     (apply str (repeat (count (@prompt-fn (eval-state/get-ns))) \space))))
 
 (defn setup-reader! []
-  (Log/setOutput (PrintStream. (ByteArrayOutputStream.)))
+  (when-not (System/getenv "JLINE_LOGGING")
+    (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
   (reset! jline-reader (make-reader)) ; since construction is side-effect-y
   (reset! jline-pushback-reader ; since this depends on jline-reader
     (CustomizableBufferLineNumberingPushbackReader.
