@@ -10,6 +10,7 @@
   "Exits the REPL. This is fairly brutal, does (System/exit 0)."
   []
   (shutdown-agents)
-  (println "Bye for now!")
+  (print "Bye for now!")
+  (flush)
   (System/exit 0))
 
