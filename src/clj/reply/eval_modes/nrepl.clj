@@ -56,6 +56,7 @@
           (flush)
           (when (and ns (not (:session options)))
             (reset! current-ns ns)))))
+    (when (:interactive options) (println))
     (reset! current-command-id nil)
     @current-ns))
 
@@ -64,7 +65,6 @@
   ([connection {:keys [prompt] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns (execute-with-client connection options "")]
-        (println)
         (prompt ns)
         (flush)
         (let [eof (Object.)
@@ -83,7 +83,7 @@
                 :else
                   (recur (execute-with-client
                            connection
-                           options
+                           (assoc options :interactive true)
                            (binding [*print-meta* true]
                              (pr-str read-result))))))))))
 
