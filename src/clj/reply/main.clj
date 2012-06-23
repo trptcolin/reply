@@ -20,6 +20,8 @@
       "-i" (recur more (assoc arg-map :custom-init (initialization/formify-file arg)))
       "--init" (recur more (assoc arg-map :custom-init (initialization/formify-file arg)))
 
+      "--history-file" (recur more (assoc arg-map :history-file arg))
+
       "--prompt" (recur more (assoc arg-map :custom-prompt (read-string arg)))
 
       "--attach" (recur more (assoc arg-map :attach arg))
@@ -40,12 +42,13 @@
   (println "Welcome back!")
   (reader.jline/resume-reader))
 
-(defmacro with-launching-context [& body]
+(defmacro with-launching-context [options & body]
   `(try
     (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
     (signals/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                   clojure.repl/pst clj-stacktrace.repl/pst]
+      (reader.jline/setup-reader! ~options)
       ~@body)
     (catch Exception e# (clojure.repl/pst e#))
     (finally (exit/exit))))
@@ -57,7 +60,7 @@
 (defn launch-nrepl [options]
   "Launches the nREPL version of REPL-y, with options already
   parsed out"
-  (with-launching-context
+  (with-launching-context options
     (reader.jline/with-jline-in
       (set-prompt options)
       (eval-modes.nrepl/main options))))
@@ -66,7 +69,7 @@
   "Launches the standalone (non-nREPL) version of REPL-y, with options already
   parsed out"
   [options]
-  (with-launching-context
+  (with-launching-context options
     (set-prompt options)
     (eval-modes.standalone/main options)))
 
@@ -87,6 +90,7 @@
   -i/--init:           Provide a Clojure file to evaluate in the user ns
   -e/--eval:           Provide a custom form on the command line to evaluate in
                          the user ns
+  --history-file:      Provide a path for the history file
   --prompt:            Provide a custom prompt function
   --skip-default-init: Skip the default initialization code
   --standalone:        Launch standalone mode instead of the default nREPL

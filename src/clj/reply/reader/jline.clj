@@ -18,12 +18,15 @@
     (print "^C")
     (flush)))
 
-(defn make-reader []
+(defn make-reader [options]
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (let [reader (ConsoleReader.)
         home (System/getProperty "user.home")
-        history (FileHistory. (File. home ".jline-reply.history"))
+        history-path (if (:history-file options)
+                       (File. (:history-file options))
+                       (File. home ".jline-reply.history"))
+        history (FileHistory. history-path)
         completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
     (.setBlinkMatchingParen (.getKeys reader) true)
     (doto reader
@@ -47,10 +50,10 @@
     @jline-reader
     (apply str (repeat (count (@prompt-fn (eval-state/get-ns))) \space))))
 
-(defn setup-reader! []
+(defn setup-reader! [options]
   (when-not (System/getenv "JLINE_LOGGING")
     (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
-  (reset! jline-reader (make-reader)) ; since construction is side-effect-y
+  (reset! jline-reader (make-reader options)) ; since construction is side-effect-y
   (reset! jline-pushback-reader ; since this depends on jline-reader
     (CustomizableBufferLineNumberingPushbackReader.
       (JlineInputReader.
