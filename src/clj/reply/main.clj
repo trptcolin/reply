@@ -8,35 +8,21 @@
             [reply.signals :as signals]
             [clojure.main]
             [clojure.repl]
+            [clojure.tools.cli :as cli]
             [clj-stacktrace.repl]))
 
 (defn parse-args [args]
-  (loop [[option arg & more :as args] args
-         arg-map {:custom-init '()}]
-    (case option
-      "-e" (recur more (assoc arg-map :custom-init (read-string arg)))
-      "--eval" (recur more (assoc arg-map :custom-init (read-string arg)))
-
-      "-i" (recur more (assoc arg-map :custom-init (initialization/formify-file arg)))
-      "--init" (recur more (assoc arg-map :custom-init (initialization/formify-file arg)))
-
-      "--history-file" (recur more (assoc arg-map :history-file arg))
-
-      "--prompt" (recur more (assoc arg-map :custom-prompt (read-string arg)))
-
-      "--attach" (recur more (assoc arg-map :attach arg))
-      "--port" (recur more (assoc arg-map :port arg))
-
-      "-h" (recur (cons arg more) (assoc arg-map :help true))
-      "--help" (recur (cons arg more) (assoc arg-map :help true))
-
-      "--standalone" (recur (cons arg more) (assoc arg-map :standalone true))
-      "--color" (recur (cons arg more) (assoc arg-map :color true))
-
-      "--skip-default-init" (recur (cons arg more)
-                                   (assoc arg-map :skip-default-init true))
-
-      arg-map)))
+  (cli/cli args
+           ["-h" "--help" "Show this help screen" :flag true]
+           ["-e" "--eval" "Provide a custom form on the command line to evaluate in the user ns" :parse-fn read-string]
+           ["-i" "--init" "Provide a Clojure file to evaluate in the user ns" :parse-fn initialization/formify-file]
+           ["--standalone" "Launch standalone mode instead of the default nREPL" :flag true]
+           ["--color" "Use color; currently only available with nREPL" :flag true]
+           ["--skip-default-init" "Skip the default initialization code" :flag true]
+           ["--history-file" "Provide a path for the history file"]
+           ["--prompt" "--custom-prompt" "Provide a custom prompt function" :parse-fn read-string]
+           ["--attach" "Attach to an existing nREPL session on this port or host:port, when used with nREPL"]
+           ["--port" "Start new nREPL server on this port"]))
 
 (defn handle-resume [signal]
   (println "Welcome back!")
@@ -73,31 +59,21 @@
     (set-prompt options)
     (eval-modes.standalone/main options)))
 
-(declare -main) ; for --help
 (defn launch
   "Entry point for tools which may prefer to send a map of options
-  rather than a varargs list of arguments.  Available options:
-  [:help :custom-init :skip-default-init :standalone :attach :port :color]
-  See -main for descriptions."
+  rather than a varargs list of arguments. See parse-args for available
+  options."
   [options]
-  (cond (:help options) (do (println (clojure.repl/doc -main)) (exit/exit))
-        (:standalone options) (launch-standalone options)
-        :else (launch-nrepl options)))
+  (if (:standalone options)
+    (launch-standalone options)
+    (launch-nrepl options)))
 
-(defn -main
-  "Launches a REPL. Customizations available:
-  -h/--help:           Show this help screen
-  -i/--init:           Provide a Clojure file to evaluate in the user ns
-  -e/--eval:           Provide a custom form on the command line to evaluate in
-                         the user ns
-  --history-file:      Provide a path for the history file
-  --prompt:            Provide a custom prompt function
-  --skip-default-init: Skip the default initialization code
-  --standalone:        Launch standalone mode instead of the default nREPL
-  --attach:            Attach to an existing nREPL session on this port or
-                         host:port, when used with nREPL
-  --port:              Start new nREPL server on this port
-  --color:             Use color; currently only available with nREPL"
-
-  [& args]
-  (launch (parse-args args)))
+(defn -main [& args]
+  (let [[options args banner]
+          (try (parse-args args)
+            (catch Exception e
+              (parse-args ["--help"])))]
+    (when (:help options)
+      (println banner)
+      (exit/exit))
+    (launch options)))
