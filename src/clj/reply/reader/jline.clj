@@ -18,15 +18,20 @@
     (print "^C")
     (flush)))
 
+(defn- make-history-file [history-path]
+  (if history-path
+    (let [history-file (File. history-path)]
+      (if (.getParentFile history-file)
+        history-file
+        (File. "." history-path)))
+    (File. (System/getProperty "user.home")
+           ".jline-reply.history")))
+
 (defn make-reader [options]
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (let [reader (ConsoleReader.)
-        home (System/getProperty "user.home")
-        history-path (if (:history-file options)
-                       (File. (:history-file options))
-                       (File. home ".jline-reply.history"))
-        history (FileHistory. history-path)
+        history (FileHistory. (make-history-file (:history-file options)))
         completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
     (.setBlinkMatchingParen (.getKeys reader) true)
     (doto reader
