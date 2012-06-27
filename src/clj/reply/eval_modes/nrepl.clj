@@ -75,7 +75,7 @@
                             (catch Exception e
                               (if (= (.getMessage e) "EOF while reading")
                                 eof
-                                (do (print "ohai") (prn e)))))]
+                                (prn e))))]
           (cond (reply.exit/done? eof read-result)
                   nil
                 (= request-prompt read-result)
