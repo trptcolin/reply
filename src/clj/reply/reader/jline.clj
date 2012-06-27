@@ -5,7 +5,7 @@
             [clojure.main])
   (:import [java.io File IOException PrintStream ByteArrayOutputStream]
            [reply.reader.jline JlineInputReader]
-           [reply.hacks CustomizableBufferLineNumberingPushbackReader]
+           [reply.hacks RawInputTrackingLineNumberingPushbackReader]
            [jline.console ConsoleReader]
            [jline.console.history FileHistory]
            [jline.internal Configuration Log]))
@@ -60,7 +60,7 @@
     (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
   (reset! jline-reader (make-reader options)) ; since construction is side-effect-y
   (reset! jline-pushback-reader ; since this depends on jline-reader
-    (CustomizableBufferLineNumberingPushbackReader.
+    (RawInputTrackingLineNumberingPushbackReader.
       (JlineInputReader.
         {:jline-reader @jline-reader
          :set-empty-prompt set-empty-prompt})

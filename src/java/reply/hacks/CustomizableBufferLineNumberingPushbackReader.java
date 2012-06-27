@@ -22,16 +22,17 @@ public class CustomizableBufferLineNumberingPushbackReader extends PushbackReade
   private boolean _prev;
 
   public CustomizableBufferLineNumberingPushbackReader(Reader r){
-    super(new LineNumberReader(r));
+      super(new LineNumberReader(r));
   }
+
 
   // this constructor is the only change from clojure.lang
   public CustomizableBufferLineNumberingPushbackReader(Reader r, int sz){
-    super(new LineNumberReader(r, sz));
+      super(new LineNumberReader(r, sz));
   }
 
   public int getLineNumber(){
-    return ((LineNumberReader) in).getLineNumber() + 1;
+      return ((LineNumberReader) in).getLineNumber() + 1;
   }
 
   public int read() throws IOException{

@@ -47,8 +47,8 @@
                 (session-responses session))]
         (do
           (when (some #{"need-input"} (:status res))
-            (.readLine *in*) ; pop off leftover newline from pushback
             (let [input-result (.readLine *in*)]
+              (.clearRawInput *in*)
               (session-sender
                 {:op "stdin" :stdin (str input-result "\n")
                  :id (nrepl.misc/uuid)})))
@@ -60,6 +60,16 @@
     (reset! current-command-id nil)
     @current-ns))
 
+(defn repl-read [request-prompt request-exit]
+  (if-let [start-or-end ({:line-start request-prompt :stream-end request-exit}
+                         (clojure.main/skip-whitespace *in*))]
+      [[] start-or-end]
+      (let [input (clojure.core/read *in*)]
+        (clojure.main/skip-if-eol *in*)
+        (let [raw-input (.getRawInput *in*)]
+          (.clearRawInput *in*)
+          [raw-input input]))))
+
 (defn run-repl
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt] :as options}]
@@ -69,13 +79,14 @@
         (flush)
         (let [eof (Object.)
               request-prompt (Object.)
-              read-result (try
-                            (binding [*ns* (eval-state/get-ns)]
-                              (clojure.main/repl-read request-prompt eof))
-                            (catch Exception e
-                              (if (= (.getMessage e) "EOF while reading")
-                                eof
-                                (prn e))))]
+              [raw-input read-result]
+                (try
+                  (binding [*ns* (eval-state/get-ns)]
+                    (repl-read request-prompt eof))
+                  (catch Exception e
+                    (if (= (.getMessage e) "EOF while reading")
+                      eof
+                      (prn e))))]
           (cond (reply.exit/done? eof read-result)
                   nil
                 (= request-prompt read-result)
@@ -84,8 +95,7 @@
                   (recur (execute-with-client
                            connection
                            (assoc options :interactive true)
-                           (binding [*print-meta* true]
-                             (pr-str read-result))))))))))
+                           (apply str raw-input)))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
 (defn- url-for [attach host port]
