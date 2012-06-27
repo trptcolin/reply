@@ -33,3 +33,15 @@
                 (.write w sep)
                 (recur xs)))))
         (.write w end)))))
+
+(in-ns 'clojure.core)
+(defmethod print-method java.lang.Double [^Double d, ^Writer w]
+  (let [result-str
+          (cond
+            (= d Double/POSITIVE_INFINITY) "Double/POSITIVE_INFINITY"
+            (= d Double/NEGATIVE_INFINITY) "Double/NEGATIVE_INFINITY"
+            (.isNaN d) "Double/NaN"
+            :else (str d))]
+    (.write w result-str)))
+
+(in-ns 'reply.hacks.printing)
