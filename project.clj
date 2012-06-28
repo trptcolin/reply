@@ -6,9 +6,9 @@
                    [jline "2.7"]
                    [org.thnetos/cd-client "0.3.4"]
                    [clj-stacktrace "0.2.4"]
-                   [org.clojure/tools.nrepl "0.2.0-beta7"]
+                   [org.clojure/tools.nrepl "0.2.0-beta8"]
                    [org.clojure/tools.cli "0.2.1"]
-                   [com.cemerick/drawbridge "0.0.3"]
+                   [com.cemerick/drawbridge "0.0.6"]
                    [clojure-complete "0.2.1"]]
     :profiles {:dev {:dependencies ~dev-deps}}
     :dev-dependencies ~dev-deps
