@@ -40,6 +40,7 @@ public class RawInputTrackingLineNumberingPushbackReader extends CustomizableBuf
       rawInput.removeLast();
   }
 
+  @SuppressWarnings("unchecked")
   public String readLine() throws IOException {
       String line = super.readLine();
       if (line != null && line.length() > 0) {
