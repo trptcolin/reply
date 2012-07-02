@@ -9,6 +9,7 @@
                    [org.clojure/tools.nrepl "0.2.0-beta8"]
                    [org.clojure/tools.cli "0.2.1"]
                    [com.cemerick/drawbridge "0.0.6"]
+                   [trptcolin/versioneer "0.1.0"]
                    [clojure-complete "0.2.1"]]
     :profiles {:dev {:dependencies ~dev-deps}}
     :dev-dependencies ~dev-deps

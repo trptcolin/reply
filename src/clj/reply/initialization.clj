@@ -1,7 +1,7 @@
 (ns reply.initialization
   (:require [clojure.pprint]
             [clojure.repl]
-            [reply.version]))
+            [trptcolin.versioneer.core :as version]))
 
 (defmacro repl-defn [sym & args]
   (let [no-meta-source (binding [*print-meta* true]
@@ -94,7 +94,7 @@
   "Assumes cd-client will be on the classpath when this is evaluated."
   []
   `(do
-    (println "REPL-y" ~(reply.version/get-version))
+    (println "REPL-y" ~(version/get-version "reply" "reply"))
     (println "Clojure" (clojure-version))
 
     (use '[clojure.repl :only ~'[source apropos dir]])
