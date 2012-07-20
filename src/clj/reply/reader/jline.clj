@@ -40,9 +40,11 @@
       (.setPaginationEnabled true)
       (.addCompleter completer))))
 
+(def prompt-end "=> ")
+
 (defmulti get-prompt type)
 (defmethod get-prompt :default [ns]
-  (format "%s=> " ns))
+  (format (str "%s" prompt-end) ns))
 (defmethod get-prompt clojure.lang.Namespace [ns]
   (get-prompt (ns-name ns)))
 
@@ -53,7 +55,10 @@
 (defn set-empty-prompt []
   (.setPrompt
     @jline-reader
-    (apply str (repeat (count (@prompt-fn (eval-state/get-ns))) \space))))
+    (apply str
+      (concat (repeat (- (count (@prompt-fn (eval-state/get-ns))) (count prompt-end))
+                      \space)
+              prompt-end))))
 
 (defn setup-reader! [options]
   (when-not (System/getenv "JLINE_LOGGING")
