@@ -20,11 +20,11 @@ A fitter, happier, more productive REPL for Clojure.
 
 ## Installation
 
-I'm hoping this will eventually be distributed with Russ Olsen's excellent
-[dejour](https://github.com/russolsen/dejour), and perhaps also with
-Phil Hagelberg's [leiningen](https://github.com/technomancy/leiningen).
+REPLy is now part of [leiningen](https://github.com/technomancy/leiningen), as
+of the 2.x preview series. It's definitely your best bet for installation and
+Clojure development in general.
 
-Meantime (assuming you have
+And here's how to get a standalone version up and running (assuming you have
 [leiningen](https://github.com/technomancy/leiningen.git) installed):
 
     git clone https://github.com/trptcolin/reply.git
