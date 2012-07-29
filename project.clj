@@ -1,4 +1,4 @@
-(let [dev-deps '[[midje "1.3-alpha4" :exclusions [org.clojure/clojure]]]]
+(let [dev-deps '[[midje "1.4.0" :exclusions [org.clojure/clojure]]]]
 
   (defproject reply "0.1.0-SNAPSHOT"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
