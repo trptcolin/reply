@@ -53,12 +53,14 @@
   (when f (reset! prompt-fn f)))
 
 (defn set-empty-prompt []
-  (.setPrompt
-    @jline-reader
-    (apply str
-      (concat (repeat (- (count (@prompt-fn (eval-state/get-ns))) (count prompt-end))
-                      \space)
-              prompt-end))))
+  (let [prompt-end (str "#_" prompt-end)]
+    (.setPrompt
+      @jline-reader
+      (apply str
+        (concat (repeat (- (count (@prompt-fn (eval-state/get-ns)))
+                           (count prompt-end))
+                        \space)
+                prompt-end)))))
 
 (defn setup-reader! [options]
   (when-not (System/getenv "JLINE_LOGGING")
