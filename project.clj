@@ -1,6 +1,6 @@
 (let [dev-deps '[[midje "1.4.0" :exclusions [org.clojure/clojure]]]]
 
-  (defproject reply "0.1.0-SNAPSHOT"
+  (defproject reply "0.1.0-beta10"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.4.0"]
                    [org.clojars.trptcolin/jline "2.8-alpha1"]
