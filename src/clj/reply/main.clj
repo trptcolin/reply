@@ -36,6 +36,12 @@
                   clojure.repl/pst clj-stacktrace.repl/pst]
       (reader.jline/setup-reader! ~options)
       ~@body)
+    (catch clojure.lang.ExceptionInfo e#
+      (let [status# (:status (:object (ex-data e#)))
+            body# (:body (:object (ex-data e#)))]
+        (cond (= 401 status#) (println "Unauthorized.")
+              (number? status#) (println "Remote error:" (slurp body#))
+              :else (clojure.repl/pst e#))))
     (catch Exception e# (clojure.repl/pst e#))
     (finally (exit/exit))))
 
