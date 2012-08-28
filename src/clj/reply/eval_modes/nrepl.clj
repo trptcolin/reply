@@ -58,15 +58,20 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn repl-read [request-prompt request-exit]
+(defn repl-read [request-prompt request-exit read-error]
   (if-let [start-or-end ({:line-start request-prompt :stream-end request-exit}
                          (clojure.main/skip-whitespace *in*))]
-      [[] start-or-end]
+    [[] start-or-end]
+    (try
       (let [input (clojure.core/read *in*)]
         (clojure.main/skip-if-eol *in*)
         (let [raw-input (.getRawInput *in*)]
           (.clearRawInput *in*)
-          [raw-input input]))))
+          [raw-input input]))
+      (catch Exception e
+        (clojure.main/skip-if-eol *in*)
+        (.clearRawInput *in*)
+        [e read-error]))))
 
 (defn run-repl
   ([connection] (run-repl connection nil))
@@ -77,18 +82,18 @@
         (flush)
         (let [eof (Object.)
               request-prompt (Object.)
+              read-error (Object.)
               [raw-input read-result]
                 (try
                   (binding [*ns* (eval-state/get-ns)]
-                    (repl-read request-prompt eof))
-                  (catch Exception e
-                    (if (= (.getMessage e) "EOF while reading")
-                      eof
-                      (prn e))))]
+                    (repl-read request-prompt eof read-error)))]
           (cond (reply.exit/done? eof read-result)
                   nil
                 (= request-prompt read-result)
                   (recur ns)
+                (= read-error read-result)
+                  (do (println raw-input) ; where we stash the read exception
+                      (recur ns))
                 :else
                   (recur (execute-with-client
                            connection
