@@ -30,7 +30,7 @@
 (defn make-reader [options]
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
-  (let [reader (ConsoleReader. System/in System/out)
+  (let [reader (ConsoleReader.)
         history (FileHistory. (make-history-file (:history-file options)))
         completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
     (.setBlinkMatchingParen (.getKeys reader) true)
