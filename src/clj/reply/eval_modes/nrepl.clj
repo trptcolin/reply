@@ -106,7 +106,9 @@
               [raw-input read-result]
                 (try
                   (binding [*ns* (eval-state/get-ns)]
-                    (repl-parse request-prompt eof read-error)))]
+                    (repl-parse request-prompt eof read-error))
+                  (catch Exception e
+                    [e read-error]))]
           (cond (reply.exit/done? eof read-result)
                   nil
                 (= request-prompt read-result)
