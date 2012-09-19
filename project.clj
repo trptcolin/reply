@@ -23,4 +23,4 @@
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
     :test-paths ["spec"]
-    :main ^{:skip-aot true} reply.main))
+    :main ^{:skip-aot true} reply.ReplyMain))

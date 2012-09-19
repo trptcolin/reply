@@ -33,13 +33,16 @@ And here's how to get a standalone version up and running (assuming you have
 
 ## Usage
 
-Run `bin/reply.sh` on Mac/Linux, or `bin\reply.bat` on Windows.
+The easiest way: use `lein repl` (for 2.x). Skip the rest if that's all you
+need.
 
-And if you want to really live the high life, add the bin directory to
-your $PATH.
+Running `lein trampoline run` at the command line, in this project, will get
+you the latest stuff on master.
 
-If you want additional stuff on the classpath, you can set `$USER_CP`. For
-instance:
+There are also example bin scripts that are currently just set up to work with
+Leiningen 1.x (2.x already contains REPLy, just not necessarily always the
+latest from master here). If you want additional stuff on the classpath, you
+can set `$USER_CP`. For instance:
 
     USER_CP=`lein classpath` reply
 
@@ -60,6 +63,26 @@ Skip all the bells-and-whistles initialization and provide your own:
 For details on the latest and greatest:
 
     $ reply --help
+
+
+## Debugging
+
+If you're having problems, feel free to [open an
+issue](https://github.com/trptcolin/reply/issues), but the following may help.
+
+For keybinding issues, check out `~/.inputrc` - you can mostly use the same
+specifications there as you can with normal readline applications like bash,
+but from time to time we do come across missing features that we then add to
+[jline](https://github.com/jline/jline2).
+
+To get a very detailed look at what jline is doing under the hood, you can
+`export JLINE_LOGGING=trace` (or `debug`) before starting REPLy. There may be
+more output than you'd like, but this kind of output is especially helpful when
+debugging keybinding issues.
+
+You can use the `--standalone` flag to rule out any nREPL-related questions,
+but I'm not aware of anyone using `--standalone` for other purposes. Please let
+me know if you are!
 
 
 ## Thanks

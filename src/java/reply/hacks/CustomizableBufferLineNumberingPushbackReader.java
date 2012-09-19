@@ -26,7 +26,9 @@ public class CustomizableBufferLineNumberingPushbackReader extends PushbackReade
   }
 
 
-  // this constructor is the only change from clojure.lang
+  // This constructor is the only change from clojure.lang. Once the patch is
+  // released in clojure 1.5 and leiningen starts using it, we can use
+  // clojure's LineNumberingPushbackReader for this.
   public CustomizableBufferLineNumberingPushbackReader(Reader r, int sz){
       super(new LineNumberReader(r, sz));
   }
