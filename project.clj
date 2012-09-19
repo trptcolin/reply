@@ -1,4 +1,4 @@
-(let [dev-deps '[[midje "1.4.0" :exclusions [org.clojure/clojure]]]]
+(let [dev-deps '[[speclj "2.3.0"]]]
 
   (defproject reply "0.1.0-SNAPSHOT"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
@@ -11,12 +11,16 @@
                    [com.cemerick/drawbridge "0.0.6"]
                    [trptcolin/versioneer "0.1.0"]
                    [clojure-complete "0.2.2"]
-                   [org.clojars.trptcolin/sjacket "0.1.1" :exclusions [org.cojure/clojure]]]
+                   [org.clojars.trptcolin/sjacket "0.1.1"
+                    :exclusions [org.cojure/clojure]]]
     :profiles {:dev {:dependencies ~dev-deps}}
     :dev-dependencies ~dev-deps
+    :plugins ~dev-deps
     :aot [reply.reader.jline.JlineInputReader]
     :source-path "src/clj"
     :java-source-path "src/java"
+    :test-path "spec"
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
+    :test-paths ["spec"]
     :main ^{:skip-aot true} reply.main))
