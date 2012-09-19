@@ -48,7 +48,6 @@
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
         (let [input-result (.readLine *in*)]
-          (.clearRawInput *in*)
           (session-sender
             {:op "stdin" :stdin (str input-result "\n")
              :id (nrepl.misc/uuid)})))
@@ -59,21 +58,6 @@
     (when (:interactive options) (println))
     (reset! current-command-id nil)
     @current-ns))
-
-(defn repl-read [request-prompt request-exit read-error]
-  (if-let [start-or-end ({:line-start request-prompt :stream-end request-exit}
-                         (clojure.main/skip-whitespace *in*))]
-    [[] start-or-end]
-    (try
-      (let [input (clojure.core/read *in*)]
-        (clojure.main/skip-if-eol *in*)
-        (let [raw-input (.getRawInput *in*)]
-          (.clearRawInput *in*)
-          [raw-input input]))
-      (catch Exception e
-        (clojure.main/skip-if-eol *in*)
-        (.clearRawInput *in*)
-        [e read-error]))))
 
 (defn repl-parse [request-prompt request-exit read-error]
   (loop [text-so-far nil]
