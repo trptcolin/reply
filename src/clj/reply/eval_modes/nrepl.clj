@@ -59,7 +59,7 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn repl-parse [request-prompt request-exit read-error]
+(defn repl-parse [request-prompt request-exit read-error execute]
   (loop [text-so-far nil]
     (if-let [next-text (.readLine *in*)]
       (let [concatted-text (if text-so-far
@@ -67,14 +67,18 @@
                              next-text)
             parse-tree (sjacket.parser/parser concatted-text)
             completed? #(not= :net.cgrand.parsley/unfinished (:tag %))]
-        (cond (not (completed? parse-tree))
-                (recur concatted-text)
-              (empty? (:content parse-tree))
-                (recur concatted-text)
-              :else
-                (let [complete-forms (take-while completed? (:content parse-tree))
-                      remainder (drop-while completed? (:content parse-tree))]
-                  [(map sjacket/str-pt complete-forms) {:remainder remainder}])))
+        (if (empty? (:content parse-tree))
+              (recur concatted-text)
+            (let [complete-forms (take-while completed? (:content parse-tree))
+                  remainder (drop-while completed? (:content parse-tree))
+                  results (map (comp execute sjacket/str-pt)
+                               (remove #(contains? #{:whitespace :comment :discard}
+                                                   (:tag %))
+                                       complete-forms))]
+              (dorun results)
+              (if (seq remainder)
+                (recur (apply str (map sjacket/str-pt remainder)))
+                [complete-forms {:ns (last results)}]))))
       [[] request-exit])))
 
 (defn run-repl
@@ -90,7 +94,9 @@
               [raw-input read-result]
                 (try
                   (binding [*ns* (eval-state/get-ns)]
-                    (repl-parse request-prompt eof read-error))
+                    (repl-parse request-prompt eof read-error
+                                (partial execute-with-client connection
+                                         (assoc options :interactive true))))
                   (catch Exception e
                     [e read-error]))]
           (cond (reply.exit/done? eof read-result)
@@ -100,14 +106,8 @@
                 (= read-error read-result)
                   (do (println raw-input) ; where we stash any read exceptions
                       (recur ns))
-                (:remainder read-result)
-                  (do (execute-with-client connection (assoc options :interactive true) (apply str raw-input))
-                      (recur ns))
                 :else
-                  (recur (execute-with-client
-                           connection
-                           (assoc options :interactive true)
-                           (apply str raw-input)))))))))
+                  (recur (:ns read-result))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
 (defn- url-for [attach host port]
