@@ -59,7 +59,7 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn repl-parse [request-prompt request-exit read-error execute]
+(defn repl-parse [request-exit execute]
   (loop [text-so-far nil]
     (if-let [next-text (.readLine *in*)]
       (let [concatted-text (if text-so-far
@@ -89,24 +89,22 @@
         (prompt ns)
         (flush)
         (let [eof (Object.)
-              request-prompt (Object.)
               read-error (Object.)
+              execute (partial execute-with-client connection
+                               (assoc options :interactive true))
               [raw-input read-result]
                 (try
                   (binding [*ns* (eval-state/get-ns)]
-                    (repl-parse request-prompt eof read-error
-                                (partial execute-with-client connection
-                                         (assoc options :interactive true))))
+                    (repl-parse eof execute))
                   (catch Exception e
                     [e read-error]))]
           (cond (reply.exit/done? eof read-result)
                   nil
-                (= request-prompt read-result)
-                  (recur ns)
                 (= read-error read-result)
                   (do (println raw-input) ; where we stash any read exceptions
                       (recur ns))
                 :else
+                  ; TODO: expect result as seq of forms to consume and eval on this side
                   (recur (:ns read-result))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
