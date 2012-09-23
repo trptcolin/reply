@@ -81,6 +81,34 @@
                 [complete-forms {:ns (last results)}]))))
       [[] request-exit])))
 
+(defn parsed-forms
+  ([request-exit] (parsed-forms request-exit nil))
+  ([request-exit text-so-far]
+   (if-let [next-text (.readLine *in*)]
+     (let [concatted-text (if text-so-far
+                            (str text-so-far \newline next-text)
+                            next-text)
+           parse-tree (sjacket.parser/parser concatted-text)
+           completed? #(not= :net.cgrand.parsley/unfinished (:tag %))]
+       (if (empty? (:content parse-tree))
+         (list "")
+         (let [complete-forms (take-while completed? (:content parse-tree))
+               remainder (drop-while completed? (:content parse-tree))
+               form-strings (map sjacket/str-pt
+                                 (remove #(contains? #{:whitespace :comment :discard}
+                                                     (:tag %))
+                                         complete-forms))]
+           (cond (seq remainder)
+                   (lazy-seq
+                     (concat form-strings
+                             (parsed-forms request-exit
+                                           (apply str (map sjacket/str-pt remainder)))))
+                 (seq form-strings)
+                   form-strings
+                 :else ; all whitespace and/or comments, probably
+                   (list "")))))
+     (list request-exit))))
+
 (defn run-repl
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt] :as options}]
@@ -92,20 +120,10 @@
               read-error (Object.)
               execute (partial execute-with-client connection
                                (assoc options :interactive true))
-              [raw-input read-result]
-                (try
-                  (binding [*ns* (eval-state/get-ns)]
-                    (repl-parse eof execute))
-                  (catch Exception e
-                    [e read-error]))]
-          (cond (reply.exit/done? eof read-result)
-                  nil
-                (= read-error read-result)
-                  (do (println raw-input) ; where we stash any read exceptions
-                      (recur ns))
-                :else
-                  ; TODO: expect result as seq of forms to consume and eval on this side
-                  (recur (:ns read-result))))))))
+              forms (parsed-forms eof)]
+          (if (reply.exit/done? eof (first forms))
+            nil
+            (recur (last (doall (map execute forms))))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
 (defn- url-for [attach host port]
