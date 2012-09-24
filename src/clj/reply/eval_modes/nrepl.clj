@@ -59,28 +59,6 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn repl-parse [request-exit execute]
-  (loop [text-so-far nil]
-    (if-let [next-text (.readLine *in*)]
-      (let [concatted-text (if text-so-far
-                             (str text-so-far \newline next-text)
-                             next-text)
-            parse-tree (sjacket.parser/parser concatted-text)
-            completed? #(not= :net.cgrand.parsley/unfinished (:tag %))]
-        (if (empty? (:content parse-tree))
-              (recur concatted-text)
-            (let [complete-forms (take-while completed? (:content parse-tree))
-                  remainder (drop-while completed? (:content parse-tree))
-                  results (map (comp execute sjacket/str-pt)
-                               (remove #(contains? #{:whitespace :comment :discard}
-                                                   (:tag %))
-                                       complete-forms))]
-              (dorun results)
-              (if (seq remainder)
-                (recur (apply str (map sjacket/str-pt remainder)))
-                [complete-forms {:ns (last results)}]))))
-      [[] request-exit])))
-
 (defn parsed-forms
   ([request-exit] (parsed-forms request-exit nil))
   ([request-exit text-so-far]
@@ -105,7 +83,7 @@
                                            (apply str (map sjacket/str-pt remainder)))))
                  (seq form-strings)
                    form-strings
-                 :else ; all whitespace and/or comments, probably
+                 :else
                    (list "")))))
      (list request-exit))))
 
@@ -117,7 +95,6 @@
         (prompt ns)
         (flush)
         (let [eof (Object.)
-              read-error (Object.)
               execute (partial execute-with-client connection
                                (assoc options :interactive true))
               forms (parsed-forms eof)]
