@@ -66,11 +66,11 @@
      (let [concatted-text (if text-so-far
                             (str text-so-far \newline next-text)
                             next-text)
-           parse-tree (sjacket.parser/parser concatted-text)
-           completed? #(not= :net.cgrand.parsley/unfinished (:tag %))]
+           parse-tree (sjacket.parser/parser concatted-text)]
        (if (empty? (:content parse-tree))
          (list "")
-         (let [complete-forms (take-while completed? (:content parse-tree))
+         (let [completed? #(not= :net.cgrand.parsley/unfinished (:tag %))
+               complete-forms (take-while completed? (:content parse-tree))
                remainder (drop-while completed? (:content parse-tree))
                form-strings (map sjacket/str-pt
                                  (remove #(contains? #{:whitespace :comment :discard}
@@ -137,6 +137,15 @@
       (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form)))
     (read-string @results)))
 
+(defn poll-for-responses [connection]
+  (when-let [{:keys [out err] :as resp} (nrepl.transport/recv connection 100)]
+    (when err (print err))
+    (when out (print out))
+    (when-not (or err out)
+      (.offer (@response-queues (:session resp)) resp))
+    (flush))
+  (recur connection))
+
 (defn main
   "Mostly ripped from nREPL's cmdline namespace."
   [options]
@@ -155,16 +164,8 @@
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)]
-      (.start (Thread.
-        (fn []
-          (when-let [{:keys [out err] :as resp}
-                  (nrepl.transport/recv connection 100)]
-            (when err (print err))
-            (when out (print out))
-            (when-not (or err out)
-              (.offer (@response-queues (:session resp)) resp))
-            (flush))
-          (recur))))
+
+      (.start (Thread. (partial poll-for-responses connection)))
       (execute-with-client
                client
                (assoc options :value (constantly nil))
