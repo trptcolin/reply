@@ -42,7 +42,7 @@
         (cond (= 401 status#) (println "Unauthorized.")
               (number? status#) (println "Remote error:" (slurp body#))
               :else (clojure.repl/pst e#))))
-    (catch Exception e# (clojure.repl/pst e#))
+    (catch Throwable t# (clojure.repl/pst t#))
     (finally (exit/exit))))
 
 (defn set-prompt [options]

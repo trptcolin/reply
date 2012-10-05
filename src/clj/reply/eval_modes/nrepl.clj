@@ -138,12 +138,15 @@
     (read-string @results)))
 
 (defn poll-for-responses [connection]
-  (when-let [{:keys [out err] :as resp} (nrepl.transport/recv connection 100)]
-    (when err (print err))
-    (when out (print out))
-    (when-not (or err out)
-      (.offer (@response-queues (:session resp)) resp))
-    (flush))
+  (try (when-let [{:keys [out err] :as resp} (nrepl.transport/recv connection 100)]
+         (when err (print err))
+         (when out (print out))
+         (when-not (or err out)
+           (.offer (@response-queues (:session resp)) resp))
+         (flush))
+    (catch Throwable t
+      (clojure.repl/pst t)
+      (reply.exit/exit)))
   (recur connection))
 
 (defn main
