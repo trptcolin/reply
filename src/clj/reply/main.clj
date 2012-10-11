@@ -14,8 +14,8 @@
 (defn parse-args [args]
   (cli/cli args
            ["-h" "--help" "Show this help screen" :flag true]
-           ["-e" "--eval" "Provide a custom form on the command line to evaluate in the user ns" :parse-fn read-string]
-           ["-i" "--init" "Provide a Clojure file to evaluate in the user ns" :parse-fn initialization/formify-file]
+           ["-e" "--eval" "--custom-eval" "Provide a custom form on the command line to evaluate in the user ns" :parse-fn read-string]
+           ["-i" "--init" "--custom-init" "Provide a Clojure file to evaluate in the user ns" :parse-fn initialization/formify-file]
            ["--standalone" "Launch standalone mode instead of the default nREPL" :flag true]
            ["--color" "Use color; currently only available with nREPL" :flag true]
            ["--skip-default-init" "Skip the default initialization code" :flag true]

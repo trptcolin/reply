@@ -153,9 +153,10 @@
 
 (defn construct-init-code
   [{:keys [skip-default-init
-           custom-init] :as options}]
+           custom-init custom-eval] :as options}]
   `(do
     ~(when-not skip-default-init (default-init-code))
-    ~(when custom-init custom-init)
+     ~(when custom-eval custom-eval)
+     ~(when custom-init custom-init)
     nil))
 
