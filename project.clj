@@ -4,7 +4,7 @@
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.4.0"]
                    [jline/jline "2.8"]
-                   [org.thnetos/cd-client "0.3.5"]
+                   [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.4"]
                    [org.clojure/tools.nrepl "0.2.0-beta9"]
                    [org.clojure/tools.cli "0.2.1"]
