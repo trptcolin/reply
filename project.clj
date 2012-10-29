@@ -11,7 +11,7 @@
                    [com.cemerick/drawbridge "0.0.6"]
                    [trptcolin/versioneer "0.1.0"]
                    [clojure-complete "0.2.2"]
-                   [org.clojars.trptcolin/sjacket "0.1.1-SNAPSHOT"
+                   [org.clojars.trptcolin/sjacket "0.1.1"
                     :exclusions [org.clojure/clojure]]]
     :profiles {:dev {:dependencies ~dev-deps}}
     :dev-dependencies ~dev-deps
