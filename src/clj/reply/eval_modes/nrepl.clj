@@ -134,7 +134,9 @@
       client
       {:value (partial reset! results)
        :session session}
-      (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form)))
+      (binding [*print-length* nil
+                *print-level* nil]
+        (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form))))
     (read-string @results)))
 
 (defn poll-for-responses [connection]
@@ -172,11 +174,13 @@
       (execute-with-client
                client
                (assoc options :value (constantly nil))
-               (pr-str (list 'do
-                         (reply.initialization/export-definition
-                           'reply.signals/set-signal-handler!)
-                         '(set-signal-handler! "INT" (fn [s]))
-                         (reply.initialization/construct-init-code options))))
+               (binding [*print-length* nil
+                         *print-level* nil]
+                 (pr-str (list 'do
+                           (reply.initialization/export-definition
+                             'reply.signals/set-signal-handler!)
+                           '(set-signal-handler! "INT" (fn [s]))
+                           (reply.initialization/construct-init-code options)))))
 
       (handle-client-interruption! client)
       (run-repl client options))))
