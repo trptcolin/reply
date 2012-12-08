@@ -1,5 +1,6 @@
 (ns reply.eval-modes.nrepl
-  (:import [java.util.concurrent ConcurrentLinkedQueue])
+  (:import [java.util.concurrent LinkedBlockingQueue
+                                 TimeUnit])
   (:require [clojure.main]
             [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
@@ -32,7 +33,9 @@
 
 (defn session-responses [session]
   (lazy-seq
-    (cons (.poll (@response-queues session))
+    (cons (.poll ^LinkedBlockingQueue (@response-queues session)
+                 50
+                 TimeUnit/MILLISECONDS)
           (session-responses session))))
 
 (defn execute-with-client [client options form]
@@ -107,7 +110,7 @@
   (if (and attach (re-find #"^\w+://" attach))
     attach
     (let [[port host] (if attach
-                        (reverse (.split attach ":"))
+                        (reverse (.split ^String attach ":"))
                         [port host])]
       (format "nrepl://%s:%s" (or host "localhost") port))))
 
@@ -144,7 +147,7 @@
          (when err (print err))
          (when out (print out))
          (when-not (or err out)
-           (.offer (@response-queues (:session resp)) resp))
+           (.offer ^LinkedBlockingQueue (@response-queues (:session resp)) resp))
          (flush))
     (catch Throwable t
       (clojure.repl/pst t)
@@ -159,8 +162,8 @@
         session            (nrepl/new-session client)
         completion-session (nrepl/new-session client)]
     (reset! current-session session)
-    (swap! response-queues assoc session (ConcurrentLinkedQueue.))
-    (swap! response-queues assoc completion-session (ConcurrentLinkedQueue.))
+    (swap! response-queues assoc session (LinkedBlockingQueue.))
+    (swap! response-queues assoc completion-session (LinkedBlockingQueue.))
     (let [options (assoc options :prompt
                     (fn [ns]
                       (reader.jline/prepare-for-read
