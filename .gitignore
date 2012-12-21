@@ -5,4 +5,5 @@ pom.xml
 /target/
 .lein-failures
 .lein-deps-sum
+.lein-repl-history
 checkouts
