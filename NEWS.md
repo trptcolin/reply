@@ -1,6 +1,6 @@
 # REPLy News (digest of changes)
 
-## 0.1.3 ;; ???
+## 0.1.3 ;; 2012-12-28
 - Update sjacket to handle ns-qualified keywords (#94)
 - Stop busy-wait pegging CPU (#92)
 

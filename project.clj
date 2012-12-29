@@ -1,6 +1,6 @@
 (let [dev-deps '[[speclj "2.3.0"]]]
 
-  (defproject reply "0.1.3-SNAPSHOT"
+  (defproject reply "0.1.3"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.4.0"]
                    [jline/jline "2.8"]
@@ -11,7 +11,7 @@
                    [com.cemerick/drawbridge "0.0.6"]
                    [trptcolin/versioneer "0.1.0"]
                    [clojure-complete "0.2.2"]
-                   [org.clojars.trptcolin/sjacket "0.1.1"
+                   [org.clojars.trptcolin/sjacket "0.1.2"
                     :exclusions [org.clojure/clojure]]]
     :profiles {:dev {:dependencies ~dev-deps}}
     :dev-dependencies ~dev-deps
