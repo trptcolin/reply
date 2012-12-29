@@ -1,6 +1,6 @@
 # REPLy News (digest of changes)
 
-## 0.1.4, ???
+## 0.1.4, 2012-12-29
 - Update sjacket to handle more single characters, and long strings
 
 ## 0.1.3, 2012-12-28
