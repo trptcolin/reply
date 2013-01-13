@@ -92,7 +92,9 @@
 
 (defn default-init-code
   "Assumes cd-client will be on the classpath when this is evaluated."
-  []
+  [{:keys [require-pprint]
+    :or {:require-pprint '(require [clojure.pprint :refer (pp pprint)])}
+    :as options}]
   `(do
     (println "REPL-y" ~(version/get-version "reply" "reply"))
     (println "Clojure" (clojure-version))
@@ -103,7 +105,7 @@
       (refer 'clojure.repl :only '~'[pst doc find-doc]))
 
     (use '[clojure.java.javadoc :only ~'[javadoc]])
-    (use '[clojure.pprint :only ~'[pp pprint]])
+    ~require-pprint
 
     ~(export-definition 'reply.initialization/help)
 
@@ -155,7 +157,7 @@
   [{:keys [skip-default-init
            custom-init custom-eval] :as options}]
   `(do
-    ~(when-not skip-default-init (default-init-code))
+    ~(when-not skip-default-init (default-init-code options))
      ~(when custom-eval custom-eval)
      ~(when custom-init custom-init)
     nil))
