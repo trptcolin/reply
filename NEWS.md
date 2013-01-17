@@ -1,5 +1,15 @@
 # REPLy News (digest of changes)
 
+## 0.1.7, 2013-01-16
+- Fix regexes with whitespace (sjacket)
+- Fix printing Calendar objects (nREPL)
+
+## 0.1.6, 2013-01-12
+- Bump for nREPL 0.2.0 final
+
+## 0.1.5, 2013-01-11
+- Fix parsing characters followed by non-whitespace characters (sjacket)
+
 ## 0.1.4, 2012-12-29
 - Update sjacket to handle more single characters, and long strings
 
