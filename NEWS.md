@@ -1,5 +1,8 @@
 # REPLy News (digest of changes)
 
+## 0.1.8, 2013-01-17
+- Parse characters *containing* whitespace (sjacket)
+
 ## 0.1.7, 2013-01-16
 - Fix regexes with whitespace (sjacket)
 - Fix printing Calendar objects (nREPL)
