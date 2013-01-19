@@ -1,5 +1,9 @@
 # REPLy News (digest of changes)
 
+## 0.1.9, 2013-01-19
+- Handle unexpected nodes in the input parse tree by failing faster
+  (technomancy/leiningen#940)
+
 ## 0.1.8, 2013-01-17
 - Parse characters *containing* whitespace (sjacket)
 
@@ -24,7 +28,8 @@
 - Fix exit/quit parsing
 
 ## 0.1.1, 2012-10-30
-- Insulate against user-specified `*print-level*` settings on initialization (#89)
+- Insulate against user-specified `*print-level*` settings on initialization
+  (#89)
 - Get rid of 1.4 dependency (ExceptionInfo) (#88)
 
 ## 0.1.0, 2012-10-28
