@@ -72,7 +72,10 @@
            parse-tree (sjacket.parser/parser concatted-text)]
        (if (empty? (:content parse-tree))
          (list "")
-         (let [completed? #(not= :net.cgrand.parsley/unfinished (:tag %))
+         (let [completed? (fn [node]
+                            (or (not= :net.cgrand.parsley/unfinished (:tag node))
+                                (some #(= :net.cgrand.parsley/unexpected (:tag %))
+                                      (tree-seq :tag :content node))))
                complete-forms (take-while completed? (:content parse-tree))
                remainder (drop-while completed? (:content parse-tree))
                form-strings (map sjacket/str-pt
