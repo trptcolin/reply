@@ -105,43 +105,44 @@
     (use '[clojure.java.javadoc :only ~'[javadoc]])
     (use '[clojure.pprint :only ~'[pp pprint]])
 
-    ~(export-definition 'reply.initialization/help)
+    (let [original-ns# ~'*ns*]
+      (ns reply.exports)
+      ~(export-definition 'reply.initialization/intern-with-meta)
 
-    (ns reply.exports)
-    ~(export-definition 'reply.initialization/intern-with-meta)
+      (binding [*err* (java.io.StringWriter.)]
+        ~(export-definition 'reply.initialization/repl-defn)
+        (~'intern-with-meta '~'user '~'defn ~'#'repl-defn))
 
-    (binding [*err* (java.io.StringWriter.)]
-      ~(export-definition 'reply.initialization/repl-defn)
-      (~'intern-with-meta '~'user '~'defn ~'#'repl-defn))
+      ~(export-definition 'reply.initialization/help)
+      (~'intern-with-meta '~'user '~'help ~'#'help)
 
-    ~(export-definition 'reply.initialization/sourcery)
-    (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
+      ~(export-definition 'reply.initialization/sourcery)
+      (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
 
-    ~(export-definition 'reply.initialization/clojuredocs-available?)
-    ~(export-definition 'reply.initialization/call-with-ns-and-name)
-    ~(export-definition 'reply.initialization/handle-fns-etc)
-    ~(export-definition 'reply.initialization/lazy-clojuredocs)
-    (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
-    (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
+      ~(export-definition 'reply.initialization/clojuredocs-available?)
+      ~(export-definition 'reply.initialization/call-with-ns-and-name)
+      ~(export-definition 'reply.initialization/handle-fns-etc)
+      ~(export-definition 'reply.initialization/lazy-clojuredocs)
+      (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
+      (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
 
-    (try
-      (require '[complete.core])
-      ; hack for 1.2 support until we release the next clojure-complete version
-      ~(export-definition 'reply.initialization/resolve-class)
-      (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
+      (try
+        (require '[complete.core])
+        ; hack for 1.2 support until we release the next clojure-complete version
+        ~(export-definition 'reply.initialization/resolve-class)
+        (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
 
-      (catch Exception e#
-        (try
-          (eval '~(formify-file
-                  (ClassLoader/getSystemResource "complete/core.clj")))
-          (catch Exception f#
-            (intern (create-ns '~'complete.core) '~'completions
-              (fn [prefix# ns#] []))
-            (println "Unable to initialize completions.")))))
+        (catch Exception e#
+          (try
+            (eval '~(formify-file
+                      (ClassLoader/getSystemResource "complete/core.clj")))
+            (catch Exception f#
+              (intern (create-ns '~'complete.core) '~'completions
+                      (fn [prefix# ns#] []))
+              (println "Unable to initialize completions.")))))
 
-    (in-ns '~'user)
-
-    (~'help)
+      (in-ns (ns-name original-ns#)))
+    (~'user/help)
     nil))
 
 (defn eval-in-user-ns [code]
