@@ -34,6 +34,7 @@
         history (FileHistory. (make-history-file (:history-file options)))
         completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
     (.setBlinkMatchingParen (.getKeys reader) true)
+    (.setHandleUserInterrupt reader true)
     (doto reader
       (.setHistory history)
       (.setExpandEvents false)

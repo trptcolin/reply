@@ -38,6 +38,11 @@
                  TimeUnit/MILLISECONDS)
           (session-responses session))))
 
+(defn safe-read-line [input-stream]
+  (try (.readLine input-stream)
+    (catch jline.console.UserInterruptException e
+      :interrupted)))
+
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
@@ -50,10 +55,11 @@
                          (some #{"done" "interrupted" "error"} (:status %))))
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
-        (let [input-result (.readLine *in*)]
-          (session-sender
-            {:op "stdin" :stdin (str input-result "\n")
-             :id (nrepl.misc/uuid)})))
+        (let [input-result (safe-read-line *in*)]
+          (when-not (= :interrupted input-result)
+            (session-sender
+              {:op "stdin" :stdin (str input-result "\n")
+               :id (nrepl.misc/uuid)}))))
       (when value ((:value options print) value))
       (flush)
       (when (and ns (not (:session options)))
@@ -65,12 +71,14 @@
 (defn parsed-forms
   ([request-exit] (parsed-forms request-exit nil))
   ([request-exit text-so-far]
-   (if-let [next-text (.readLine *in*)]
-     (let [concatted-text (if text-so-far
+   (if-let [next-text (safe-read-line *in*)]
+     (let [interrupted? (= :interrupted next-text)
+           parse-tree (when-not interrupted?
+                        (sjacket.parser/parser
+                          (if text-so-far
                             (str text-so-far \newline next-text)
-                            next-text)
-           parse-tree (sjacket.parser/parser concatted-text)]
-       (if (empty? (:content parse-tree))
+                            next-text)))]
+       (if (or interrupted? (empty? (:content parse-tree)))
          (list "")
          (let [completed? (fn [node]
                             (or (not= :net.cgrand.parsley/unfinished (:tag node))
