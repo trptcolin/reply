@@ -16,6 +16,7 @@
            ["-h" "--help" "Show this help screen" :flag true]
            ["-e" "--eval" "--custom-eval" "Provide a custom form on the command line to evaluate in the user ns" :parse-fn read-string]
            ["-i" "--init" "--custom-init" "Provide a Clojure file to evaluate in the user ns" :parse-fn initialization/formify-file]
+           ["--require-pprint" "Provide a custom form on the command line to require a pretty printer" :parse-fn read-string]
            ["--standalone" "Launch standalone mode instead of the default nREPL" :flag true]
            ["--color" "Use color; currently only available with nREPL" :flag true]
            ["--skip-default-init" "Skip the default initialization code" :flag true]
