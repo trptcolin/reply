@@ -1,5 +1,8 @@
 @echo off
 
+REM NOTE: assumes dependencies in lib directory (leiningen 1 style).
+REM See README for normal Usage.
+
 SETLOCAL enabledelayedexpansion
 
 SET CURRENT_DIR=%~dp0

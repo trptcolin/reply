@@ -21,8 +21,8 @@ A fitter, happier, more productive REPL for Clojure.
 ## Installation
 
 REPLy is now part of [leiningen](https://github.com/technomancy/leiningen), as
-of the 2.x preview series. It's definitely your best bet for installation and
-Clojure development in general.
+of the 2.x series. It's definitely your best bet for installation and Clojure
+development in general.
 
 And here's how to get a standalone version up and running (assuming you have
 [leiningen](https://github.com/technomancy/leiningen.git) installed):
@@ -33,37 +33,22 @@ And here's how to get a standalone version up and running (assuming you have
 
 ## Usage
 
-The easiest way: use `lein repl` (for 2.x). Skip the rest if that's all you
-need.
+The easiest way to use REPLy is simply to run `lein repl` (for 2.x). That's it!
 
-Running `lein trampoline run` at the command line, in this project, will get
-you the latest stuff on master.
+If you want to check out the latest stuff on REPLy master, you can run `lein
+trampoline run` in this project.
 
-There are also example bin scripts that are currently just set up to work with
-Leiningen 1.x (2.x already contains REPLy, just not necessarily always the
-latest from master here). If you want additional stuff on the classpath, you
-can set `$USER_CP`. For instance:
+If you're confined to Leiningen 1.x, you can use the example bin scripts that
+are set up to work with Leiningen 1.x.
 
-    USER_CP=`lein classpath` reply
+If for some reason your use case requires avoiding Leiningen, you can use the
+bin scripts as a guide (you're probably used to shell scripting anyway, in that
+case). If you want to add additional dependencies to the classpath, setting
+`$USER_CP` will. For example: `USER_CP=$(lein classpath) reply`.
 
-### Examples of fancy options:
-
-Launch in [nREPL](https://github.com/clojure/tools.nrepl) mode:
-
-    $ reply
-
-Standalone execution (no nREPL):
-
-    $ reply --standalone
-
-Skip all the bells-and-whistles initialization and provide your own:
-
-    $ reply --skip-default-init -e '(println "OHAI WORLD")'
-
-For details on the latest and greatest:
-
-    $ reply --help
-
+If you want to use REPLy from another piece of software, your entry point
+should be `reply.main/launch-nrepl`. There are lots of options, which you can
+learn more about by running `(println (last (reply.main/parse-args ["-h"])))`.
 
 ## Debugging
 
@@ -99,7 +84,7 @@ this during our open-source Friday afternoons.
 
 ## License
 
-Copyright (C) 2011-2012 Colin Jones
+Copyright (C) 2011-2013 Colin Jones
 
 Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.

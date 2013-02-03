@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# NOTE: assumes dependencies in lib directory (leiningen 1 style).
+# See README for normal Usage.
 
 # normalize $0 on certain BSDs
 if [ "$(dirname "$0")" = "." ]; then
