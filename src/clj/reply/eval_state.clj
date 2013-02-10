@@ -9,7 +9,8 @@
      #'clojure.core/*print-meta* *print-meta*
      #'clojure.core/*print-length* *print-length*
      #'clojure.core/*print-level* *print-level*
-     #'clojure.core/*compile-path* (System/getProperty "clojure.compile.path" "classes")
+     #'clojure.core/*compile-path* (System/getProperty
+                                     "clojure.compile.path" "classes")
      #'clojure.core/*command-line-args* *command-line-args*
      #'clojure.core/*unchecked-math* *unchecked-math*
      #'clojure.core/*assert* *assert*

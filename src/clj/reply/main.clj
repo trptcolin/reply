@@ -14,14 +14,23 @@
 (defn parse-args [args]
   (cli/cli args
            ["-h" "--help" "Show this help screen" :flag true]
-           ["-e" "--eval" "--custom-eval" "Provide a custom form on the command line to evaluate in the user ns" :parse-fn read-string]
-           ["-i" "--init" "--custom-init" "Provide a Clojure file to evaluate in the user ns" :parse-fn initialization/formify-file]
-           ["--standalone" "Launch standalone mode instead of the default nREPL" :flag true]
-           ["--color" "Use color; currently only available with nREPL" :flag true]
-           ["--skip-default-init" "Skip the default initialization code" :flag true]
+           ["-e" "--eval" "--custom-eval"
+            "Provide a custom form to evaluate in the user ns"
+            :parse-fn read-string]
+           ["-i" "--init" "--custom-init"
+            "Provide a Clojure file to evaluate in the user ns"
+            :parse-fn initialization/formify-file]
+           ["--standalone" "Launch standalone mode instead of the default nREPL"
+            :flag true]
+           ["--color" "Use color; currently only available with nREPL"
+            :flag true]
+           ["--skip-default-init" "Skip the default initialization code"
+            :flag true]
            ["--history-file" "Provide a path for the history file"]
-           ["--prompt" "--custom-prompt" "Provide a custom prompt function" :parse-fn read-string]
-           ["--attach" "Attach to an existing nREPL session on this port or host:port, when used with nREPL"]
+           ["--prompt" "--custom-prompt" "Provide a custom prompt function"
+            :parse-fn read-string]
+           ["--attach"
+            "Attach to an existing nREPL session on this port or host:port"]
            ["--port" "Start new nREPL server on this port"]))
 
 (defn handle-resume [signal]
@@ -30,7 +39,8 @@
 
 (defmacro with-launching-context [options & body]
   `(try
-    (.addShutdownHook (Runtime/getRuntime) (Thread. #(reader.jline/shutdown-reader)))
+    (.addShutdownHook (Runtime/getRuntime)
+                      (Thread. #(reader.jline/shutdown-reader)))
     (signals/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                   clojure.repl/pst clj-stacktrace.repl/pst]
@@ -42,7 +52,8 @@
                     (let [status# (:status (:object (ex-data e#)))
                           body# (:body (:object (ex-data e#)))]
                       (cond (= 401 status#) (println "Unauthorized.")
-                            (number? status#) (println "Remote error:" (slurp ~body))
+                            (number? status#) (println "Remote error:"
+                                                       (slurp ~body))
                             :else (clojure.repl/pst e#)))))
                '(catch Throwable t# (clojure.repl/pst t#))])
     (finally (exit/exit))))

@@ -80,21 +80,25 @@
                             next-text)))]
        (if (or interrupted? (empty? (:content parse-tree)))
          (list "")
-         (let [completed? (fn [node]
-                            (or (not= :net.cgrand.parsley/unfinished (:tag node))
-                                (some #(= :net.cgrand.parsley/unexpected (:tag %))
-                                      (tree-seq :tag :content node))))
+         (let [completed?
+               (fn [node]
+                 (or (not= :net.cgrand.parsley/unfinished (:tag node))
+                     (some #(= :net.cgrand.parsley/unexpected (:tag %))
+                           (tree-seq :tag :content node))))
                complete-forms (take-while completed? (:content parse-tree))
                remainder (drop-while completed? (:content parse-tree))
                form-strings (map sjacket/str-pt
-                                 (remove #(contains? #{:whitespace :comment :discard}
-                                                     (:tag %))
+                                 (remove #(contains?
+                                            #{:whitespace :comment :discard}
+                                            (:tag %))
                                          complete-forms))]
            (cond (seq remainder)
                    (lazy-seq
                      (concat form-strings
-                             (parsed-forms request-exit
-                                           (apply str (map sjacket/str-pt remainder)))))
+                             (parsed-forms
+                               request-exit
+                               (apply str (map sjacket/str-pt
+                                               remainder)))))
                  (seq form-strings)
                    form-strings
                  :else
@@ -154,11 +158,13 @@
     (read-string @results)))
 
 (defn poll-for-responses [connection]
-  (try (when-let [{:keys [out err] :as resp} (nrepl.transport/recv connection 100)]
+  (try (when-let [{:keys [out err] :as resp}
+                  (nrepl.transport/recv connection 100)]
          (when err (print err))
          (when out (print out))
          (when-not (or err out)
-           (.offer ^LinkedBlockingQueue (@response-queues (:session resp)) resp))
+           (.offer ^LinkedBlockingQueue (@response-queues (:session resp))
+                   resp))
          (flush))
     (catch Throwable t
       (clojure.repl/pst t)
@@ -194,7 +200,8 @@
                            (reply.initialization/export-definition
                              'reply.signals/set-signal-handler!)
                            '(set-signal-handler! "INT" (fn [s]))
-                           (reply.initialization/construct-init-code options)))))
+                           (reply.initialization/construct-init-code
+                             options)))))
 
       (handle-client-interruption! client)
       (run-repl client options))))

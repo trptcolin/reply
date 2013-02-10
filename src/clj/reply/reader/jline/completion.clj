@@ -12,7 +12,8 @@
       (let [buffer (or buffer "")
             prefix (or (completion/get-word-ending-at buffer cursor) "")
             prefix-length (.length prefix)
-            possible-completions-form (construct-possible-completions-form prefix)
+            possible-completions-form (construct-possible-completions-form
+                                        prefix)
             possible-completions (eval-fn possible-completions-form)]
         (if (or (empty? possible-completions) (zero? prefix-length))
           -1

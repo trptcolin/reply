@@ -29,7 +29,7 @@
       (Thread/sleep 2000)
       (when (and @action (not (:completed @action)) (.isAlive thread))
         (println ";;;;;;;;;;")
-        (println "; Sorry, have to call Thread.stop on this command, because it's not dying.")
+        (println "; Sorry, have to call Thread.stop on this command.")
         (println ";;;;;;;;;;")
         (.stop thread)))))
 

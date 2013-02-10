@@ -14,7 +14,8 @@
 (def jline-pushback-reader (atom nil))
 
 (defn print-interruption []
-  (when-not (#{"none" "off" "false"} (.getProperty (Configuration/getProperties) "jline.terminal"))
+  (when-not (#{"none" "off" "false"}
+               (.getProperty (Configuration/getProperties) "jline.terminal"))
     (print "^C")
     (flush)))
 
@@ -32,7 +33,8 @@
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (let [reader (ConsoleReader.)
         history (FileHistory. (make-history-file (:history-file options)))
-        completer (jline.completion/make-completer reply.initialization/eval-in-user-ns #())]
+        completer (jline.completion/make-completer
+                    reply.initialization/eval-in-user-ns #())]
     (.setBlinkMatchingParen (.getKeys reader) true)
     (.setHandleUserInterrupt reader true)
     (doto reader
@@ -66,8 +68,10 @@
 (defn setup-reader! [options]
   (when-not (System/getenv "JLINE_LOGGING")
     (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
-  (reset! jline-reader (make-reader options)) ; since construction is side-effect-y
-  (reset! jline-pushback-reader ; since this depends on jline-reader
+  ; since construction is side-effect-y
+  (reset! jline-reader (make-reader options))
+  ; since this depends on jline-reader
+  (reset! jline-pushback-reader
     (CustomizableBufferLineNumberingPushbackReader.
       (JlineInputReader.
         {:jline-reader @jline-reader
@@ -105,13 +109,15 @@
 (defmacro with-jline-in [& body]
   `(do
     (try
-      (prepare-for-read reply.initialization/eval-in-user-ns (eval-state/get-ns))
+      (prepare-for-read reply.initialization/eval-in-user-ns
+                        (eval-state/get-ns))
       (binding [*in* @jline-pushback-reader]
         (Thread/interrupted) ; just to clear the status
         ~@body)
       ; NOTE: this indirection is for wrapped exceptions in 1.3
       (catch Throwable e#
-        (if (#{IOException InterruptedException} (type (clojure.main/repl-exception e#)))
+        (if (#{IOException InterruptedException}
+               (type (clojure.main/repl-exception e#)))
           (do (reset-reader) nil)
           (throw e#))))))
 

@@ -5,8 +5,10 @@
 
 (defmacro repl-defn [sym & args]
   (let [no-meta-source (binding [*print-meta* true]
-                         (with-out-str (clojure.pprint/pprint `(defn ~sym ~@args))))
-        meta-source `(clojure.core/defn ~(vary-meta sym assoc :source no-meta-source) ~@args)]
+                         (with-out-str
+                           (clojure.pprint/pprint `(defn ~sym ~@args))))
+        meta-source `(clojure.core/defn
+                       ~(vary-meta sym assoc :source no-meta-source) ~@args)]
     meta-source))
 
 (defmacro sourcery [name]
@@ -52,7 +54,8 @@
      (require '[cd-client.core])
      true
      (catch Exception e#
-       (println "Warning: Could not load the ClojureDocs client, so `clojuredocs` will be unavailable")
+       (println "Warning: Could not load the ClojureDocs client, so"
+                "`clojuredocs` will be unavailable")
        (println "  Details:" e# "\n")
        false))))
 
