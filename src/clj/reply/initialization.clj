@@ -94,56 +94,60 @@
   "Assumes cd-client will be on the classpath when this is evaluated."
   []
   `(do
-    (println "REPL-y" ~(version/get-version "reply" "reply"))
-    (println "Clojure" (clojure-version))
+     (println "REPL-y" ~(version/get-version "reply" "reply"))
+     (println "Clojure" (clojure-version))
 
-    (use '[clojure.repl :only ~'[source apropos dir]])
-    ; doc and find-doc live in clojure.core in 1.2
-    (when (ns-resolve '~'clojure.repl '~'pst)
-      (refer 'clojure.repl :only '~'[pst doc find-doc]))
+     (use '[clojure.repl :only ~'[source apropos dir]])
+     ; doc and find-doc live in clojure.core in 1.2
+     (when (ns-resolve '~'clojure.repl '~'pst)
+       (refer 'clojure.repl :only '~'[pst doc find-doc]))
 
-    (use '[clojure.java.javadoc :only ~'[javadoc]])
-    (use '[clojure.pprint :only ~'[pp pprint]])
+     (use '[clojure.java.javadoc :only ~'[javadoc]])
+     (use '[clojure.pprint :only ~'[pp pprint]])
 
-    (let [original-ns# ~'*ns*]
-      (ns reply.exports)
-      ~(export-definition 'reply.initialization/intern-with-meta)
+     (create-ns 'reply.exports)
+     (~'intern '~'reply.exports '~'original-ns ~'*ns*)
+     (in-ns '~'reply.exports)
+     (clojure.core/refer '~'clojure.core)
 
-      (binding [*err* (java.io.StringWriter.)]
-        ~(export-definition 'reply.initialization/repl-defn)
-        (~'intern-with-meta '~'user '~'defn ~'#'repl-defn))
+     ~(export-definition 'reply.initialization/intern-with-meta)
 
-      ~(export-definition 'reply.initialization/help)
-      (~'intern-with-meta '~'user '~'help ~'#'help)
+     (binding [*err* (java.io.StringWriter.)]
+       ~(export-definition 'reply.initialization/repl-defn)
+       (~'intern-with-meta '~'user '~'defn ~'#'repl-defn))
 
-      ~(export-definition 'reply.initialization/sourcery)
-      (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
+     ~(export-definition 'reply.initialization/help)
+     (~'intern-with-meta '~'user '~'help ~'#'help)
 
-      ~(export-definition 'reply.initialization/clojuredocs-available?)
-      ~(export-definition 'reply.initialization/call-with-ns-and-name)
-      ~(export-definition 'reply.initialization/handle-fns-etc)
-      ~(export-definition 'reply.initialization/lazy-clojuredocs)
-      (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
-      (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
+     ~(export-definition 'reply.initialization/sourcery)
+     (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
 
-      (try
-        (require '[complete.core])
-        ; hack for 1.2 support until we release the next clojure-complete version
-        ~(export-definition 'reply.initialization/resolve-class)
-        (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
+     ~(export-definition 'reply.initialization/clojuredocs-available?)
+     ~(export-definition 'reply.initialization/call-with-ns-and-name)
+     ~(export-definition 'reply.initialization/handle-fns-etc)
+     ~(export-definition 'reply.initialization/lazy-clojuredocs)
+     (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
+     (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
 
-        (catch Exception e#
-          (try
-            (eval '~(formify-file
-                      (ClassLoader/getSystemResource "complete/core.clj")))
-            (catch Exception f#
-              (intern (create-ns '~'complete.core) '~'completions
-                      (fn [prefix# ns#] []))
-              (println "Unable to initialize completions.")))))
+     (try
+       (require '[complete.core])
+       ; hack for 1.2 support until we release the next clojure-complete version
+       ~(export-definition 'reply.initialization/resolve-class)
+       (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
 
-      (in-ns (ns-name original-ns#)))
-    (~'user/help)
-    nil))
+       (catch Exception e#
+         (try
+           (eval '~(formify-file
+                     (ClassLoader/getSystemResource "complete/core.clj")))
+           (catch Exception f#
+             (intern (create-ns '~'complete.core) '~'completions
+                     (fn [prefix# ns#] []))
+             (println "Unable to initialize completions.")))))
+
+     (in-ns (ns-name ~'original-ns))
+
+     (~'user/help)
+     nil))
 
 (defn eval-in-user-ns [code]
   (let [original-ns (symbol (str *ns*))]
