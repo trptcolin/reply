@@ -1,4 +1,4 @@
-# REPLy News (digest of changes)
+# REPLy Changelog
 
 ## 0.1.10, ???
 - Handle interruption (via ctrl-c) during input with new jline capabilities
