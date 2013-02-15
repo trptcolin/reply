@@ -1,6 +1,6 @@
 # REPLy Changelog
 
-## 0.1.10, ???
+## 0.1.10, 2012-02-15
 - Handle interruption (via ctrl-c) during input with new jline capabilities
 - Allow startup in any ns (technomancy/leiningen#955)
 - Allow customizing in/out streams (technomancy/leiningen#957)
