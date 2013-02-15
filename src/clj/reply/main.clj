@@ -63,8 +63,10 @@
     (reader.jline/set-prompt-fn! (eval prompt-form))))
 
 (defn launch-nrepl [options]
-  "Launches the nREPL version of REPL-y, with options already
-  parsed out"
+  "Launches the nREPL version of REPL-y, with options already parsed out. The
+  options map can also include :input-stream and :output-stream entries, which
+  must be Java objects passed via this entry point, as they can't be parsed
+  from a command line."
   (with-launching-context options
     (reader.jline/with-jline-in
       (set-prompt options)

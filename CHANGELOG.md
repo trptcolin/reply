@@ -2,7 +2,8 @@
 
 ## 0.1.10, ???
 - Handle interruption (via ctrl-c) during input with new jline capabilities
-- Allow startup in any ns (technomancy/leiningen#955
+- Allow startup in any ns (technomancy/leiningen#955)
+- Allow customizing in/out streams (technomancy/leiningen#957)
 
 ## 0.1.9, 2013-01-19
 - Handle unexpected nodes in the input parse tree by failing faster

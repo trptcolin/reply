@@ -3,7 +3,8 @@
   (:require [reply.reader.jline.completion :as jline.completion]
             [reply.eval-state :as eval-state]
             [clojure.main])
-  (:import [java.io File IOException PrintStream ByteArrayOutputStream]
+  (:import [java.io File IOException PrintStream ByteArrayOutputStream
+            FileInputStream FileDescriptor]
            [reply.reader.jline JlineInputReader]
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
            [jline.console ConsoleReader]
@@ -28,11 +29,14 @@
     (File. (System/getProperty "user.home")
            ".jline-reply.history")))
 
-(defn make-reader [options]
+(defn make-reader [{:keys [input-stream output-stream history-file]
+                    :as options}]
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
-  (let [reader (ConsoleReader.)
-        history (FileHistory. (make-history-file (:history-file options)))
+  (let [reader (ConsoleReader. (or input-stream
+                                   (FileInputStream. FileDescriptor/in))
+                               (or output-stream System/out))
+        history (FileHistory. (make-history-file history-file))
         completer (jline.completion/make-completer
                     reply.initialization/eval-in-user-ns #())]
     (.setBlinkMatchingParen (.getKeys reader) true)
