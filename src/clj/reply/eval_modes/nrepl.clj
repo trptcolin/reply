@@ -10,7 +10,8 @@
             [reply.exit]
             [reply.eval-state :as eval-state]
             [reply.initialization]
-            [reply.reader.jline :as reader.jline]
+            [reply.reader.simple-jline :as simple-jline]
+            [reply.reader.jline.completion :as jline.completion]
             [reply.signals :as signals]
             [net.cgrand.sjacket :as sjacket]
             [net.cgrand.sjacket.parser :as sjacket.parser]))
@@ -23,7 +24,6 @@
   (signals/set-signal-handler!
     "INT"
     (fn [sig]
-      (reader.jline/print-interruption)
       (when-let [command-id @current-command-id]
         (client {:op "interrupt"
                  :session @current-session
@@ -38,10 +38,21 @@
                  TimeUnit/MILLISECONDS)
           (session-responses session))))
 
-(defn safe-read-line [input-stream]
-  (try (.readLine input-stream)
-    (catch jline.console.UserInterruptException e
-      :interrupted)))
+(defn make-completer [ns]
+  (fn [reader]
+    (let [eval-fn reply.initialization/eval-in-user-ns
+          redraw-line-fn (fn []
+                           (.redrawLine reader)
+                           (.flush reader))]
+      (if ns
+        (jline.completion/make-completer
+          eval-fn redraw-line-fn ns)
+        nil))))
+
+(defn safe-read-line
+  [{:keys [input-stream prompt-string ns] :as state}]
+  (simple-jline/safe-read-line
+    (assoc state :completer-factory (make-completer ns))))
 
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
@@ -55,7 +66,8 @@
                          (some #{"done" "interrupted" "error"} (:status %))))
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
-        (let [input-result (safe-read-line *in*)]
+        (let [input-result (safe-read-line {:input-stream *in*
+                                            :prompt-string (constantly "STDIN> ")})]
           (when-not (= :interrupted input-result)
             (session-sender
               {:op "stdin" :stdin (str input-result "\n")
@@ -68,10 +80,10 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn parsed-forms
-  ([request-exit] (parsed-forms request-exit nil))
-  ([request-exit text-so-far]
-   (if-let [next-text (safe-read-line *in*)]
+(defn parsed-forms [{:keys [ns request-exit text-so-far prompt-string] :as options}]
+   (if-let [next-text (safe-read-line {:ns ns
+                                       :input-stream *in*
+                                       :prompt-string prompt-string})]
      (let [interrupted? (= :interrupted next-text)
            parse-tree (when-not interrupted?
                         (sjacket.parser/parser
@@ -96,26 +108,33 @@
                    (lazy-seq
                      (concat form-strings
                              (parsed-forms
-                               request-exit
-                               (apply str (map sjacket/str-pt
-                                               remainder)))))
+                               (assoc options
+                                      :text-so-far
+                                      (apply str (map sjacket/str-pt
+                                                      remainder))
+                                      :prompt-string
+                                      (apply str (concat (repeat (- (count prompt-string)
+                                                                    (count "#_=> "))
+                                                                 \space)
+                                                         "#_=> "))))))
                  (seq form-strings)
                    form-strings
                  :else
                    (list "")))))
-     (list request-exit))))
+     (list request-exit)))
 
 (defn run-repl
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns (execute-with-client connection options "")]
-        (prompt ns)
-        (flush)
         (let [eof (Object.)
               execute (partial execute-with-client connection
                                (assoc options :interactive true))
-              forms (parsed-forms eof)]
+              forms (parsed-forms {:request-exit eof
+                                   :prompt-string (prompt ns)
+                                   :ns ns
+                                   :text-so-far nil})]
           (if (reply.exit/done? eof (first forms))
             nil
             (recur (last (doall (map execute forms))))))))))
@@ -172,7 +191,6 @@
   (recur connection))
 
 (defn main
-  "Mostly ripped from nREPL's cmdline namespace."
   [options]
   (let [connection         (get-connection options)
         client             (nrepl/client connection Long/MAX_VALUE)
@@ -182,10 +200,7 @@
     (swap! response-queues assoc session (LinkedBlockingQueue.))
     (swap! response-queues assoc completion-session (LinkedBlockingQueue.))
     (let [options (assoc options :prompt
-                    (fn [ns]
-                      (reader.jline/prepare-for-read
-                        (partial completion-eval client completion-session)
-                        ns)))
+                    (fn [ns] (str ns "=> ")))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)]

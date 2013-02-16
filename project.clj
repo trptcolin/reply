@@ -16,7 +16,6 @@
     :profiles {:dev {:dependencies ~dev-deps}}
     :dev-dependencies ~dev-deps
     :plugins ~dev-deps
-    :aot [reply.reader.jline.JlineInputReader]
     :source-path "src/clj"
     :java-source-path "src/java"
     :test-path "spec"

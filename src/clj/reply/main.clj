@@ -4,7 +4,7 @@
             [reply.exit :as exit]
             [reply.hacks.printing :as hacks.printing]
             [reply.initialization :as initialization]
-            [reply.reader.jline :as reader.jline]
+            ;[reply.reader.jline :as reader.jline]
             [reply.signals :as signals]
             [clojure.main]
             [clojure.repl]
@@ -34,17 +34,13 @@
            ["--port" "Start new nREPL server on this port"]))
 
 (defn handle-resume [signal]
-  (println "Welcome back!")
-  (reader.jline/resume-reader))
+  (println "Welcome back!"))
 
 (defmacro with-launching-context [options & body]
   `(try
-    (.addShutdownHook (Runtime/getRuntime)
-                      (Thread. #(reader.jline/shutdown-reader)))
     (signals/set-signal-handler! "CONT" handle-resume)
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                   clojure.repl/pst clj-stacktrace.repl/pst]
-      (reader.jline/setup-reader! ~options)
       ~@body)
     ~@(filter identity
               [(when (resolve 'ex-info)
@@ -58,26 +54,19 @@
                '(catch Throwable t# (clojure.repl/pst t#))])
     (finally (exit/exit))))
 
-(defn set-prompt [options]
-  (when-let [prompt-form (:custom-prompt options)]
-    (reader.jline/set-prompt-fn! (eval prompt-form))))
-
 (defn launch-nrepl [options]
   "Launches the nREPL version of REPL-y, with options already parsed out. The
   options map can also include :input-stream and :output-stream entries, which
   must be Java objects passed via this entry point, as they can't be parsed
   from a command line."
   (with-launching-context options
-    (reader.jline/with-jline-in
-      (set-prompt options)
-      (eval-modes.nrepl/main options))))
+    (eval-modes.nrepl/main options)))
 
 (defn launch-standalone
   "Launches the standalone (non-nREPL) version of REPL-y, with options already
   parsed out"
   [options]
   (with-launching-context options
-    (set-prompt options)
     (eval-modes.standalone/main options)))
 
 (defn launch
