@@ -9,6 +9,7 @@
 (defn make-completer [eval-fn redraw-line-fn ns]
   (proxy [Completer] []
     (complete [^String buffer cursor ^java.util.List candidates]
+      ; candidates is empty, wants possibilities added
       (let [buffer (or buffer "")
             prefix (or (completion/get-word-ending-at buffer cursor) "")
             prefix-length (.length prefix)

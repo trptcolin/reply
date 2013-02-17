@@ -58,32 +58,43 @@
       (.setPaginationEnabled true)
       (.setPrompt prompt-string))))
 
+(def jline-state (atom {}))
+
 (defn get-input-line [state]
   (if (:reader state)
     (prepare-for-next-read state)
     (initialize-jline))
-  (let [reader (setup-console-reader state)
-        input (try (.readLine reader)
-                (catch jline.console.UserInterruptException e
-                  :interrupted))]
-    (if (= :interrupted input)
-      (assoc state
-             :reader reader
-             :input ""
-             :interrupted true)
-      (assoc state
-             :reader reader
-             :input input
-             :interrupted nil))))
-
-(def jline-state (atom {}))
+  (if (:no-jline state)
+    (do
+      (shutdown state) ; TODO: this prints a newline; stop jline from doing this.
+      (assoc (dissoc state :no-jline)
+           :reader nil
+           :input (read-line)))
+    (let [reader (setup-console-reader state)
+          input (try (.readLine reader)
+                  (catch jline.console.UserInterruptException e
+                    :interrupted))]
+      (if (= :interrupted input)
+        (assoc state
+               :reader reader
+               :input ""
+               :interrupted true)
+        (assoc state
+               :reader reader
+               :input input
+               :interrupted nil)))))
 
 (defn safe-read-line
-  [{:keys [input-stream prompt-string completer-factory] :as state}]
+  [{:keys [prompt-string completer-factory no-jline input-stream] :as options}]
   (swap! jline-state
          assoc
+         :no-jline no-jline
          :prompt-string prompt-string
          :completer-factory completer-factory)
+
+  (when input-stream ; default args are janky
+    (swap! jline-state assoc :input-stream input-stream))
+
   (swap! jline-state
          (fn [previous-state]
            (get-input-line previous-state)))

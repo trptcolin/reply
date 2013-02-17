@@ -66,12 +66,11 @@
                          (some #{"done" "interrupted" "error"} (:status %))))
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
-        (let [input-result (safe-read-line {:input-stream *in*
-                                            :prompt-string (constantly "STDIN> ")})]
-          (when-not (= :interrupted input-result)
-            (session-sender
-              {:op "stdin" :stdin (str input-result "\n")
-               :id (nrepl.misc/uuid)}))))
+        (let [input-result (safe-read-line {:no-jline true
+                                            :prompt-string ""})]
+          (session-sender
+            {:op "stdin" :stdin (str input-result "\n")
+             :id (nrepl.misc/uuid)})))
       (when value ((:value options print) value))
       (flush)
       (when (and ns (not (:session options)))
@@ -80,9 +79,10 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn parsed-forms [{:keys [ns request-exit text-so-far prompt-string] :as options}]
+(defn parsed-forms [{:keys [ns request-exit text-so-far
+                            prompt-string input-stream] :as options}]
    (if-let [next-text (safe-read-line {:ns ns
-                                       :input-stream *in*
+                                       :input-stream input-stream
                                        :prompt-string prompt-string})]
      (let [interrupted? (= :interrupted next-text)
            parse-tree (when-not interrupted?
