@@ -4,7 +4,7 @@
   (:import [jline.console.completer Completer]))
 
 (defn construct-possible-completions-form [prefix ns]
-  `(~'complete.core/completions (~'str ~prefix) (symbol '~ns)))
+  `(~'complete.core/completions (~'str ~prefix) (~'symbol ~ns)))
 
 (defn make-completer [eval-fn redraw-line-fn ns]
   (proxy [Completer] []

@@ -57,8 +57,9 @@
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
-        session-sender (nrepl/client-session client :session session)]
-    (session-sender {:op "eval" :code form :id command-id})
+        session-sender (nrepl/client-session client :session session)
+        message-to-send {:op "eval" :code form :id command-id}]
+    (session-sender message-to-send)
     (reset! current-command-id command-id)
     (doseq [{:keys [ns value out err] :as res}
             (take-while

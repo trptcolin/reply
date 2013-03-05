@@ -18,6 +18,7 @@
 
 (defn shutdown [{:keys [reader] :as state}]
   (when reader
+    (.clear (.getCursorBuffer reader))
     (.restore (.getTerminal reader))
     (.shutdown reader)))
 
@@ -66,7 +67,7 @@
     (initialize-jline))
   (if (:no-jline state)
     (do
-      (shutdown state) ; TODO: this prints a newline; stop jline from doing this.
+      (shutdown state)
       (assoc (dissoc state :no-jline)
            :reader nil
            :input (read-line)))

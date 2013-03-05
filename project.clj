@@ -23,4 +23,5 @@
     :java-source-paths ["src/java"]
     :test-paths ["spec"]
     :repl-options {:init-ns user}
+    :aot [reply.reader.jline.JlineInputReader]
     :main ^{:skip-aot true} reply.ReplyMain))
