@@ -64,14 +64,17 @@
     (doseq [{:keys [ns value out err] :as res}
             (take-while
               #(not (and (= command-id (:id %))
-                         (some #{"done" "interrupted" "error"} (:status %))))
+                         (some #{"done" "interrupted" "error" "eval-error"} (:status %))))
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
+        (reset! current-command-id nil)
         (let [input-result (safe-read-line {:no-jline true
-                                            :prompt-string ""})]
-          (session-sender
-            {:op "stdin" :stdin (str input-result "\n")
-             :id (nrepl.misc/uuid)})))
+                                            :prompt-string ""})
+              in-message-id (nrepl.misc/uuid)
+              message {:op "stdin" :stdin (str input-result "\n")
+                       :id in-message-id}]
+          (session-sender message)
+          (reset! current-command-id command-id)))
       (when value ((:value options print) value))
       (flush)
       (when (and ns (not (:session options)))
@@ -198,8 +201,9 @@
         session            (nrepl/new-session client)
         completion-session (nrepl/new-session client)]
     (reset! current-session session)
-    (swap! response-queues assoc session (LinkedBlockingQueue.))
-    (swap! response-queues assoc completion-session (LinkedBlockingQueue.))
+    (swap! response-queues assoc
+           session (LinkedBlockingQueue.)
+           completion-session (LinkedBlockingQueue.))
     (let [options (assoc options :prompt
                     (fn [ns] (str ns "=> ")))
           options (if (:color options)
