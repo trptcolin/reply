@@ -147,7 +147,7 @@
                      (fn [prefix# ns#] []))
              (println "Unable to initialize completions.")))))
 
-     (in-ns (ns-name ~'original-ns))
+     (in-ns (ns-name ~'reply.exports/original-ns))
 
      (~'user/help)
      nil))
