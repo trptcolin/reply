@@ -136,7 +136,8 @@
        (require '[complete.core])
        ; hack for 1.2 support until we release the next clojure-complete version
        ~(export-definition 'reply.initialization/resolve-class)
-       (~'intern-with-meta '~'complete.core '~'resolve-class ~'#'resolve-class)
+       (~'reply.exports/intern-with-meta
+          '~'complete.core '~'resolve-class ~'#'resolve-class)
 
        (catch Exception e#
          (try

@@ -1,6 +1,7 @@
 (ns reply.reader.jline.completion
   (:require [reply.completion :as completion]
-            [reply.eval-state :as eval-state])
+            [reply.eval-state :as eval-state]
+            [complete.core])
   (:import [jline.console.completer Completer]))
 
 (defn construct-possible-completions-form [prefix ns]
