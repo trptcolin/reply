@@ -127,12 +127,24 @@
                    (list "")))))
      (list request-exit)))
 
+(defn- handle-ns-init-error [ns connection options]
+  (if (= ns "reply.eval-modes.nrepl")
+    (let [fallback-ns
+          (execute-with-client
+            connection options
+            "(in-ns 'user)
+            (println \"\\nError loading namespace; falling back to user\")")]
+      (println)
+      fallback-ns)
+    ns))
+
 (defn run-repl
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns (execute-with-client connection options "")]
-        (let [eof (Object.)
+        (let [ns (handle-ns-init-error ns connection options)
+              eof (Object.)
               execute (partial execute-with-client connection
                                (assoc options :interactive true))
               forms (parsed-forms {:request-exit eof
