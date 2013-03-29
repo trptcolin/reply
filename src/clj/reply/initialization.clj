@@ -3,19 +3,6 @@
             [clojure.repl]
             [trptcolin.versioneer.core :as version]))
 
-(defmacro repl-defn [sym & args]
-  (let [no-meta-source (binding [*print-meta* true]
-                         (with-out-str
-                           (clojure.pprint/pprint `(defn ~sym ~@args))))
-        meta-source `(clojure.core/defn
-                       ~(vary-meta sym assoc :source no-meta-source) ~@args)]
-    meta-source))
-
-(defmacro sourcery [name]
-  `(if-let [s# (:source (meta (var ~name)))]
-    (do (print s#) (flush))
-    (clojure.repl/source ~name)))
-
 (defn help
   "Prints a list of helpful commands."
   []
@@ -24,7 +11,6 @@
   (println "    Docs: (doc function-name-here)")
   (println "          (find-doc \"part-of-name-here\")")
   (println "  Source: (source function-name-here)")
-  (println "          (user/sourcery function-name-here)")
   (println " Javadoc: (javadoc java-object-or-class-here)")
   (println "Examples from clojuredocs.org: [clojuredocs or cdoc]")
   (println "          (user/clojuredocs name-here)")
@@ -115,15 +101,8 @@
 
      ~(export-definition 'reply.initialization/intern-with-meta)
 
-     (binding [*err* (java.io.StringWriter.)]
-       ~(export-definition 'reply.initialization/repl-defn)
-       (~'intern-with-meta '~'user '~'defn ~'#'repl-defn))
-
      ~(export-definition 'reply.initialization/help)
      (~'intern-with-meta '~'user '~'help ~'#'help)
-
-     ~(export-definition 'reply.initialization/sourcery)
-     (~'intern-with-meta '~'user '~'sourcery ~'#'sourcery)
 
      ~(export-definition 'reply.initialization/clojuredocs-available?)
      ~(export-definition 'reply.initialization/call-with-ns-and-name)
