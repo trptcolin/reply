@@ -33,6 +33,66 @@
                       (class (clojure.main/repl-exception e)))
             (throw e))))))
 
+(defn unresolve
+  "Given a var, return a sequence of all symbols that resolve to the
+  var from the current namespace *ns*."
+  [var]
+  (when-not (instance? clojure.lang.Var var)
+    (throw (Exception. (format "unresolve: first arg must be Var"))))
+  (let [home-ns (.ns var)
+        sym-name-str (second (re-find #"/(.*)$" (str var)))]
+    (sort-by
+     #(count (str %))
+     (concat
+      ;; The symbols in the current namespace that map to the var, if
+      ;; any
+      (->> (ns-map *ns*)
+           (filter (fn [[k v]] (= var v)))
+           (map first))
+      ;; This is the "canonical" symbol that resolves to the var, with
+      ;; full namespace/symbol-name
+      (list (symbol (str home-ns) sym-name-str))
+      ;; There might be one or more aliases for the symbol's home
+      ;; namespace defined in the current namespace.
+      (->> (ns-aliases *ns*)
+           (filter (fn [[ns-alias ns]] (= ns home-ns)))
+           (map first)
+           (map (fn [ns-alias-symbol]
+                  (symbol (str ns-alias-symbol) sym-name-str))))))))
+
+(defn better-apropos
+  "Given a regular expression or stringable thing, calculate a
+  sequence of all symbols in all currently-loaded namespaces such that
+  it matches the str-or-pattern, with at most one such symbol per Var.
+  The sequence returned contains symbols that map to those Vars, and are
+  the shortest symbols that map to the Var, when qualified with the
+  namespace name or alias, if that qualification is necessary to name
+  the Var.  Note that it is possible the symbol returned does not match
+  the str-or-pattern itself, e.g. if the symbol-to-var mapping was
+  created with :rename.
+  
+  Searches through all non-Java symbols in the current namespace, but
+  only public symbols of other namespaces."
+  [str-or-pattern & opts]
+  (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
+                   #(re-find str-or-pattern (str %))
+                   #(.contains (str %) (str str-or-pattern)))]
+    (map #(first (reply.initialization/unresolve %))
+         (set
+          (mapcat (fn [ns]
+                    (map second
+                         (filter (fn [[s v]] (matches? s))
+                                 (if (= ns *ns*)
+                                   (concat (ns-interns ns) (ns-refers ns))
+                                   (ns-publics ns)))))
+                  (all-ns))))))
+
+(defn apro
+  "Shorter-name version of apropos that also sorts and pretty-prints
+  the results."
+  [str-or-pattern & opts]
+  (clojure.pprint/pprint (sort (apply reply.initialization/better-apropos str-or-pattern opts))))
+
 (def clojuredocs-available?
   (delay
    (try
@@ -103,6 +163,11 @@
 
      ~(export-definition 'reply.initialization/help)
      (~'intern-with-meta '~'user '~'help ~'#'help)
+
+     ~(export-definition 'reply.initialization/apro)
+     ~(export-definition 'reply.initialization/better-apropos)
+     (~'intern-with-meta '~'user '~'apro ~'#'apro)
+     (~'intern-with-meta '~'user '~'better-apropos ~'#'better-apropos)
 
      ~(export-definition 'reply.initialization/clojuredocs-available?)
      ~(export-definition 'reply.initialization/call-with-ns-and-name)
