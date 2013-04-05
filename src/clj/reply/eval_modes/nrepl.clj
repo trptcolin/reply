@@ -10,11 +10,10 @@
             [reply.exit]
             [reply.eval-state :as eval-state]
             [reply.initialization]
+            [reply.parsing :as parsing]
             [reply.reader.simple-jline :as simple-jline]
             [reply.reader.jline.completion :as jline.completion]
-            [reply.signals :as signals]
-            [net.cgrand.sjacket :as sjacket]
-            [net.cgrand.sjacket.parser :as sjacket.parser]))
+            [reply.signals :as signals]))
 
 (def current-command-id (atom nil))
 (def current-session (atom nil))
@@ -85,50 +84,6 @@
     (reset! current-command-id nil)
     @current-ns))
 
-(defn parsed-forms [{:keys [ns request-exit text-so-far
-                            prompt-string input-stream] :as options}]
-   (if-let [next-text (safe-read-line {:ns ns
-                                       :input-stream input-stream
-                                       :prompt-string prompt-string})]
-     (let [interrupted? (= :interrupted next-text)
-           parse-tree (when-not interrupted?
-                        (sjacket.parser/parser
-                          (if text-so-far
-                            (str text-so-far \newline next-text)
-                            next-text)))]
-       (if (or interrupted? (empty? (:content parse-tree)))
-         (list "")
-         (let [completed?
-               (fn [node]
-                 (or (not= :net.cgrand.parsley/unfinished (:tag node))
-                     (some #(= :net.cgrand.parsley/unexpected (:tag %))
-                           (tree-seq :tag :content node))))
-               complete-forms (take-while completed? (:content parse-tree))
-               remainder (drop-while completed? (:content parse-tree))
-               form-strings (map sjacket/str-pt
-                                 (remove #(contains?
-                                            #{:whitespace :comment :discard}
-                                            (:tag %))
-                                         complete-forms))]
-           (cond (seq remainder)
-                   (lazy-seq
-                     (concat form-strings
-                             (parsed-forms
-                               (assoc options
-                                      :text-so-far
-                                      (apply str (map sjacket/str-pt
-                                                      remainder))
-                                      :prompt-string
-                                      (apply str (concat (repeat (- (count prompt-string)
-                                                                    (count "#_=> "))
-                                                                 \space)
-                                                         "#_=> "))))))
-                 (seq form-strings)
-                   form-strings
-                 :else
-                   (list "")))))
-     (list request-exit)))
-
 (defn- handle-ns-init-error [ns connection options]
   (if (= ns "reply.eval-modes.nrepl")
     (let [fallback-ns
@@ -149,10 +104,12 @@
               eof (Object.)
               execute (partial execute-with-client connection
                                (assoc options :interactive true))
-              forms (parsed-forms {:request-exit eof
-                                   :prompt-string (prompt ns)
-                                   :ns ns
-                                   :text-so-far nil})]
+              forms (parsing/parsed-forms
+                      {:request-exit eof
+                       :prompt-string (prompt ns)
+                       :ns ns
+                       :read-line-fn safe-read-line
+                       :text-so-far nil})]
           (if (reply.exit/done? eof (first forms))
             nil
             (recur (last (doall (map execute forms))))))))))
