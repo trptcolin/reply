@@ -6,15 +6,16 @@
 (defn help
   "Prints a list of helpful commands."
   []
-  (println "    Exit: Control+D or (exit) or (quit)")
-  (println "Commands: (user/help)")
-  (println "    Docs: (doc function-name-here)")
-  (println "          (find-doc \"part-of-name-here\")")
-  (println "  Source: (source function-name-here)")
-  (println " Javadoc: (javadoc java-object-or-class-here)")
-  (println "Examples from clojuredocs.org: [clojuredocs or cdoc]")
-  (println "          (user/clojuredocs name-here)")
-  (println "          (user/clojuredocs \"ns-here\" \"name-here\")"))
+  (println "        Exit: Control+D or (exit) or (quit)")
+  (println "    Commands: (user/help)")
+  (println "        Docs: (doc function-name-here)")
+  (println "              (find-doc \"part-of-name-here\")")
+  (println "Find by Name: (find-name \"part-of-name-here\")")
+  (println "      Source: (source function-name-here)")
+  (println "     Javadoc: (javadoc java-object-or-class-here)")
+  (println "    Examples from clojuredocs.org: [clojuredocs or cdoc]")
+  (println "              (user/clojuredocs name-here)")
+  (println "              (user/clojuredocs \"ns-here\" \"name-here\")"))
 
 (defn intern-with-meta [ns sym value-var]
   (intern ns
@@ -60,8 +61,12 @@
            (map (fn [ns-alias-symbol]
                   (symbol (str ns-alias-symbol) sym-name-str))))))))
 
-(defn better-apropos
-  "Given a regular expression or stringable thing, calculate a
+(defn apropos-better
+  "Similar to clojure.repl/apropos, but provides enough context (in the form of
+  namespaces where the vars live, when necessary) to actually use the results
+  in a REPL.
+
+  Given a regular expression or stringable thing, calculate a
   sequence of all symbols in all currently-loaded namespaces such that
   it matches the str-or-pattern, with at most one such symbol per Var.
   The sequence returned contains symbols that map to those Vars, and are
@@ -70,28 +75,23 @@
   the Var.  Note that it is possible the symbol returned does not match
   the str-or-pattern itself, e.g. if the symbol-to-var mapping was
   created with :rename.
-  
+
   Searches through all non-Java symbols in the current namespace, but
   only public symbols of other namespaces."
-  [str-or-pattern & opts]
+  [str-or-pattern]
   (let [matches? (if (instance? java.util.regex.Pattern str-or-pattern)
                    #(re-find str-or-pattern (str %))
                    #(.contains (str %) (str str-or-pattern)))]
-    (map #(first (reply.initialization/unresolve %))
-         (set
-          (mapcat (fn [ns]
-                    (map second
-                         (filter (fn [[s v]] (matches? s))
-                                 (if (= ns *ns*)
-                                   (concat (ns-interns ns) (ns-refers ns))
-                                   (ns-publics ns)))))
-                  (all-ns))))))
-
-(defn apro
-  "Shorter-name version of apropos that also sorts and pretty-prints
-  the results."
-  [str-or-pattern & opts]
-  (clojure.pprint/pprint (sort (apply reply.initialization/better-apropos str-or-pattern opts))))
+    (sort
+      (map #(first ((ns-resolve 'reply.exports 'unresolve) %))
+           (set
+             (mapcat (fn [ns]
+                       (map second
+                            (filter (fn [[s v]] (matches? s))
+                                    (if (= ns *ns*)
+                                      (concat (ns-interns ns) (ns-refers ns))
+                                      (ns-publics ns)))))
+                     (all-ns)))))))
 
 (def clojuredocs-available?
   (delay
@@ -139,9 +139,7 @@
 (defn formify-file [f]
   (read-string (str "(do " (slurp f) ")")))
 
-(defn default-init-code
-  "Assumes cd-client will be on the classpath when this is evaluated."
-  []
+(defn default-init-code []
   `(do
      (println "REPL-y" ~(version/get-version "reply" "reply"))
      (println "Clojure" (clojure-version))
@@ -164,10 +162,10 @@
      ~(export-definition 'reply.initialization/help)
      (~'intern-with-meta '~'user '~'help ~'#'help)
 
-     ~(export-definition 'reply.initialization/apro)
-     ~(export-definition 'reply.initialization/better-apropos)
-     (~'intern-with-meta '~'user '~'apro ~'#'apro)
-     (~'intern-with-meta '~'user '~'better-apropos ~'#'better-apropos)
+     ~(export-definition 'reply.initialization/unresolve)
+     ~(export-definition 'reply.initialization/apropos-better)
+     (~'intern-with-meta '~'user '~'apropos-better ~'#'apropos-better)
+     (~'intern-with-meta '~'user '~'find-name ~'#'apropos-better)
 
      ~(export-definition 'reply.initialization/clojuredocs-available?)
      ~(export-definition 'reply.initialization/call-with-ns-and-name)
