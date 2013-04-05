@@ -20,6 +20,8 @@
 (def current-session (atom nil))
 (def current-ns (atom (str *ns*)))
 
+(def completion-eval-fn (atom (constantly ())))
+
 (defn handle-client-interruption! [client]
   (signals/set-signal-handler!
     "INT"
@@ -40,7 +42,7 @@
 
 (defn make-completer [ns]
   (fn [reader]
-    (let [eval-fn reply.initialization/eval-in-user-ns
+    (let [eval-fn @completion-eval-fn
           redraw-line-fn (fn []
                            (.redrawLine reader)
                            (.flush reader))]
@@ -216,6 +218,8 @@
     (swap! response-queues assoc
            session (LinkedBlockingQueue.)
            completion-session (LinkedBlockingQueue.))
+    (reset! completion-eval-fn
+            (partial completion-eval client completion-session))
     (let [options (assoc options :prompt
                     (fn [ns] (str ns "=> ")))
           options (if (:color options)
