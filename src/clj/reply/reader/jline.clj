@@ -38,7 +38,9 @@
                                (or output-stream System/out))
         history (FileHistory. (make-history-file history-file))
         completer (jline.completion/make-completer
-                    reply.initialization/eval-in-user-ns #() *ns*)]
+                    reply.initialization/eval-in-user-ns
+                    #()
+                    (str (ns-name *ns*)))]
     (.setBlinkMatchingParen (.getKeys reader) true)
     (.setHandleUserInterrupt reader true)
     (doto reader
@@ -109,7 +111,7 @@
       (fn []
         (.redrawLine @jline-reader)
         (.flush @jline-reader))
-      ns)))
+      (str (ns-name ns)))))
 
 (defmacro with-jline-in [& body]
   `(do

@@ -3,18 +3,21 @@
             [reply.eval-state :as eval-state]
             [reply.exit :as exit]
             [reply.initialization :as initialization]
+            [reply.reader.jline :as jline]
             [reply.signals :as signals]))
 
 (def reply-read
   (fn [prompt exit]
     (concurrency/starting-read!)
     (binding [*ns* (eval-state/get-ns)]
-      (print (str (ns-name *ns*) "=> "))
-      (flush)
-      (let [read-result (clojure.main/repl-read prompt exit)]
-        (if (exit/done? exit read-result)
-          exit
-          read-result)))))
+      (let [result (jline/read prompt exit)]
+        (when-let [reader @jline/jline-reader]
+          (.clear (.getCursorBuffer reader))
+          (.restore (.getTerminal reader))
+          (.shutdown reader)
+          (reset! jline/jline-reader nil)
+          (reset! jline/jline-pushback-reader nil))
+        result))))
 
 (def reply-eval
   (concurrency/act-in-future
