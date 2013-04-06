@@ -1,6 +1,5 @@
 (ns reply.eval-modes.nrepl
-  (:import [java.util.concurrent LinkedBlockingQueue
-                                 TimeUnit])
+  (:import [java.util.concurrent LinkedBlockingQueue TimeUnit])
   (:require [clojure.main]
             [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
@@ -182,7 +181,6 @@
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)]
-
       (.start (Thread. (partial poll-for-responses connection)))
       (execute-with-client
                client
@@ -195,7 +193,6 @@
                            '(set-signal-handler! "INT" (fn [s]))
                            (reply.initialization/construct-init-code
                              options)))))
-
       (handle-client-interruption! client)
       (run-repl client options))))
 
