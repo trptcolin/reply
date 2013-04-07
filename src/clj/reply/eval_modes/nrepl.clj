@@ -11,14 +11,11 @@
             [reply.initialization]
             [reply.parsing :as parsing]
             [reply.reader.simple-jline :as simple-jline]
-            [reply.reader.jline.completion :as jline.completion]
             [reply.signals :as signals]))
 
 (def current-command-id (atom nil))
 (def current-session (atom nil))
 (def current-ns (atom (str *ns*)))
-
-(def completion-eval-fn (atom (constantly ())))
 
 (defn handle-client-interruption! [client]
   (signals/set-signal-handler!
@@ -38,38 +35,23 @@
                  TimeUnit/MILLISECONDS)
           (session-responses session))))
 
-(defn make-completer [ns]
-  (fn [reader]
-    (let [eval-fn @completion-eval-fn
-          redraw-line-fn (fn []
-                           (.redrawLine reader)
-                           (.flush reader))]
-      (if ns
-        (jline.completion/make-completer
-          eval-fn redraw-line-fn ns)
-        nil))))
-
-(defn safe-read-line
-  [{:keys [input-stream prompt-string ns] :as state}]
-  (simple-jline/safe-read-line
-    (assoc state :completer-factory (make-completer ns))))
-
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
         session-sender (nrepl/client-session client :session session)
-        message-to-send {:op "eval" :code form :id command-id}]
+        message-to-send {:op "eval" :code form :id command-id}
+        read-input-line-fn (:read-input-line-fn options)]
     (session-sender message-to-send)
     (reset! current-command-id command-id)
     (doseq [{:keys [ns value out err] :as res}
             (take-while
               #(not (and (= command-id (:id %))
-                         (some #{"done" "interrupted" "error" "eval-error"} (:status %))))
+                         (some #{"done" "interrupted" "error" "eval-error"}
+                               (:status %))))
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
         (reset! current-command-id nil)
-        (let [input-result (safe-read-line {:no-jline true
-                                            :prompt-string ""})
+        (let [input-result (read-input-line-fn)
               in-message-id (nrepl.misc/uuid)
               message {:op "stdin" :stdin (str input-result "\n")
                        :id in-message-id}]
@@ -96,7 +78,7 @@
 
 (defn run-repl
   ([connection] (run-repl connection nil))
-  ([connection {:keys [prompt] :as options}]
+  ([connection {:keys [prompt read-line-fn] :as options}]
     (let [{:keys [major minor incremental qualifier]} *clojure-version*]
       (loop [ns (execute-with-client connection options "")]
         (let [ns (handle-ns-init-error ns connection options)
@@ -107,7 +89,7 @@
                       {:request-exit eof
                        :prompt-string (prompt ns)
                        :ns ns
-                       :read-line-fn safe-read-line
+                       :read-line-fn read-line-fn
                        :text-so-far nil})]
           (if (reply.exit/done? eof (first forms))
             nil
@@ -174,13 +156,21 @@
     (swap! response-queues assoc
            session (LinkedBlockingQueue.)
            completion-session (LinkedBlockingQueue.))
-    (reset! completion-eval-fn
-            (partial completion-eval client completion-session))
     (let [options (assoc options :prompt
                     (fn [ns] (str ns "=> ")))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
-                    options)]
+                    options)
+          completion-eval-fn (partial completion-eval client completion-session)
+          options (assoc options
+                         :read-line-fn
+                           (partial
+                             simple-jline/safe-read-line
+                             completion-eval-fn)
+                         :read-input-line-fn
+                           (partial
+                             simple-jline/safe-read-line
+                             {:no-jline true :prompt-string ""}))]
       (.start (Thread. (partial poll-for-responses connection)))
       (execute-with-client
                client

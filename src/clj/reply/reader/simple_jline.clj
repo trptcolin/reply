@@ -39,7 +39,7 @@
   (.flush (.getHistory reader))
   (.removeCompleter reader (first (.getCompleters reader))))
 
-(defn- setup-console-reader
+(defn setup-console-reader
   [{:keys [prompt-string reader input-stream output-stream
            history-file completer-factory blink-parens]
     :or {input-stream (FileInputStream. FileDescriptor/in)
@@ -88,17 +88,32 @@
                :input input
                :interrupted nil)))))
 
+(defn make-completer [ns eval-fn]
+  (fn [reader]
+    (let [redraw-line-fn (fn []
+                           (.redrawLine reader)
+                           (.flush reader))]
+      (if ns
+        (jline.completion/make-completer
+          eval-fn redraw-line-fn ns)
+        nil))))
+
 (defn safe-read-line
-  [{:keys [prompt-string completer-factory no-jline input-stream] :as options}]
-  (swap! jline-state
-         assoc
-         :no-jline no-jline
-         :prompt-string prompt-string
-         :completer-factory completer-factory)
-  (when input-stream
-    (swap! jline-state assoc :input-stream input-stream))
-  (swap! jline-state get-input-line)
-  (if (:interrupted @jline-state) ;; TODO: don't do this same check in 2 places
-    :interrupted
-    (:input @jline-state)))
+  ([{:keys [prompt-string completer-factory no-jline input-stream]
+     :as options}]
+   (swap! jline-state
+          assoc
+          :no-jline no-jline
+          :prompt-string prompt-string
+          :completer-factory completer-factory)
+   (when input-stream
+     (swap! jline-state assoc :input-stream input-stream))
+   (swap! jline-state get-input-line)
+   (if (:interrupted @jline-state) ;; TODO: don't do this same check in 2 places
+     :interrupted
+     (:input @jline-state)))
+  ([completion-eval-fn
+    {:keys [ns] :as state}]
+   (safe-read-line
+     (assoc state :completer-factory (make-completer ns completion-eval-fn)))))
 
