@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [read])
   (:require [reply.reader.jline.completion :as jline.completion]
             [reply.eval-state :as eval-state]
+            [reply.reader.simple-jline :as simple-jline]
             [clojure.main])
   (:import [java.io File IOException PrintStream ByteArrayOutputStream
             FileInputStream FileDescriptor]
@@ -13,41 +14,6 @@
 
 (def jline-reader (atom nil))
 (def jline-pushback-reader (atom nil))
-
-(defn print-interruption []
-  (when-not (#{"none" "off" "false"}
-               (.getProperty (Configuration/getProperties) "jline.terminal"))
-    (print "^C")
-    (flush)))
-
-(defn- make-history-file [history-path]
-  (if history-path
-    (let [history-file (File. history-path)]
-      (if (.getParentFile history-file)
-        history-file
-        (File. "." history-path)))
-    (File. (System/getProperty "user.home")
-           ".jline-reply.history")))
-
-(defn make-reader [{:keys [input-stream output-stream history-file]
-                    :as options}]
-  (when (= "dumb" (System/getenv "TERM"))
-    (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
-  (let [reader (ConsoleReader. (or input-stream
-                                   (FileInputStream. FileDescriptor/in))
-                               (or output-stream System/out))
-        history (FileHistory. (make-history-file history-file))
-        completer (jline.completion/make-completer
-                    reply.initialization/eval-in-user-ns
-                    #()
-                    (str (ns-name *ns*)))]
-    (.setBlinkMatchingParen (.getKeys reader) true)
-    (.setHandleUserInterrupt reader true)
-    (doto reader
-      (.setHistory history)
-      (.setExpandEvents false)
-      (.setPaginationEnabled true)
-      (.addCompleter completer))))
 
 (def prompt-end "=> ")
 
@@ -75,7 +41,7 @@
   (when-not (System/getenv "JLINE_LOGGING")
     (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
   ; since construction is side-effect-y
-  (reset! jline-reader (make-reader options))
+  (reset! jline-reader (simple-jline/setup-console-reader options))
   ; since this depends on jline-reader
   (reset! jline-pushback-reader
     (CustomizableBufferLineNumberingPushbackReader.
@@ -84,38 +50,18 @@
          :set-empty-prompt set-empty-prompt})
       1)))
 
-(defn reset-reader []
-  (when @jline-reader
-    (-> (.getCursorBuffer @jline-reader)
-        (.clear))))
-
-(defn resume-reader []
-  (when @jline-reader
-    (.reset (.getTerminal @jline-reader))
-    (.redrawLine @jline-reader)
-    (.flush @jline-reader)))
-
-(defn shutdown-reader []
-  (when @jline-reader
-    (.restore (.getTerminal @jline-reader))))
-
 (defn prepare-for-read [eval-fn ns]
-  (when-not @jline-reader (setup-reader! {}))
-  (.flush (.getHistory @jline-reader))
+  (simple-jline/prepare-for-next-read {:reader @jline-reader})
   (.setPrompt @jline-reader (@prompt-fn ns))
   (eval-state/set-ns ns)
-  (.removeCompleter @jline-reader (first (.getCompleters @jline-reader)))
   (.addCompleter @jline-reader
-    (jline.completion/make-completer
-      eval-fn
-      (fn []
-        (.redrawLine @jline-reader)
-        (.flush @jline-reader))
-      (str (ns-name ns)))))
+    ((simple-jline/make-completer (str (ns-name ns)) eval-fn)
+       @jline-reader)))
 
 (defmacro with-jline-in [& body]
   `(do
     (try
+      (setup-reader! {})
       (prepare-for-read reply.initialization/eval-in-user-ns
                         (eval-state/get-ns))
       (binding [*in* @jline-pushback-reader]
@@ -125,7 +71,7 @@
       (catch Throwable e#
         (if (#{IOException InterruptedException}
                (type (clojure.main/repl-exception e#)))
-          (do (reset-reader) nil)
+          (do (simple-jline/reset-reader @jline-reader) nil)
           (throw e#))))))
 
 (defn read [request-prompt request-exit]

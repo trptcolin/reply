@@ -16,9 +16,14 @@
         (File. "." history-path)))
     (File. (System/getProperty "user.home") ".jline-reply.history")))
 
+
+(defn reset-reader [reader]
+  (when reader
+    (.clear (.getCursorBuffer reader))))
+
 (defn shutdown [{:keys [reader] :as state}]
   (when reader
-    (.clear (.getCursorBuffer reader))
+    (reset-reader reader)
     (.restore (.getTerminal reader))
     (.shutdown reader)))
 
@@ -35,7 +40,7 @@
   (when-not (System/getenv "JLINE_LOGGING")
     (Log/setOutput (PrintStream. (null-output-stream)))))
 
-(defn- prepare-for-next-read [{:keys [reader] :as state}]
+(defn prepare-for-next-read [{:keys [reader] :as state}]
   (.flush (.getHistory reader))
   (.removeCompleter reader (first (.getCompleters reader))))
 
@@ -49,7 +54,6 @@
     :as state}]
   (let [reader (ConsoleReader. input-stream output-stream)
         history (FileHistory. (make-history-file history-file))
-        ;; TODO: rip out this default completer, make it a no-op
         completer (if completer-factory
                     (completer-factory reader)
                     nil)]

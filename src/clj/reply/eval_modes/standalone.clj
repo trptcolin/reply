@@ -4,6 +4,7 @@
             [reply.exit :as exit]
             [reply.initialization :as initialization]
             [reply.reader.jline :as jline]
+            [reply.reader.simple-jline :as simple-jline]
             [reply.signals :as signals]))
 
 (def reply-read
@@ -12,9 +13,7 @@
     (binding [*ns* (eval-state/get-ns)]
       (let [result (jline/read prompt exit)]
         (when-let [reader @jline/jline-reader]
-          (.clear (.getCursorBuffer reader))
-          (.restore (.getTerminal reader))
-          (.shutdown reader)
+          (simple-jline/shutdown reader)
           (reset! jline/jline-reader nil)
           (reset! jline/jline-pushback-reader nil))
         result))))
