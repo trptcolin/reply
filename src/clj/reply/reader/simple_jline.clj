@@ -22,15 +22,18 @@
     (.restore (.getTerminal reader))
     (.shutdown reader)))
 
+(defn null-output-stream []
+  (proxy [java.io.OutputStream] []
+    (write [b])))
+
 (defn- initialize-jline []
   (.addShutdownHook (Runtime/getRuntime)
                     (Thread. #(when-let [reader @current-console-reader]
                                 (shutdown reader))))
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
-  ;; TODO: what happens when nobody consumes from this stream?
   (when-not (System/getenv "JLINE_LOGGING")
-    (Log/setOutput (PrintStream. (ByteArrayOutputStream.)))))
+    (Log/setOutput (PrintStream. (null-output-stream)))))
 
 (defn- prepare-for-next-read [{:keys [reader] :as state}]
   (.flush (.getHistory reader))
