@@ -155,8 +155,11 @@
     (swap! response-queues assoc
            session (LinkedBlockingQueue.)
            completion-session (LinkedBlockingQueue.))
-    (let [options (assoc options :prompt
-                    (fn [ns] (str ns "=> ")))
+    (let [custom-prompt (:custom-prompt options)
+          options (assoc options :prompt
+                         (cond (fn? custom-prompt) custom-prompt
+                               (seq? custom-prompt) (eval custom-prompt)
+                               :else (fn [ns] (str ns "=> "))))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)
