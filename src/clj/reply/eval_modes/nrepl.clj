@@ -79,21 +79,20 @@
 (defn run-repl
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt read-line-fn] :as options}]
-    (let [{:keys [major minor incremental qualifier]} *clojure-version*]
-      (loop [ns (execute-with-client connection options "")]
-        (let [ns (handle-ns-init-error ns connection options)
-              eof (Object.)
-              execute (partial execute-with-client connection
-                               (assoc options :interactive true))
-              forms (parsing/parsed-forms
-                      {:request-exit eof
-                       :prompt-string (prompt ns)
-                       :ns ns
-                       :read-line-fn read-line-fn
-                       :text-so-far nil})]
-          (if (reply.exit/done? eof (first forms))
-            nil
-            (recur (last (doall (map execute forms))))))))))
+   (loop [ns (execute-with-client connection options "")]
+     (let [ns (handle-ns-init-error ns connection options)
+           eof (Object.)
+           execute (partial execute-with-client connection
+                            (assoc options :interactive true))
+           forms (parsing/parsed-forms
+                   {:request-exit eof
+                    :prompt-string (prompt ns)
+                    :ns ns
+                    :read-line-fn read-line-fn
+                    :text-so-far nil})]
+       (if (reply.exit/done? eof (first forms))
+         nil
+         (recur (last (doall (map execute forms)))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
 (defn- url-for [attach host port]
