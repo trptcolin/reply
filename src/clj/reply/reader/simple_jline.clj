@@ -95,13 +95,9 @@
          :no-jline no-jline
          :prompt-string prompt-string
          :completer-factory completer-factory)
-
-  (when input-stream ; default args are janky
+  (when input-stream
     (swap! jline-state assoc :input-stream input-stream))
-
-  (swap! jline-state
-         (fn [previous-state]
-           (get-input-line previous-state)))
+  (swap! jline-state get-input-line)
   (if (:interrupted @jline-state) ;; TODO: don't do this same check in 2 places
     :interrupted
     (:input @jline-state)))

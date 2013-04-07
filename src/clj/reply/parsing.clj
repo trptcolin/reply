@@ -52,7 +52,8 @@
                 and :prompt-string.
   - ns: the current ns, available because it can be useful for read-line-fn
   - prompt-string: for customizing the prompt
-  - text-so-far: mostly useful in the recursion"
+  - text-so-far: mostly useful in the recursion
+  And returns a seq of *strings* representing complete forms."
   [{:keys [ns request-exit text-so-far
            prompt-string read-line-fn] :as options}]
   (if-let [next-text (read-line-fn {:ns ns :prompt-string prompt-string})]
@@ -60,7 +61,6 @@
            parse-tree (when-not interrupted? (reparse text-so-far next-text))]
        (if (or interrupted? (empty? (:content parse-tree)))
          (list "")
-         (process-parse-tree parse-tree options)
-         ))
+         (process-parse-tree parse-tree options)))
      (list request-exit)))
 
