@@ -1,5 +1,13 @@
 # REPLy Changelog
 
+## 0.2.0-beta1, ???
+- Overhaul of jline support to decouple jline read from STDIN read (#91, 68)
+- Patch up completion for separately-started nREPL (#105)
+- Add apropos-better/find-name (Andy Fingerhut)
+- Eliminate defn override / `sourcery` (#102)
+- Fix negative rationals (cgrand/sjacket#14)
+- Allow input of non-BMP characters (jline/jline2#80)
+
 ## 0.1.10, 2012-02-15
 - Handle interruption (via ctrl-c) during input with new jline capabilities
 - Allow startup in any ns (technomancy/leiningen#955)
