@@ -183,8 +183,14 @@
 
        (catch Exception e#
          (try
-           (eval '~(formify-file
-                     (ClassLoader/getSystemResource "complete/core.clj")))
+           (eval
+             '~(try
+                 (formify-file
+                   (-> (Thread/currentThread)
+                       (.getContextClassLoader)
+                       (.getResource "complete/core.clj")))
+                 (catch Exception e
+                   '(throw (Exception. "Couldn't find complete/core.clj")))))
            (catch Exception f#
              (intern (create-ns '~'complete.core) '~'completions
                      (fn [prefix# ns#] []))
