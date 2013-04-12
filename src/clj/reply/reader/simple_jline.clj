@@ -16,7 +16,6 @@
         (File. "." history-path)))
     (File. (System/getProperty "user.home") ".jline-reply.history")))
 
-
 (defn reset-reader [reader]
   (when reader
     (.clear (.getCursorBuffer reader))))
@@ -29,7 +28,7 @@
 
 (defn null-output-stream []
   (proxy [java.io.OutputStream] []
-    (write [b])))
+    (write [& args])))
 
 (defn- initialize-jline []
   (.addShutdownHook (Runtime/getRuntime)
