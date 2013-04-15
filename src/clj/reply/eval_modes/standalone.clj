@@ -7,11 +7,11 @@
             [reply.reader.simple-jline :as simple-jline]
             [reply.signals :as signals]))
 
-(def reply-read
+(defn reply-read [options]
   (fn [prompt exit]
     (concurrency/starting-read!)
     (binding [*ns* (eval-state/get-ns)]
-      (let [result (jline/read prompt exit)]
+      (let [result (jline/read prompt exit options)]
         (when-let [reader @jline/jline-reader]
           (simple-jline/shutdown reader)
           (reset! jline/jline-reader nil)
@@ -32,7 +32,7 @@
 
 (defn main [options]
   (signals/set-signal-handler! "INT" handle-ctrl-c)
-  (clojure.main/repl :read reply-read
+  (clojure.main/repl :read (reply-read options)
                      :eval reply-eval
                      :print reply-print
                      :init #(initialization/eval-in-user-ns

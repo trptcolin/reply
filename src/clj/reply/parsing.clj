@@ -7,11 +7,13 @@
       (some #(= :net.cgrand.parsley/unexpected (:tag %))
             (tree-seq :tag :content node))))
 
-(defn subsequent-prompt-string [prompt-string]
-  (apply str (concat (repeat (- (count prompt-string)
-                                (count "#_=> "))
-                             \space)
-                     "#_=> ")))
+(defn subsequent-prompt-string [{:keys [prompt-string
+                                        subsequent-prompt-string]}]
+  (or subsequent-prompt-string
+      (apply str (concat (repeat (- (count prompt-string)
+                                    (count "#_=> "))
+                                 \space)
+                         "#_=> "))))
 
 (defn remove-whitespace [forms]
   (remove #(contains? #{:whitespace :comment :discard} (:tag %))
@@ -25,7 +27,7 @@
 
 (declare parsed-forms)
 
-(defn process-parse-tree [parse-tree {:keys [prompt-string] :as options}]
+(defn process-parse-tree [parse-tree options]
   (let [complete-forms (take-while node-completed? (:content parse-tree))
         remainder (drop-while node-completed? (:content parse-tree))
         form-strings (map sjacket/str-pt
@@ -39,7 +41,7 @@
                            :text-so-far
                            (apply str (map sjacket/str-pt remainder))
                            :prompt-string
-                           (subsequent-prompt-string prompt-string)))))
+                           (subsequent-prompt-string options)))))
       (seq form-strings)
         form-strings
       :else
@@ -54,9 +56,11 @@
   - prompt-string: for customizing the prompt
   - text-so-far: mostly useful in the recursion
   And returns a seq of *strings* representing complete forms."
-  [{:keys [ns request-exit text-so-far
+  [{:keys [ns request-exit text-so-far subsequent-prompt-string
            prompt-string read-line-fn] :as options}]
-  (if-let [next-text (read-line-fn {:ns ns :prompt-string prompt-string})]
+  (if-let [next-text (read-line-fn
+                       {:ns ns :prompt-string prompt-string
+                        :subsequent-prompt-string subsequent-prompt-string})]
      (let [interrupted? (= :interrupted next-text)
            parse-tree (when-not interrupted? (reparse text-so-far next-text))]
        (if (or interrupted? (empty? (:content parse-tree)))

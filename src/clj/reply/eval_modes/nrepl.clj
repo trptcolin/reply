@@ -78,7 +78,7 @@
 
 (defn run-repl
   ([connection] (run-repl connection nil))
-  ([connection {:keys [prompt read-line-fn] :as options}]
+  ([connection {:keys [prompt subsequent-prompt read-line-fn] :as options}]
    (loop [ns (execute-with-client connection options "")]
      (let [ns (handle-ns-init-error ns connection options)
            eof (Object.)
@@ -89,6 +89,7 @@
                     :prompt-string (prompt ns)
                     :ns ns
                     :read-line-fn read-line-fn
+                    :subsequent-prompt-string (subsequent-prompt ns)
                     :text-so-far nil})]
        (if (reply.exit/done? eof (first forms))
          nil
@@ -145,6 +146,11 @@
       (reply.exit/exit)))
   (recur connection))
 
+(defn ->fn [config default]
+  (cond (fn? config) config
+        (seq? config) (eval config)
+        :else default))
+
 (defn main
   [options]
   (let [connection         (get-connection options)
@@ -156,10 +162,11 @@
            session (LinkedBlockingQueue.)
            completion-session (LinkedBlockingQueue.))
     (let [custom-prompt (:custom-prompt options)
+          subsequent-prompt (:subsequent-prompt options)
           options (assoc options :prompt
-                         (cond (fn? custom-prompt) custom-prompt
-                               (seq? custom-prompt) (eval custom-prompt)
-                               :else (fn [ns] (str ns "=> "))))
+                         (->fn custom-prompt (fn [ns] (str ns "=> "))))
+          options (assoc options :subsequent-prompt
+                         (->fn subsequent-prompt nil))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)

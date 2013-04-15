@@ -28,6 +28,8 @@
            ["--history-file" "Provide a path for the history file"]
            ["--prompt" "--custom-prompt" "Provide a custom prompt function"
             :parse-fn read-string]
+           ["--subsequent-prompt" "Provide a custom subsequent prompt function"
+            :parse-fn read-string]
            ["--attach"
             "Attach to an existing nREPL session on this port or host:port"]
            ["--port" "Start new nREPL server on this port"]))

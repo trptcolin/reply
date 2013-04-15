@@ -27,28 +27,44 @@
 (defn set-prompt-fn! [f]
   (when f (reset! prompt-fn f)))
 
-(defn set-empty-prompt []
-  (let [prompt-end (str "#_" prompt-end)]
-    (.setPrompt
-      @jline-reader
-      (apply str
-        (concat (repeat (- (count (@prompt-fn (eval-state/get-ns)))
-                           (count prompt-end))
-                        \space)
-                prompt-end)))))
+(defn subsequent-prompt [options ns]
+  (let [subsequent-prompt (:subsequent-prompt options)]
+    (if subsequent-prompt
+      (subsequent-prompt ns)
+      (let [prompt-end (str "#_" prompt-end)]
+        (apply str
+               (concat (repeat (- (count (@prompt-fn ns))
+                                  (count prompt-end))
+                               \space)
+                       prompt-end))))))
 
-(defn setup-reader! [options]
+(defn set-empty-prompt [options]
+  (.setPrompt
+    @jline-reader
+    (apply str (subsequent-prompt options (eval-state/get-ns)))))
+
+(defn ->fn [config default]
+  (cond (fn? config) config
+        (seq? config) (eval config)
+        :else default))
+
+(defn setup-reader! [{:keys [prompt custom-prompt subsequent-prompt] :as options}]
   (when-not (System/getenv "JLINE_LOGGING")
     (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
-  ; since construction is side-effect-y
-  (reset! jline-reader (simple-jline/setup-console-reader options))
-  ; since this depends on jline-reader
-  (reset! jline-pushback-reader
-    (CustomizableBufferLineNumberingPushbackReader.
-      (JlineInputReader.
-        {:jline-reader @jline-reader
-         :set-empty-prompt set-empty-prompt})
-      1)))
+  (let [prompt-fn (->fn custom-prompt (fn [ns] (str ns "=> ")))
+        subsequent-prompt-fn (->fn subsequent-prompt nil)]
+    (set-prompt-fn! prompt-fn)
+    ; since construction is side-effect-y
+    (reset! jline-reader (simple-jline/setup-console-reader options))
+    ; since this depends on jline-reader
+    (reset! jline-pushback-reader
+            (CustomizableBufferLineNumberingPushbackReader.
+              (JlineInputReader.
+                {:jline-reader @jline-reader
+                 :set-empty-prompt
+                 (partial set-empty-prompt
+                          {:subsequent-prompt subsequent-prompt-fn})})
+              1))))
 
 (defn prepare-for-read [eval-fn ns]
   (simple-jline/prepare-for-next-read {:reader @jline-reader})
@@ -58,10 +74,10 @@
     ((simple-jline/make-completer (str (ns-name ns)) eval-fn)
        @jline-reader)))
 
-(defmacro with-jline-in [& body]
+(defmacro with-jline-in [options & body]
   `(do
     (try
-      (setup-reader! {})
+      (setup-reader! ~options)
       (prepare-for-read reply.initialization/eval-in-user-ns
                         (eval-state/get-ns))
       (binding [*in* @jline-pushback-reader]
@@ -74,7 +90,7 @@
           (do (simple-jline/reset-reader @jline-reader) nil)
           (throw e#))))))
 
-(defn read [request-prompt request-exit]
-  (with-jline-in
+(defn read [request-prompt request-exit options]
+  (with-jline-in options
     (clojure.main/repl-read request-prompt request-exit)))
 
