@@ -166,7 +166,7 @@
           options (assoc options :prompt
                          (->fn custom-prompt (fn [ns] (str ns "=> "))))
           options (assoc options :subsequent-prompt
-                         (->fn subsequent-prompt nil))
+                         (->fn subsequent-prompt (constantly nil)))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)
