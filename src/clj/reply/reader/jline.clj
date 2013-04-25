@@ -66,7 +66,6 @@
               1))))
 
 (defn prepare-for-read [eval-fn ns]
-  (simple-jline/prepare-for-next-read {:reader @jline-reader})
   (.setPrompt @jline-reader (@prompt-fn ns))
   (eval-state/set-ns ns)
   (.addCompleter @jline-reader
@@ -76,6 +75,8 @@
 (defmacro with-jline-in [options & body]
   `(do
     (try
+      (when @jline-reader
+        (simple-jline/prepare-for-next-read @jline-reader))
       (setup-reader! ~options)
       (prepare-for-read reply.initialization/eval-in-user-ns
                         (eval-state/get-ns))

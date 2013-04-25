@@ -43,9 +43,10 @@
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (set-jline-output!))
 
-(defn prepare-for-next-read [{:keys [reader] :as state}]
+(defn prepare-for-next-read [reader]
   (.flush (.getHistory reader))
-  (.removeCompleter reader (first (.getCompleters reader))))
+  (when-let [completer (first (.getCompleters reader))]
+    (.removeCompleter reader completer)))
 
 (defn setup-console-reader
   [{:keys [prompt-string reader input-stream output-stream
@@ -73,7 +74,6 @@
 
 (defn get-input-line [state]
   (if (:reader state)
-    (prepare-for-next-read state)
     (initialize-jline))
   (if (:no-jline state)
     (do
@@ -85,6 +85,7 @@
           input (try (.readLine reader)
                   (catch jline.console.UserInterruptException e
                     :interrupted))]
+      (prepare-for-next-read reader)
       (if (= :interrupted input)
         (assoc state
                :reader reader

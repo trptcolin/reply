@@ -13,6 +13,7 @@
     (binding [*ns* (eval-state/get-ns)]
       (let [result (jline/read prompt exit options)]
         (when-let [reader @jline/jline-reader]
+          (simple-jline/prepare-for-next-read reader)
           (simple-jline/shutdown reader)
           (reset! jline/jline-reader nil)
           (reset! jline/jline-pushback-reader nil))
