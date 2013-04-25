@@ -9,7 +9,6 @@
            [reply.reader.jline JlineInputReader]
            [reply.hacks CustomizableBufferLineNumberingPushbackReader]
            [jline.console ConsoleReader]
-           [jline.console.history FileHistory]
            [jline.internal Configuration Log]))
 
 (def jline-reader (atom nil))
@@ -48,9 +47,9 @@
         (seq? config) (eval config)
         :else default))
 
-(defn setup-reader! [{:keys [prompt custom-prompt subsequent-prompt] :as options}]
-  (when-not (System/getenv "JLINE_LOGGING")
-    (Log/setOutput (PrintStream. (ByteArrayOutputStream.))))
+(defn setup-reader! [{:keys [prompt custom-prompt subsequent-prompt]
+                      :as options}]
+  (simple-jline/set-jline-output!)
   (let [prompt-fn (->fn custom-prompt (fn [ns] (str ns "=> ")))
         subsequent-prompt-fn (->fn subsequent-prompt nil)]
     (set-prompt-fn! prompt-fn)

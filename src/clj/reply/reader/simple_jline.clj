@@ -30,14 +30,18 @@
   (proxy [java.io.OutputStream] []
     (write [& args])))
 
+(defn set-jline-output! []
+  (when (and (not (Boolean/getBoolean "jline.internal.Log.trace"))
+             (not (Boolean/getBoolean "jline.internal.Log.debug")))
+    (Log/setOutput (PrintStream. (null-output-stream)))))
+
 (defn- initialize-jline []
   (.addShutdownHook (Runtime/getRuntime)
                     (Thread. #(when-let [reader @current-console-reader]
                                 (shutdown reader))))
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
-  (when-not (System/getenv "JLINE_LOGGING")
-    (Log/setOutput (PrintStream. (null-output-stream)))))
+  (set-jline-output!))
 
 (defn prepare-for-next-read [{:keys [reader] :as state}]
   (.flush (.getHistory reader))
