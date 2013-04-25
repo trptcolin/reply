@@ -21,6 +21,7 @@
     :test-path "spec"
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
+;    :jvm-opts ["-Djline.internal.Log.trace=true"]
     :test-paths ["spec"]
     :repl-options {:init-ns user}
     :aot [reply.reader.jline.JlineInputReader]
