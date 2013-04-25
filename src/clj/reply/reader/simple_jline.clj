@@ -38,7 +38,7 @@
 (defn- initialize-jline []
   (.addShutdownHook (Runtime/getRuntime)
                     (Thread. #(when-let [reader @current-console-reader]
-                                (shutdown reader))))
+                                (shutdown {:reader reader}))))
   (when (= "dumb" (System/getenv "TERM"))
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (set-jline-output!))

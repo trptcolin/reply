@@ -14,7 +14,7 @@
       (let [result (jline/read prompt exit options)]
         (when-let [reader @jline/jline-reader]
           (simple-jline/prepare-for-next-read reader)
-          (simple-jline/shutdown reader)
+          (simple-jline/shutdown {:reader reader})
           (reset! jline/jline-reader nil)
           (reset! jline/jline-pushback-reader nil))
         result))))

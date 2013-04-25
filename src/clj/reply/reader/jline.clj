@@ -73,22 +73,19 @@
        @jline-reader)))
 
 (defmacro with-jline-in [options & body]
-  `(do
-    (try
-      (when @jline-reader
-        (simple-jline/prepare-for-next-read @jline-reader))
-      (setup-reader! ~options)
-      (prepare-for-read reply.initialization/eval-in-user-ns
-                        (eval-state/get-ns))
-      (binding [*in* @jline-pushback-reader]
-        (Thread/interrupted) ; just to clear the status
-        ~@body)
-      ; NOTE: this indirection is for wrapped exceptions in 1.3
-      (catch Throwable e#
-        (if (#{IOException InterruptedException}
-               (type (clojure.main/repl-exception e#)))
-          (do (simple-jline/reset-reader @jline-reader) nil)
-          (throw e#))))))
+  `(try
+     (setup-reader! ~options)
+     (prepare-for-read reply.initialization/eval-in-user-ns
+                       (eval-state/get-ns))
+     (binding [*in* @jline-pushback-reader]
+       (Thread/interrupted) ; just to clear the status
+       ~@body)
+     ; NOTE: this indirection is for wrapped exceptions in 1.3
+     (catch Throwable e#
+       (if (#{IOException InterruptedException}
+                          (type (clojure.main/repl-exception e#)))
+         (do (simple-jline/reset-reader @jline-reader) nil)
+         (throw e#)))))
 
 (defn read [request-prompt request-exit options]
   (with-jline-in options
