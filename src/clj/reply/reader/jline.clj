@@ -51,7 +51,7 @@
                       :as options}]
   (simple-jline/set-jline-output!)
   (let [prompt-fn (->fn custom-prompt (fn [ns] (str ns "=> ")))
-        subsequent-prompt-fn (->fn subsequent-prompt nil)]
+        subsequent-prompt-fn (->fn subsequent-prompt (constantly nil))]
     (set-prompt-fn! prompt-fn)
     ; since construction is side-effect-y
     (reset! jline-reader (simple-jline/setup-console-reader options))
