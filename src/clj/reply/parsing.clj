@@ -56,11 +56,8 @@
   - prompt-string: for customizing the prompt
   - text-so-far: mostly useful in the recursion
   And returns a seq of *strings* representing complete forms."
-  [{:keys [ns request-exit text-so-far subsequent-prompt-string
-           prompt-string read-line-fn] :as options}]
-  (if-let [next-text (read-line-fn
-                       {:ns ns :prompt-string prompt-string
-                        :subsequent-prompt-string subsequent-prompt-string})]
+  [{:keys [request-exit text-so-far read-line-fn] :as options}]
+  (if-let [next-text (read-line-fn options)]
      (let [interrupted? (= :interrupted next-text)
            parse-tree (when-not interrupted? (reparse text-so-far next-text))]
        (if (or interrupted? (empty? (:content parse-tree)))

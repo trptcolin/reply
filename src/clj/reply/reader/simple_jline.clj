@@ -1,9 +1,9 @@
 (ns reply.reader.simple-jline
   (:require [reply.reader.jline.completion :as jline.completion])
   (:import [java.io File FileInputStream FileDescriptor
-            PrintStream ByteArrayOutputStream]
+            PrintStream ByteArrayOutputStream IOException]
            [jline.console ConsoleReader]
-           [jline.console.history FileHistory]
+           [jline.console.history FileHistory MemoryHistory]
            [jline.internal Configuration Log]))
 
 (def ^:private current-console-reader (atom nil))
@@ -43,8 +43,16 @@
     (.setProperty (Configuration/getProperties) "jline.terminal" "none"))
   (set-jline-output!))
 
+(defmulti flush-history type)
+(defmethod flush-history FileHistory
+  [history]
+  (try (.flush history)
+    (catch IOException e)))
+(defmethod flush-history MemoryHistory
+  [history])
+
 (defn prepare-for-next-read [reader]
-  (.flush (.getHistory reader))
+  (flush-history (.getHistory reader))
   (when-let [completer (first (.getCompleters reader))]
     (.removeCompleter reader completer)))
 
@@ -57,7 +65,12 @@
          blink-parens true}
     :as state}]
   (let [reader (ConsoleReader. input-stream output-stream)
-        history (FileHistory. (make-history-file history-file))
+        file-history (FileHistory. (make-history-file history-file))
+        history (try
+                  (flush-history file-history)
+                  file-history
+                  (catch IOException e
+                    (MemoryHistory.)))
         completer (if completer-factory
                     (completer-factory reader)
                     nil)]
@@ -107,11 +120,12 @@
         nil))))
 
 (defn safe-read-line
-  ([{:keys [prompt-string completer-factory no-jline input-stream]
+  ([{:keys [prompt-string completer-factory no-jline input-stream history-file]
      :as options}]
    (swap! jline-state
           assoc
           :no-jline no-jline
+          :history-file history-file
           :prompt-string prompt-string
           :completer-factory completer-factory)
    (when input-stream

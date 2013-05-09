@@ -78,7 +78,8 @@
 
 (defn run-repl
   ([connection] (run-repl connection nil))
-  ([connection {:keys [prompt subsequent-prompt read-line-fn] :as options}]
+  ([connection {:keys [prompt subsequent-prompt history-file read-line-fn]
+                :as options}]
    (loop [ns (execute-with-client connection options "")]
      (let [ns (handle-ns-init-error ns connection options)
            eof (Object.)
@@ -89,6 +90,7 @@
                     :prompt-string (prompt ns)
                     :ns ns
                     :read-line-fn read-line-fn
+                    :history-file history-file
                     :subsequent-prompt-string (subsequent-prompt ns)
                     :text-so-far nil})]
        (if (reply.exit/done? eof (first forms))
