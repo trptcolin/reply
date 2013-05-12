@@ -6,11 +6,11 @@
                    [org.clojars.trptcolin/jline "2.10.3"]
                    [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.4"]
-                   [org.clojure/tools.nrepl "0.2.2"]
+                   [org.clojure/tools.nrepl "0.2.3"]
                    [org.clojure/tools.cli "0.2.1"]
                    [com.cemerick/drawbridge "0.0.6"]
                    [trptcolin/versioneer "0.1.0"]
-                   [clojure-complete "0.2.2"]
+                   [clojure-complete "0.2.3"]
                    [org.clojars.trptcolin/sjacket "0.1.0.3"
                     :exclusions [org.clojure/clojure]]]
     :profiles {:dev {:dependencies ~dev-deps}}

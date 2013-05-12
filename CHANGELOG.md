@@ -8,6 +8,7 @@
 - Fix negative rationals (cgrand/sjacket#14)
 - Allow input of non-BMP characters (jline/jline2#80)
 - Handle completion load failure more gracefully (#108)
+- Speed up & avoid crash for input handling in e.g. (read) forms (NREPL-39)
 
 ## 0.1.10, 2012-02-15
 - Handle interruption (via ctrl-c) during input with new jline capabilities
