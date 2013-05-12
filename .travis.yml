@@ -1,6 +1,6 @@
 language: clojure
-before_script: "lein compile"
-script: "lein spec"
+lein: lein2
+script: "lein2 do compile, spec"
 jdk:
   - openjdk6
   - openjdk7
