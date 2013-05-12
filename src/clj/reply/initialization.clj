@@ -1,6 +1,7 @@
 (ns reply.initialization
   (:require [clojure.pprint]
             [clojure.repl]
+            [clojure.main]
             [trptcolin.versioneer.core :as version]))
 
 (defn help

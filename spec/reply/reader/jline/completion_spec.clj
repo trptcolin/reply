@@ -8,6 +8,7 @@
              (construct-possible-completions-form "clojure.core/map-" "user"))))
 
 (describe "using the completer"
+
   (with redraw-count (atom 0))
   (with completer (make-completer eval
                                   #(swap! @redraw-count inc)

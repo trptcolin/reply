@@ -51,10 +51,17 @@
 (defmethod flush-history MemoryHistory
   [history])
 
-(defn prepare-for-next-read [reader]
-  (flush-history (.getHistory reader))
-  (when-let [completer (first (.getCompleters reader))]
-    (.removeCompleter reader completer)))
+(defprotocol InteractiveLineReader
+  (interactive-read-line [this])
+  (prepare-for-next-read [this]))
+
+(extend-protocol InteractiveLineReader
+  ConsoleReader
+  (interactive-read-line [reader] (.readLine reader))
+  (prepare-for-next-read [reader]
+    (flush-history (.getHistory reader))
+    (when-let [completer (first (.getCompleters reader))]
+      (.removeCompleter reader completer))))
 
 (defn setup-console-reader
   [{:keys [prompt-string reader input-stream output-stream
@@ -95,7 +102,7 @@
            :reader nil
            :input (read-line)))
     (let [reader (setup-console-reader state)
-          input (try (.readLine reader)
+          input (try (interactive-read-line reader)
                   (catch jline.console.UserInterruptException e
                     :interrupted))]
       (prepare-for-next-read reader)
@@ -120,7 +127,8 @@
         nil))))
 
 (defn safe-read-line
-  ([{:keys [prompt-string completer-factory no-jline input-stream history-file]
+  ([{:keys [prompt-string completer-factory no-jline input-stream output-stream
+            history-file]
      :as options}]
    (swap! jline-state
           assoc
@@ -130,6 +138,8 @@
           :completer-factory completer-factory)
    (when input-stream
      (swap! jline-state assoc :input-stream input-stream))
+   (when output-stream
+     (swap! jline-state assoc :output-stream output-stream))
    (swap! jline-state get-input-line)
    (if (:interrupted @jline-state) ;; TODO: don't do this same check in 2 places
      :interrupted
