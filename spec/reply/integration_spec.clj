@@ -28,7 +28,7 @@
             in (io/input-stream remote-url)]
         (io/copy in out)))))
 
-(describe "nrepl integration"
+(describe "nrepl integration" (tags :slow)
 
   (around [f]
     (ensure-test-jar clojure-151)
@@ -48,7 +48,6 @@
 
     (it "prints help on startup and exits properly"
       (let [fake-out (java.io.ByteArrayOutputStream.)]
-        (.flush System/out)
         (binding [*out* (java.io.PrintWriter. fake-out)]
           (with-redefs [exit/exit #()]
             (main/launch-nrepl {:attach (str *server-port*)
@@ -61,7 +60,6 @@
 
     (it "allows using doc"
       (let [fake-out (java.io.ByteArrayOutputStream.)]
-        (.flush System/out)
         (binding [*out* (java.io.PrintWriter. fake-out)]
           (with-redefs [exit/exit #()]
             (main/launch-nrepl {:attach (str *server-port*)
@@ -71,13 +69,11 @@
                                 :output-stream fake-out}))
           (should-contain (with-out-str (clojure.repl/doc map))
                           (str fake-out)))))
-
     )
 
   (describe "completion"
 
     (it "tab-completes clojure.core fns"
-        (.flush System/out)
       (let [fake-out (java.io.ByteArrayOutputStream.)]
         (binding [*out* (java.io.PrintWriter. fake-out)]
           (with-redefs [exit/exit #()]
