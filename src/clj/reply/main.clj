@@ -16,6 +16,9 @@
            ["-e" "--eval" "--custom-eval"
             "Provide a custom form to evaluate in the user ns"
             :parse-fn read-string]
+           ["--custom-help"
+            "Provide a custom help function to print instructions on repl start"
+            :parse-fn read-string]
            ["-i" "--init" "--custom-init"
             "Provide a Clojure file to evaluate in the user ns"
             :parse-fn initialization/formify-file]

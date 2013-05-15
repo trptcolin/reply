@@ -4,6 +4,10 @@
             [clojure.main]
             [trptcolin.versioneer.core :as version]))
 
+(def prelude
+  `[(println "REPL-y" ~(version/get-version "reply" "reply"))
+    (println "Clojure" (clojure-version))])
+
 (defn help
   "Prints a list of helpful commands."
   []
@@ -142,8 +146,7 @@
 
 (defn default-init-code []
   `(do
-     (println "REPL-y" ~(version/get-version "reply" "reply"))
-     (println "Clojure" (clojure-version))
+     ~@prelude
 
      (use '[clojure.repl :only ~'[source apropos dir]])
      ; doc and find-doc live in clojure.core in 1.2
@@ -198,8 +201,6 @@
              (println "Unable to initialize completions.")))))
 
      (in-ns (ns-name ~'reply.exports/original-ns))
-
-     (~'user/help)
      nil))
 
 (defn eval-in-user-ns [code]
@@ -210,10 +211,12 @@
       result)))
 
 (defn construct-init-code
-  [{:keys [skip-default-init
-           custom-init custom-eval] :as options}]
+  [{:keys [skip-default-init custom-init custom-eval custom-help] :as options}]
   `(do
-    ~(when-not skip-default-init (default-init-code))
+     ~(when-not skip-default-init (default-init-code))
+     ~(if custom-help
+        custom-help
+        '(user/help))
      ~(when custom-eval custom-eval)
      ~(when custom-init custom-init)
     nil))
