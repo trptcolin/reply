@@ -16,6 +16,8 @@
 (def current-command-id (atom nil))
 (def current-session (atom nil))
 (def current-ns (atom (str *ns*)))
+(def nrepl-server (atom nil))
+(def response-poller (atom nil))
 
 (defn handle-client-interruption! [client]
   (signals/set-signal-handler!
@@ -27,6 +29,11 @@
                  :interrupt-id command-id})))))
 
 (def response-queues (atom {}))
+
+(defn notify-all-queues-of-error []
+  (doseq [session-key (keys @response-queues)]
+    (.offer ^LinkedBlockingQueue (@response-queues session-key)
+            {:status "error" :global true})))
 
 (defn session-responses [session]
   (lazy-seq
@@ -45,7 +52,7 @@
     (reset! current-command-id command-id)
     (doseq [{:keys [ns value out err] :as res}
             (take-while
-              #(not (and (= command-id (:id %))
+              #(not (and (or (= command-id (:id %)) (:global %))
                          (some #{"done" "interrupted" "error" "eval-error"}
                                (:status %))))
               (filter identity (session-responses session)))]
@@ -118,10 +125,13 @@
     (catch Exception e)))
 
 (defn get-connection [{:keys [attach host port]}]
-  (let [port (if-not attach
-               (-> (nrepl.server/start-server :port (Integer. (or port 0)))
-                   deref :ss .getLocalPort))
+  (let [server (when-not attach
+                 (nrepl.server/start-server :port (Integer. (or port 0))))
+        port (when-not attach
+               (-> server deref :ss .getLocalPort))
         url (url-for attach host port)]
+    (when server
+      (reset! nrepl-server server))
     (when (-> url java.net.URI. .getScheme .toLowerCase #{"http" "https"})
       (load-drawbridge))
     (nrepl/url-connect url)))
@@ -138,18 +148,23 @@
     (read-string @results)))
 
 (defn poll-for-responses [connection]
-  (try (when-let [{:keys [out err] :as resp}
-                  (nrepl.transport/recv connection 100)]
-         (when err (print err))
-         (when out (print out))
-         (when-not (or err out)
-           (.offer ^LinkedBlockingQueue (@response-queues (:session resp))
-                   resp))
-         (flush))
-    (catch Throwable t
-      (clojure.repl/pst t)
-      (reply.exit/exit)))
-  (recur connection))
+  (let [continue
+        (try
+          (when-let [{:keys [out err] :as resp}
+                     (nrepl.transport/recv connection 100)]
+            (when err (print err))
+            (when out (print out))
+            (when-not (or err out)
+              (.offer ^LinkedBlockingQueue (@response-queues (:session resp))
+                      resp))
+            (flush))
+          :success
+          (catch Throwable t
+            (notify-all-queues-of-error)
+            (when (System/getenv "DEBUG") (clojure.repl/pst t))
+            :failure))]
+    (when (= :success continue)
+      (recur connection))))
 
 (defn ->fn [config default]
   (cond (fn? config) config
@@ -185,8 +200,10 @@
                            (partial
                              simple-jline/safe-read-line
                              {:no-jline true :prompt-string ""}))]
-      (.start (Thread.
+      (reset! response-poller
+              (Thread.
                 (bound-fn [] (poll-for-responses connection))))
+      (.start @response-poller)
       (execute-with-client
                client
                (assoc options :value (constantly nil))
@@ -199,5 +216,7 @@
                            (reply.initialization/construct-init-code
                              options)))))
       (handle-client-interruption! client)
-      (run-repl client options))))
+      (run-repl client options))
+    (when @nrepl-server
+      (nrepl.server/stop-server @nrepl-server))))
 

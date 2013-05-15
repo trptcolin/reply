@@ -7,11 +7,11 @@
 (defn done? [eof expression]
   ((done-commands eof) expression))
 
-(defn exit
-  "Exits the REPL. This is fairly brutal, does (System/exit 0)."
+(defn ^:dynamic exit
+  "Exits the REPL. Warning: this does (shutdown-agents). Rebind if you don't
+  want that."
   []
   (shutdown-agents)
   (print "Bye for now!")
-  (flush)
-  (System/exit 0))
+  (flush))
 

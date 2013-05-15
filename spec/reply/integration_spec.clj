@@ -11,14 +11,23 @@
 
 (def ^:dynamic *server-port* nil)
 
-;; TODO: this is easy but seems wasteful; probably better to use pomegranate
-(def nrepl-023
+(defmacro with-fake-printing [fake-out fake-err & body]
+  `(with-redefs [exit/exit #()]
+     (binding [*out* (java.io.PrintWriter. ~fake-out)
+               *err* (java.io.PrintWriter. ~fake-err)]
+       ~@body)))
+
+;; TODO: this is easy but seems like wasted effort
+;;       probably better to use pomegranate
+(def nrepl
   {:local-path "spec/nrepl-0.2.3.jar"
    :remote-url "http://repo1.maven.org/maven2/org/clojure/tools.nrepl/0.2.3/tools.nrepl-0.2.3.jar"})
 
-(def clojure-151
+(def clojure
   {:local-path "spec/clojure-1.5.1.jar"
    :remote-url "http://repo1.maven.org/maven2/org/clojure/clojure/1.5.1/clojure-1.5.1.jar"})
+  ;{:local-path "spec/clojure-1.6.0-master-SNAPSHOT.jar"
+  ; :remote-url "file:///Users/colin/.m2/repository/org/clojure/clojure/1.6.0-master-SNAPSHOT/clojure-1.6.0-master-SNAPSHOT.jar"})
 
 (defn ensure-test-jar [{:keys [local-path remote-url]}]
   (let [file (java.io.File. local-path)]
@@ -28,63 +37,72 @@
             in (io/input-stream remote-url)]
         (io/copy in out)))))
 
+(ensure-test-jar clojure)
+(ensure-test-jar nrepl)
+
 (describe "nrepl integration" (tags :slow)
 
   (around [f]
-    (ensure-test-jar clojure-151)
-    (ensure-test-jar nrepl-023)
     (let [cl (classlojure/classlojure
-               (str "file:" (:local-path nrepl-023))
-               (str "file:" (:local-path clojure-151)))
+               (str "file:" (:local-path nrepl))
+               (str "file:" (:local-path clojure)))
           server-port
           (classlojure/eval-in
             cl
-            '(do (require '[clojure.tools.nrepl.server :as server])
-                 (:port (server/start-server))))]
+            '(do (require '[clojure.tools.nrepl.server])
+                 (import 'java.net.SocketException)
+                 (def running-server (atom nil))
+                 (let [server (clojure.tools.nrepl.server/start-server)]
+                   (reset! running-server server)
+                   (:port server))))]
       (binding [*server-port* server-port]
-        (f))))
+        (try (f)
+          (finally
+            (classlojure/eval-in
+              cl
+              '(try (clojure.tools.nrepl.server/stop-server @running-server)
+                 (shutdown-agents)
+                 (catch Throwable t
+                   (.println System/err "nREPL shutdown failed")))))))))
 
   (describe "initialization"
 
     (it "prints help on startup and exits properly"
-      (let [fake-out (java.io.ByteArrayOutputStream.)]
-        (binding [*out* (java.io.PrintWriter. fake-out)]
-          (with-redefs [exit/exit #()]
-            (main/launch-nrepl {:attach (str *server-port*)
-                                :input-stream
-                                (java.io.ByteArrayInputStream.
-                                  (.getBytes "exit\n(println 'foobar)\n"))
-                                :output-stream fake-out}))
-          (should-contain (with-out-str (initialization/help)) (str fake-out))
-          (should-not-contain "foobar" (str fake-out)))))
+      (let [fake-out (java.io.ByteArrayOutputStream.)
+            fake-err (java.io.ByteArrayOutputStream.)]
+        (with-fake-printing fake-out fake-err
+          (main/launch-nrepl {:attach (str *server-port*)
+                              :input-stream
+                              (java.io.ByteArrayInputStream.
+                                (.getBytes "exit\n(println 'foobar)\n"))
+                              :output-stream fake-out}))
+        (should-contain (with-out-str (initialization/help)) (str fake-out))
+        (should-not-contain "foobar" (str fake-out))))
 
     (it "allows using doc"
-      (let [fake-out (java.io.ByteArrayOutputStream.)]
-        (binding [*out* (java.io.PrintWriter. fake-out)]
-          (with-redefs [exit/exit #()]
-            (main/launch-nrepl {:attach (str *server-port*)
-                                :input-stream
-                                (java.io.ByteArrayInputStream.
-                                  (.getBytes "(doc map)\n"))
-                                :output-stream fake-out}))
-          (should-contain (with-out-str (clojure.repl/doc map))
-                          (str fake-out)))))
+      (let [fake-out (java.io.ByteArrayOutputStream.)
+            fake-err (java.io.ByteArrayOutputStream.)]
+
+        (with-fake-printing fake-out fake-err
+          (main/launch-nrepl {:attach (str *server-port*)
+                              :input-stream
+                              (java.io.ByteArrayInputStream.
+                                (.getBytes "(doc map)\nexit\n"))
+                              :output-stream fake-out}))
+        (should-contain (with-out-str (clojure.repl/doc map))
+                        (str fake-out))))
     )
 
   (describe "completion"
 
     (it "tab-completes clojure.core fns"
-      (let [fake-out (java.io.ByteArrayOutputStream.)]
-        (binding [*out* (java.io.PrintWriter. fake-out)]
-          (with-redefs [exit/exit #()]
-            (main/launch-nrepl {:attach (str *server-port*)
-                                :input-stream
-                                (java.io.ByteArrayInputStream.
-                                  (.getBytes "(map\t"))
-                                :output-stream fake-out}))
-          (should-contain "mapcat" (str fake-out))
-          (should-contain "map-indexed" (str fake-out))))
-
-      )
-    )
-  )
+      (let [fake-out (java.io.ByteArrayOutputStream.)
+            fake-err (java.io.ByteArrayOutputStream.)]
+        (with-fake-printing fake-out fake-err
+          (main/launch-nrepl {:attach (str *server-port*)
+                              :input-stream
+                              (java.io.ByteArrayInputStream.
+                                (.getBytes "map\t\nexit\n"))
+                              :output-stream fake-out}))
+        (should-contain "mapcat" (str fake-out))
+        (should-contain "map-indexed" (str fake-out))))))
