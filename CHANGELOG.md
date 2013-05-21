@@ -9,6 +9,10 @@
 - Allow input of non-BMP characters (jline/jline2#80)
 - Handle completion load failure more gracefully (#108)
 - Speed up & avoid crash for input handling in e.g. (read) forms (NREPL-39)
+- Add more default key bindings for arrows & Windows numpad (jline/jline2#86,#75)
+- Patch jansi security issue (jline/jline2#85)
+- Allow aborting current line via ctrl-g (jline)
+- Implement forward search (jline)
 
 ## 0.1.10, 2012-02-15
 - Handle interruption (via ctrl-c) during input with new jline capabilities
