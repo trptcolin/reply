@@ -4,8 +4,7 @@
   (defproject reply "0.2.0-SNAPSHOT"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.4.0"]
-                   ;[org.clojure/clojure "1.6.0-master-SNAPSHOT"]
-                   [org.clojars.trptcolin/jline "2.10.3"]
+                   [jline "2.11"]
                    [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.4"]
                    [org.clojure/tools.nrepl "0.2.3"]
