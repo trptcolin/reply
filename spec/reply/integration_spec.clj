@@ -63,44 +63,42 @@
                  (catch Throwable t
                    (.println System/err "nREPL shutdown failed")))))))))
 
+  (with fake-out (java.io.ByteArrayOutputStream.))
+  (with fake-err (java.io.ByteArrayOutputStream.))
+
+  (around [it]
+    (with-redefs [shutdown-agents #()]
+      (binding [*out* (java.io.PrintWriter. @fake-out)
+                *err* (java.io.PrintWriter. @fake-err)]
+        (it))))
+
   (describe "initialization"
 
     (it "prints help on startup and exits properly"
-      (let [fake-out (java.io.ByteArrayOutputStream.)
-            fake-err (java.io.ByteArrayOutputStream.)]
-        (with-fake-printing fake-out fake-err
-          (main/launch-nrepl {:attach (str *server-port*)
-                              :input-stream
-                              (java.io.ByteArrayInputStream.
-                                (.getBytes "exit\n(println 'foobar)\n"))
-                              :output-stream fake-out}))
-        (should-contain (with-out-str (initialization/help)) (str fake-out))
-        (should-not-contain "foobar" (str fake-out))))
+      (main/launch-nrepl {:attach (str *server-port*)
+                          :input-stream
+                          (java.io.ByteArrayInputStream.
+                            (.getBytes "exit\n(println 'foobar)\n"))
+                          :output-stream @fake-out})
+      (should-contain (with-out-str (initialization/help)) (str @fake-out))
+      (should-not-contain "foobar" (str @fake-out)))
 
     (it "allows using doc"
-      (let [fake-out (java.io.ByteArrayOutputStream.)
-            fake-err (java.io.ByteArrayOutputStream.)]
-
-        (with-fake-printing fake-out fake-err
-          (main/launch-nrepl {:attach (str *server-port*)
-                              :input-stream
-                              (java.io.ByteArrayInputStream.
-                                (.getBytes "(doc map)\nexit\n"))
-                              :output-stream fake-out}))
-        (should-contain (with-out-str (clojure.repl/doc map))
-                        (str fake-out))))
-    )
+      (main/launch-nrepl {:attach (str *server-port*)
+                          :input-stream
+                          (java.io.ByteArrayInputStream.
+                            (.getBytes "(doc map)\nexit\n"))
+                          :output-stream @fake-out})
+      (should-contain (with-out-str (clojure.repl/doc map))
+                      (str @fake-out))))
 
   (describe "completion"
 
     (it "tab-completes clojure.core fns"
-      (let [fake-out (java.io.ByteArrayOutputStream.)
-            fake-err (java.io.ByteArrayOutputStream.)]
-        (with-fake-printing fake-out fake-err
-          (main/launch-nrepl {:attach (str *server-port*)
-                              :input-stream
-                              (java.io.ByteArrayInputStream.
-                                (.getBytes "map\t\nexit\n"))
-                              :output-stream fake-out}))
-        (should-contain "mapcat" (str fake-out))
-        (should-contain "map-indexed" (str fake-out))))))
+      (main/launch-nrepl {:attach (str *server-port*)
+                          :input-stream
+                          (java.io.ByteArrayInputStream.
+                            (.getBytes "map\t\nexit\n"))
+                          :output-stream @fake-out})
+      (should-contain "mapcat" (str @fake-out))
+      (should-contain "map-indexed" (str @fake-out)))))
