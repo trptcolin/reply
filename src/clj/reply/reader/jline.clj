@@ -1,6 +1,7 @@
 (ns reply.reader.jline
   (:refer-clojure :exclude [read])
   (:require [reply.reader.jline.completion :as jline.completion]
+            [reply.conversions :refer [->fn]]
             [reply.eval-state :as eval-state]
             [reply.reader.simple-jline :as simple-jline]
             [clojure.main])
@@ -41,11 +42,6 @@
   (.setPrompt
     @jline-reader
     (apply str (subsequent-prompt options (eval-state/get-ns)))))
-
-(defn ->fn [config default]
-  (cond (fn? config) config
-        (seq? config) (eval config)
-        :else default))
 
 (defn setup-reader! [{:keys [prompt custom-prompt subsequent-prompt]
                       :as options}]

@@ -6,6 +6,7 @@
             [clojure.tools.nrepl.misc :as nrepl.misc]
             [clojure.tools.nrepl.server :as nrepl.server]
             [clojure.tools.nrepl.transport :as nrepl.transport]
+            [reply.conversions :refer [->fn]]
             [reply.exit]
             [reply.eval-state :as eval-state]
             [reply.initialization]
@@ -42,6 +43,18 @@
                  TimeUnit/MILLISECONDS)
           (session-responses session))))
 
+(declare execute-with-client)
+(defn- end-of-stream? [client options command-id message]
+  (let [relevant-message (or (= command-id (:id message)) (:global message))
+        error (some #{"error" "eval-error"} (:status message))
+        done (some #{"done" "interrupted"} (:status message))]
+
+    (when error
+      (when-let [caught (:caught options)]
+        (execute-with-client client options (str "(" (pr-str caught) ")"))))
+
+    (and relevant-message (or error done))))
+
 (defn execute-with-client [client options form]
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
@@ -52,9 +65,7 @@
     (reset! current-command-id command-id)
     (doseq [{:keys [ns value out err] :as res}
             (take-while
-              #(not (and (or (= command-id (:id %)) (:global %))
-                         (some #{"done" "interrupted" "error" "eval-error"}
-                               (:status %))))
+              #(not (end-of-stream? client options command-id %))
               (filter identity (session-responses session)))]
       (when (some #{"need-input"} (:status res))
         (reset! current-command-id nil)
@@ -165,11 +176,6 @@
             :failure))]
     (when (= :success continue)
       (recur connection))))
-
-(defn ->fn [config default]
-  (cond (fn? config) config
-        (seq? config) (eval config)
-        :else default))
 
 (defn main
   [options]

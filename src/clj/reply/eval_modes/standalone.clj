@@ -1,5 +1,6 @@
 (ns reply.eval-modes.standalone
-  (:require [reply.eval-modes.standalone.concurrency :as concurrency]
+  (:require [reply.conversions :refer [->fn]]
+            [reply.eval-modes.standalone.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
             [reply.initialization :as initialization]
             [reply.reader.jline :as jline]
@@ -33,9 +34,12 @@
 (defn main [options]
   (signals/set-signal-handler! "INT" handle-ctrl-c)
   (eval (initialization/construct-init-code options))
-  (clojure.main/repl :read (reply-read options)
-                     :eval reply-eval
-                     :print reply-print
-                     :prompt (constantly false)
-                     :need-prompt (constantly false)))
+  (let [caught (->fn (:caught options)
+                     clojure.main/repl-caught)]
+    (clojure.main/repl :read (reply-read options)
+                       :eval reply-eval
+                       :print reply-print
+                       :prompt (constantly false)
+                       :caught (fn [e] (caught (clojure.main/repl-exception e)))
+                     :need-prompt (constantly false))))
 

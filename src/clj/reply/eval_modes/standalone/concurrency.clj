@@ -20,7 +20,7 @@
         (reset! action-state {})
         @(future (act-on-form action-state act form))
         (catch Throwable e
-          (clojure.main/repl-caught e))))))
+          (throw e))))))
 
 (defn stop [action & {:keys [hard-kill-allowed]}]
   (let [thread (:thread @action)]
