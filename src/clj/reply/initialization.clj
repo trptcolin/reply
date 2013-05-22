@@ -144,6 +144,29 @@
 (defn formify-file [f]
   (read-string (str "(do " (slurp f) ")")))
 
+(defn completion-code []
+  `(try
+     (require '[complete.core])
+     ; hack for 1.2 support until we release the next clojure-complete version
+     ~(export-definition 'reply.initialization/resolve-class)
+     (~'reply.exports/intern-with-meta
+       '~'complete.core '~'resolve-class ~'#'resolve-class)
+
+     (catch Exception e#
+       (try
+         (eval
+           '~(try
+               (formify-file
+                 (-> (Thread/currentThread)
+                     (.getContextClassLoader)
+                     (.getResource "complete/core.clj")))
+               (catch Exception e
+                 '(throw (Exception. "Couldn't find complete/core.clj")))))
+         (catch Exception f#
+           (intern (create-ns '~'complete.core) '~'completions
+                   (fn [prefix# ns#] []))
+           (println "Unable to initialize completions."))))))
+
 (defn default-init-code []
   `(do
      ~@prelude
@@ -178,27 +201,7 @@
      (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
      (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
 
-     (try
-       (require '[complete.core])
-       ; hack for 1.2 support until we release the next clojure-complete version
-       ~(export-definition 'reply.initialization/resolve-class)
-       (~'reply.exports/intern-with-meta
-          '~'complete.core '~'resolve-class ~'#'resolve-class)
-
-       (catch Exception e#
-         (try
-           (eval
-             '~(try
-                 (formify-file
-                   (-> (Thread/currentThread)
-                       (.getContextClassLoader)
-                       (.getResource "complete/core.clj")))
-                 (catch Exception e
-                   '(throw (Exception. "Couldn't find complete/core.clj")))))
-           (catch Exception f#
-             (intern (create-ns '~'complete.core) '~'completions
-                     (fn [prefix# ns#] []))
-             (println "Unable to initialize completions.")))))
+     ~(completion-code)
 
      (in-ns (ns-name ~'reply.exports/original-ns))
      nil))
