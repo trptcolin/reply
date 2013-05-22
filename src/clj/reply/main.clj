@@ -1,7 +1,6 @@
 (ns reply.main
   (:require [reply.eval-modes.nrepl :as eval-modes.nrepl]
             [reply.eval-modes.standalone :as eval-modes.standalone]
-            [reply.exit :as exit]
             [reply.hacks.printing :as hacks.printing]
             [reply.initialization :as initialization]
             [reply.signals :as signals]
@@ -40,6 +39,10 @@
 (defn handle-resume [signal]
   (println "Welcome back!"))
 
+(defn say-goodbye []
+  (print "Bye for now!")
+  (flush))
+
 (defmacro with-launching-context [options & body]
   `(try
     (signals/set-signal-handler! "CONT" handle-resume)
@@ -56,7 +59,7 @@
                                                        (slurp ~body))
                             :else (clojure.repl/pst e#)))))
                '(catch Throwable t# (clojure.repl/pst t#))])
-    (finally (exit/exit))))
+    (finally (say-goodbye))))
 
 (defn launch-nrepl [options]
   "Launches the nREPL version of REPL-y, with options already parsed out. The
@@ -86,8 +89,9 @@
   (let [[options args banner]
           (try (parse-args args)
             (catch Exception e
+              (println (.getMessage e))
               (parse-args ["--help"])))]
-    (when (:help options)
+    (if (:help options)
       (println banner)
-      (exit/exit))
-    (launch options)))
+      (launch options))
+    (shutdown-agents)))

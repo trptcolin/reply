@@ -1,7 +1,6 @@
 (ns reply.eval-modes.standalone
   (:require [reply.eval-modes.standalone.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
-            [reply.exit :as exit]
             [reply.initialization :as initialization]
             [reply.reader.jline :as jline]
             [reply.reader.simple-jline :as simple-jline]

@@ -1,6 +1,5 @@
 (ns reply.integration-spec
   (:require [speclj.core :refer :all]
-            [reply.exit :as exit]
             [reply.initialization :as initialization]
             [reply.main :as main]
             [reply.reader.simple-jline :as simple-jline]
@@ -12,10 +11,9 @@
 (def ^:dynamic *server-port* nil)
 
 (defmacro with-fake-printing [fake-out fake-err & body]
-  `(with-redefs [exit/exit #()]
-     (binding [*out* (java.io.PrintWriter. ~fake-out)
-               *err* (java.io.PrintWriter. ~fake-err)]
-       ~@body)))
+  `(binding [*out* (java.io.PrintWriter. ~fake-out)
+             *err* (java.io.PrintWriter. ~fake-err)]
+     ~@body))
 
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
