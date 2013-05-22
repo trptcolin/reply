@@ -3,7 +3,7 @@
 
 (def bindings
   (atom
-    {#'clojure.core/*ns* (the-ns 'user)
+    {#'clojure.core/*ns* nil
      #'clojure.core/*warn-on-reflection* *warn-on-reflection*
      #'clojure.core/*math-context* *math-context*
      #'clojure.core/*print-meta* *print-meta*
@@ -20,7 +20,8 @@
      #'clojure.core/*e nil}))
 
 (defn get-ns []
-  (@bindings #'*ns*))
+  (or (@bindings #'*ns*)
+      @(ns-resolve 'clojure.core '*ns*)))
 
 (defmulti set-ns type)
 (defmethod set-ns :default [ns]

@@ -32,11 +32,10 @@
 
 (defn main [options]
   (signals/set-signal-handler! "INT" handle-ctrl-c)
+  (eval (initialization/construct-init-code options))
   (clojure.main/repl :read (reply-read options)
                      :eval reply-eval
                      :print reply-print
-                     :init #(initialization/eval-in-user-ns
-                             (initialization/construct-init-code options))
                      :prompt (constantly false)
                      :need-prompt (constantly false)))
 
