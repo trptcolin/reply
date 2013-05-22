@@ -28,8 +28,8 @@
 
 (defn subsequent-prompt [options ns]
   (let [subsequent-prompt (:subsequent-prompt options)]
-    (if subsequent-prompt
-      (subsequent-prompt ns)
+    (if-let [prompt-string (and subsequent-prompt (subsequent-prompt ns))]
+      prompt-string
       (let [prompt-end (str "#_" prompt-end)]
         (apply str
                (concat (repeat (- (count (@prompt-fn ns))
