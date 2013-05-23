@@ -8,7 +8,7 @@
 
 (def ^:private current-console-reader (atom nil))
 
-(defn- make-history-file [history-path]
+(defn- make-history-file [^String history-path]
   (if history-path
     (let [history-file (File. history-path)]
       (if (.getParentFile history-file)
@@ -16,7 +16,7 @@
         (File. "." history-path)))
     (File. (System/getProperty "user.home") ".jline-reply.history")))
 
-(defn reset-reader [reader]
+(defn reset-reader [^ConsoleReader reader]
   (when reader
     (.clear (.getCursorBuffer reader))))
 
@@ -36,7 +36,7 @@
 (defn set-jline-output! []
   (when (and (not (Boolean/getBoolean "jline.internal.Log.trace"))
              (not (Boolean/getBoolean "jline.internal.Log.debug")))
-    (Log/setOutput (PrintStream. (null-output-stream)))))
+    (Log/setOutput (PrintStream. ^java.io.OutputStream (null-output-stream)))))
 
 (defn- initialize-jline []
   (.addShutdownHook (Runtime/getRuntime)
@@ -48,7 +48,7 @@
 
 (defmulti flush-history type)
 (defmethod flush-history FileHistory
-  [history]
+  [^FileHistory history]
   (try (.flush history)
     (catch IOException e)))
 (defmethod flush-history MemoryHistory
@@ -120,7 +120,7 @@
                :interrupted nil)))))
 
 (defn make-completer [ns eval-fn]
-  (fn [reader]
+  (fn [^ConsoleReader reader]
     (let [redraw-line-fn (fn []
                            (.redrawLine reader)
                            (.flush reader))]

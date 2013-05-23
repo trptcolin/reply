@@ -1,5 +1,6 @@
 (ns reply.eval-modes.nrepl
-  (:import [java.util.concurrent LinkedBlockingQueue TimeUnit])
+  (:import [java.util.concurrent LinkedBlockingQueue TimeUnit]
+           [java.net ServerSocket])
   (:require [clojure.main]
             [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
@@ -149,9 +150,11 @@
 
 (defn get-connection [{:keys [attach host port]}]
   (let [server (when-not attach
-                 (nrepl.server/start-server :port (Integer. (or port 0))))
+                 (nrepl.server/start-server
+                   :port (Integer/parseInt (str (or port 0)))))
         port (when-not attach
-               (-> server deref :ss .getLocalPort))
+               (let [^ServerSocket socket (-> server deref :ss)]
+                 (.getLocalPort socket)))
         url (url-for attach host port)]
     (when server
       (reset! nrepl-server server))
