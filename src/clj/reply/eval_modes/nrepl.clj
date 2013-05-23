@@ -27,6 +27,7 @@
     (nrepl.server/stop-server @nrepl-server))
   (when (isa? (class @current-connection) java.io.Closeable)
     (.close ^java.io.Closeable @current-connection))
+  (signals/set-signal-handler! "INT" (constantly nil))
   (reset! current-command-id nil)
   (reset! current-session nil)
   (reset! current-connection nil)
@@ -44,10 +45,10 @@
 
 (def response-queues (atom {}))
 
-(defn notify-all-queues-of-error []
+(defn notify-all-queues-of-error [e]
   (doseq [session-key (keys @response-queues)]
     (.offer ^LinkedBlockingQueue (@response-queues session-key)
-            {:status "error" :global true})))
+            {:status ["error"] :global true :error e})))
 
 (defn session-responses [session]
   (lazy-seq
@@ -61,10 +62,11 @@
   (let [relevant-message (or (= command-id (:id message)) (:global message))
         error (some #{"error" "eval-error"} (:status message))
         done (some #{"done" "interrupted"} (:status message))]
-
     (when error
       (when-let [caught (:caught options)]
-        (execute-with-client client options (str "(" (pr-str caught) ")"))))
+        (execute-with-client client options (str "(" (pr-str caught) ")")))
+      (when (:global message)
+        (throw (:error message))))
 
     (and relevant-message (or error done))))
 
@@ -186,7 +188,7 @@
             (flush))
           :success
           (catch Throwable t
-            (notify-all-queues-of-error)
+            (notify-all-queues-of-error t)
             (when (System/getenv "DEBUG") (clojure.repl/pst t))
             :failure))]
     (when (= :success continue)
