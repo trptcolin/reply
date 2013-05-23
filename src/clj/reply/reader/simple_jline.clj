@@ -20,11 +20,14 @@
   (when reader
     (.clear (.getCursorBuffer reader))))
 
-(defn shutdown [{:keys [reader] :as state}]
-  (when reader
-    (reset-reader reader)
-    (.restore (.getTerminal reader))
-    (.shutdown reader)))
+(defn shutdown
+  ([] (shutdown {:reader @current-console-reader}))
+  ([{:keys [^ConsoleReader reader] :as state}]
+   (when reader
+     (reset-reader reader)
+     (.restore (.getTerminal reader))
+     (.shutdown reader))
+   (reset! current-console-reader nil)))
 
 (defn null-output-stream []
   (proxy [java.io.OutputStream] []
@@ -83,6 +86,7 @@
                     nil)]
     (.setBlinkMatchingParen (.getKeys reader) blink-parens)
     (when completer (.addCompleter reader completer))
+    (reset! current-console-reader reader)
     (doto reader
       (.setHistory history)
       (.setHandleUserInterrupt true)
@@ -93,14 +97,13 @@
 (def jline-state (atom {}))
 
 (defn get-input-line [state]
-  (if (:reader state)
+  (when-not (:reader state)
     (initialize-jline))
+  (shutdown state)
   (if (:no-jline state)
-    (do
-      (shutdown state)
-      (assoc (dissoc state :no-jline)
+    (assoc (dissoc state :no-jline)
            :reader nil
-           :input (read-line)))
+           :input (read-line))
     (let [reader (setup-console-reader state)
           input (try (interactive-read-line reader)
                   (catch jline.console.UserInterruptException e

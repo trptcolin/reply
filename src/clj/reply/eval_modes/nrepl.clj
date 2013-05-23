@@ -16,9 +16,21 @@
 
 (def current-command-id (atom nil))
 (def current-session (atom nil))
+(def current-connection (atom nil))
 (def current-ns (atom (str *ns*)))
 (def nrepl-server (atom nil))
 (def response-poller (atom nil))
+
+(defn reset-nrepl-state! []
+  (when @nrepl-server
+    (nrepl.server/stop-server @nrepl-server))
+  (when (isa? (class @current-connection) java.io.Closeable)
+    (.close ^java.io.Closeable @current-connection))
+  (reset! current-command-id nil)
+  (reset! current-session nil)
+  (reset! current-connection nil)
+  (reset! nrepl-server nil)
+  (reset! response-poller nil))
 
 (defn handle-client-interruption! [client]
   (signals/set-signal-handler!
@@ -183,6 +195,7 @@
         client             (nrepl/client connection Long/MAX_VALUE)
         session            (nrepl/new-session client)
         completion-session (nrepl/new-session client)]
+    (reset! current-connection connection)
     (reset! current-session session)
     (swap! response-queues assoc
            session (LinkedBlockingQueue.)
@@ -206,10 +219,12 @@
                            (partial
                              simple-jline/safe-read-line
                              {:no-jline true :prompt-string ""}))]
-      (reset! response-poller
-              (Thread.
-                (bound-fn [] (poll-for-responses connection))))
-      (.start @response-poller)
+      (let [^Runnable operation (bound-fn [] (poll-for-responses connection))]
+        (reset! response-poller (Thread. operation)))
+      (doto ^Thread @response-poller
+        (.setName "nREPL response poller")
+        (.setDaemon true)
+        (.start))
       (execute-with-client
                client
                (assoc options :value (constantly nil))
@@ -222,7 +237,7 @@
                            (reply.initialization/construct-init-code
                              options)))))
       (handle-client-interruption! client)
-      (run-repl client options))
-    (when @nrepl-server
-      (nrepl.server/stop-server @nrepl-server))))
+      (run-repl client options)
+      (reset-nrepl-state!)
+      (simple-jline/shutdown))))
 
