@@ -40,7 +40,7 @@
 
 (defn set-empty-prompt [options]
   (.setPrompt
-    @jline-reader
+    ^ConsoleReader @jline-reader
     (apply str (subsequent-prompt options (eval-state/get-ns)))))
 
 (defn setup-reader! [{:keys [prompt custom-prompt subsequent-prompt]
@@ -62,9 +62,9 @@
               1))))
 
 (defn prepare-for-read [eval-fn ns]
-  (.setPrompt @jline-reader (@prompt-fn ns))
+  (.setPrompt ^ConsoleReader @jline-reader (@prompt-fn ns))
   (eval-state/set-ns ns)
-  (.addCompleter @jline-reader
+  (.addCompleter ^ConsoleReader @jline-reader
     ((simple-jline/make-completer (str (ns-name ns)) eval-fn)
        @jline-reader)))
 

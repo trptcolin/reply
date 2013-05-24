@@ -7,7 +7,7 @@
    "\\[" "\\]"
    "\\{" "\\}"])
 
-(defn input-up-to [input index]
+(defn input-up-to [^String input index]
   (let [topmost-index (min index (.length input))]
     (.substring input 0 topmost-index)))
 

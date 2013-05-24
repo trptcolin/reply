@@ -42,7 +42,7 @@
 (defn unresolve
   "Given a var, return a sequence of all symbols that resolve to the
   var from the current namespace *ns*."
-  [var]
+  [^clojure.lang.Var var]
   (when-not (instance? clojure.lang.Var var)
     (throw (Exception. (format "unresolve: first arg must be Var"))))
   (let [home-ns (.ns var)
@@ -113,7 +113,7 @@
 (defn call-with-ns-and-name
   [f v]
   (let [m (meta v)
-        ns (str (.name (:ns m)))
+        ns (str (.name ^clojure.lang.Namespace (:ns m)))
         name (str (:name m))]
     (f ns name)))
 
