@@ -16,7 +16,7 @@
             "Provide a custom form to evaluate in the user ns"
             :parse-fn read-string]
            ["--custom-help"
-            "Provide a custom help function to print instructions on repl start"
+            "Provide a custom help form to print instructions on repl start"
             :parse-fn read-string]
            ["--caught"
             "[experimental] Provide an error handler function (0-1 arguments)"
