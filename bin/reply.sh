@@ -1,6 +1,8 @@
 #!/bin/sh
 
 # NOTE: assumes dependencies in lib directory (leiningen 1 style).
+# You can put these there with:
+#   mvn dependency:copy-dependencies -DoutputDirectory=lib
 # See README for normal Usage.
 
 # normalize $0 on certain BSDs
@@ -28,7 +30,9 @@ if [ -z "$USER_CP" ]; then
 fi
 
 CP="$BASEDIR"/../src/clj/:\
-"$BASEDIR"/../classes/
+"$BASEDIR"/../classes/:\
+"$BASEDIR"/../target/classes/
+
 for j in "$BASEDIR"/../lib/*.jar; do
   CP=$CP:$j
 done
