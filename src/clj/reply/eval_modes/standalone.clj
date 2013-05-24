@@ -11,7 +11,9 @@
   (fn [prompt exit]
     (concurrency/starting-read!)
     (binding [*ns* (eval-state/get-ns)]
-      (let [result (jline/read prompt exit options)]
+      (let [result (try (jline/read prompt exit options)
+                     (catch jline.console.UserInterruptException e
+                       prompt))]
         (when-let [reader @jline/jline-reader]
           (simple-jline/prepare-for-next-read reader)
           (simple-jline/shutdown {:reader reader})
