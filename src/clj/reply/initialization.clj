@@ -167,7 +167,7 @@
                    (fn [prefix# ns#] []))
            (println "Unable to initialize completions."))))))
 
-(defn default-init-code []
+(defn default-init-code [{:keys [custom-help] :as options}]
   `(do
      ~@prelude
 
@@ -186,7 +186,10 @@
 
      ~(export-definition 'reply.initialization/intern-with-meta)
 
-     ~(export-definition 'reply.initialization/help)
+     ~(if custom-help
+        `(defn ~'help [] ~custom-help)
+        (export-definition 'reply.initialization/help))
+
      (~'intern-with-meta '~'user '~'help ~'#'help)
 
      ~(export-definition 'reply.initialization/unresolve)
@@ -204,6 +207,9 @@
      ~(completion-code)
 
      (in-ns (ns-name ~'reply.exports/original-ns))
+
+     (user/help)
+
      nil))
 
 (defn eval-in-user-ns [code]
@@ -216,10 +222,7 @@
 (defn construct-init-code
   [{:keys [skip-default-init custom-init custom-eval custom-help] :as options}]
   `(do
-     ~(when-not skip-default-init (default-init-code))
-     ~(if custom-help
-        custom-help
-        '(user/help))
+     ~(when-not skip-default-init (default-init-code options))
      ~(when custom-eval custom-eval)
      ~(when custom-init custom-init)
     nil))
