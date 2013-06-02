@@ -90,7 +90,7 @@
                        :id in-message-id}]
           (session-sender message)
           (reset! current-command-id command-id)))
-      (when value ((:value options print) value))
+      (when value ((:print-value options) value))
       (flush)
       (when (and ns (not (:session options)))
         (reset! current-ns ns)))
@@ -211,6 +211,9 @@
                          (->fn custom-prompt (fn [ns] (str ns "=> "))))
           options (assoc options :subsequent-prompt
                          (->fn subsequent-prompt (constantly nil)))
+          print-value (:print-value options)
+          options (assoc options :print-value
+                         (->fn print-value print))
           options (if (:color options)
                     (merge options nrepl.cmdline/colored-output)
                     options)
@@ -232,7 +235,7 @@
         (.start))
       (execute-with-client
                client
-               (assoc options :value (constantly nil))
+               (assoc options :print-value (constantly nil))
                (binding [*print-length* nil
                          *print-level* nil]
                  (pr-str (list 'do
