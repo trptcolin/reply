@@ -23,6 +23,6 @@
             (if (empty? possible-completions)
               -1
               (do
-                (.addAll candidates possible-completions)
+                (.addAll candidates (map str possible-completions))
                 (redraw-line-fn)
                 (- cursor prefix-length)))))))))
