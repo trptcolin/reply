@@ -168,7 +168,7 @@
   (let [results (atom "nil")]
     (execute-with-client
       client
-      {:value (partial reset! results)
+      {:print-value (partial reset! results)
        :session session}
       (binding [*print-length* nil
                 *print-level* nil]
