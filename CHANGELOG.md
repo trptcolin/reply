@@ -1,5 +1,8 @@
 # REPLy Changelog
 
+## 0.2.1, 2013-07-26
+- Fix completion where *print-length* is low (#120)
+
 ## 0.2.0, 2013-05-23
 - Overhaul of jline support to decouple jline read from STDIN read (#91, 68)
 - Patch up completion for separately-started nREPL (#105)
