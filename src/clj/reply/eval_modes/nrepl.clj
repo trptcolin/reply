@@ -227,12 +227,14 @@
                            (partial
                              simple-jline/safe-read-line
                              {:no-jline true :prompt-string ""}))]
+
       (let [^Runnable operation (bound-fn [] (poll-for-responses connection))]
         (reset! response-poller (Thread. operation)))
       (doto ^Thread @response-poller
         (.setName "nREPL response poller")
         (.setDaemon true)
         (.start))
+      (completion-eval-fn '(set! *print-length* nil))
       (execute-with-client
                client
                (assoc options :print-value (constantly nil))
