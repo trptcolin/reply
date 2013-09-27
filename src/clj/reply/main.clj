@@ -45,7 +45,7 @@
   (println "Welcome back!"))
 
 (defn say-goodbye []
-  (print "Bye for now!")
+  (println "Bye for now!")
   (flush))
 
 (defmacro with-launching-context [options & body]
