@@ -64,8 +64,7 @@
                                                        (slurp ~body))
                             :else (clojure.repl/pst e#)))))
                '(catch Throwable t# (clojure.repl/pst t#))])
-    (finally (say-goodbye)
-             (shutdown-agents))))
+    (finally (say-goodbye))))
 
 (defn launch-nrepl [options]
   "Launches the nREPL version of REPL-y, with options already parsed out. The
@@ -98,5 +97,6 @@
               (println (.getMessage e))
               (parse-args ["--help"])))]
     (if (:help options)
-      (do (println banner) (shutdown-agents))
-      (launch options))))
+      (println banner)
+      (launch options))
+    (shutdown-agents)))
