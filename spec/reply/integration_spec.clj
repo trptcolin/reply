@@ -81,7 +81,8 @@
                             (.getBytes "exit\n(println 'foobar)\n"))
                           :output-stream @fake-out})
       (should-contain (with-out-str (initialization/help)) (str @fake-out))
-      (should-not-contain "foobar" (str @fake-out)))
+      (should-not-contain "foobar" (str @fake-out))
+      (should-contain "Bye for now!\n" (str @fake-out)))
 
     (it "allows using doc"
       (main/launch-nrepl {:attach (str *server-port*)
