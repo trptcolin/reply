@@ -1,5 +1,9 @@
 # REPLy Changelog
 
+## 0.3.0, 2013-11-11
+- Move all shutdown-agents calls into -main (technomancy/leiningen#1288)
+- Add newline when exiting (#126)
+
 ## 0.2.1, 2013-07-26
 - Fix completion where *print-length* is low (#120)
 
