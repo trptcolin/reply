@@ -14,14 +14,12 @@
                    [clojure-complete "0.2.3"]
                    [org.clojars.trptcolin/sjacket "0.1.0.3"
                     :exclusions [org.clojure/clojure]]]
+    :min-lein-version "2.0.0"
     :profiles {:dev {:dependencies ~dev-deps}}
-    :dev-dependencies ~dev-deps
     :plugins ~dev-deps
-    :source-path "src/clj"
-    :java-source-path "src/java"
-    :test-path "spec"
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
+    :javac-options ["-target" "1.5" "-source" "1.5" "-Xlint:-options"]
 ;    :jvm-opts ["-Djline.internal.Log.trace=true"]
     :test-paths ["spec"]
     :repl-options {:init-ns user}
