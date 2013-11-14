@@ -36,6 +36,8 @@
 (defn main [options]
   (signals/set-signal-handler! "INT" handle-ctrl-c)
   (eval (initialization/construct-init-code options))
+  (eval '(defn quit [] (System/exit 0)))
+  (eval '(defn exit [] (System/exit 0)))
   (let [caught (->fn (:caught options)
                      clojure.main/repl-caught)]
     (clojure.main/repl :read (reply-read options)
@@ -43,5 +45,5 @@
                        :print reply-print
                        :prompt (constantly false)
                        :caught (fn [e] (caught (clojure.main/repl-exception e)))
-                     :need-prompt (constantly false))))
+                       :need-prompt (constantly false))))
 
