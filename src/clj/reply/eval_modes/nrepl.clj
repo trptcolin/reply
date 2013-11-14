@@ -175,13 +175,13 @@
         (pr-str `(binding [*ns* (symbol ~(deref current-ns))] ~form))))
     (read-string @results)))
 
-(defn poll-for-responses [connection]
+(defn poll-for-responses [{:keys [print-out print-err] :as options} connection]
   (let [continue
         (try
           (when-let [{:keys [out err] :as resp}
                      (nrepl.transport/recv connection 100)]
-            (when err (print err))
-            (when out (print out))
+            (when err ((or print-err print) err))
+            (when out ((or print-out print) out))
             (when-not (or err out)
               (.offer ^LinkedBlockingQueue (@response-queues (:session resp))
                       resp))
@@ -192,7 +192,7 @@
             (when (System/getenv "DEBUG") (clojure.repl/pst t))
             :failure))]
     (when (= :success continue)
-      (recur connection))))
+      (recur options connection))))
 
 (defn main
   [options]
@@ -215,7 +215,11 @@
           options (assoc options :print-value
                          (->fn print-value print))
           options (if (:color options)
-                    (merge options nrepl.cmdline/colored-output)
+                    (merge options (clojure.set/rename-keys
+                                     nrepl.cmdline/colored-output
+                                     {:value :print-value
+                                      :out :print-out
+                                      :err :print-err}))
                     options)
           completion-eval-fn (partial completion-eval client completion-session)
           options (assoc options
@@ -228,7 +232,7 @@
                              simple-jline/safe-read-line
                              {:no-jline true :prompt-string ""}))]
 
-      (let [^Runnable operation (bound-fn [] (poll-for-responses connection))]
+      (let [^Runnable operation (bound-fn [] (poll-for-responses options connection))]
         (reset! response-poller (Thread. operation)))
       (doto ^Thread @response-poller
         (.setName "nREPL response poller")
