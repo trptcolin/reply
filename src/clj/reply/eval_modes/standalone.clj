@@ -1,49 +1,88 @@
 (ns reply.eval-modes.standalone
   (:require [reply.conversions :refer [->fn]]
+            [reply.eval-modes.shared :as eval-modes.shared]
             [reply.eval-modes.standalone.concurrency :as concurrency]
             [reply.eval-state :as eval-state]
+            [reply.exit :as exit]
             [reply.initialization :as initialization]
-            [reply.reader.jline :as jline]
+            [reply.parsing :as parsing]
             [reply.reader.simple-jline :as simple-jline]
             [reply.signals :as signals]))
 
-(defn reply-read [options]
-  (fn [prompt exit]
-    (concurrency/starting-read!)
-    (binding [*ns* (eval-state/get-ns)]
-      (let [result (try (jline/read prompt exit options)
-                     (catch jline.console.UserInterruptException e
-                       prompt))]
-        (when-let [reader @jline/jline-reader]
-          (simple-jline/prepare-for-next-read reader)
-          (simple-jline/shutdown {:reader reader})
-          (reset! jline/jline-reader nil)
-          (reset! jline/jline-pushback-reader nil))
-        result))))
-
-(def reply-eval
+(defn make-future-eval [options]
   (concurrency/act-in-future
     (fn [form]
       (eval-state/with-bindings
-        (partial eval form)))))
+        (fn [] (eval form))))))
 
-(def reply-print
-  (concurrency/act-in-future prn))
+(defn make-reply-eval [options]
+  (let [future-eval (make-future-eval options)]
+    (fn [form]
+      (simple-jline/shutdown)
+      (future-eval form))))
 
 (defn handle-ctrl-c [signal]
   (concurrency/stop-running-actions))
 
+(defn execute [{:keys [print-value print-out print-err] :as options}
+               form]
+  (let [actual-form (try (read-string form)
+                         (catch Throwable t ""))
+        reply-eval (make-reply-eval options)
+        failure-sentinel (Object.)
+        result (try (reply-eval actual-form)
+                 (catch InterruptedException e nil)
+                 (catch Throwable t
+                   (let [e (clojure.main/repl-exception t)]
+                     (set! *e e)
+                     ((or print-err println) e))
+                   failure-sentinel))]
+    ;lazyseq: (1 2 3 4 5 ...)
+    ;pr: "(1 2 3 4 5 ...)"
+    (when (not= failure-sentinel result)
+      (print-value result))
+    (when (:interactive options) (println))
+    (eval-state/get-ns-string)))
+
+(defn run-repl [{:keys [prompt subsequent-prompt history-file
+                        input-stream output-stream read-line-fn]
+                 :as options}]
+  (loop [ns (eval-state/get-ns-string)]
+    (let [eof (Object.)
+          execute (partial execute (assoc options :interactive true))
+          forms (parsing/parsed-forms
+                  {:request-exit eof
+                   :prompt-string (prompt ns)
+                   :ns ns
+                   :read-line-fn read-line-fn
+                   :history-file history-file
+                   :input-stream input-stream
+                   :output-stream output-stream
+                   :subsequent-prompt-string (subsequent-prompt ns)
+                   :text-so-far nil})]
+      (if (exit/done? eof (first forms))
+        nil
+        (recur (last (doall (map execute forms))))))))
+
 (defn main [options]
   (signals/set-signal-handler! "INT" handle-ctrl-c)
-  (eval (initialization/construct-init-code options))
-  (eval '(defn quit [] (System/exit 0)))
-  (eval '(defn exit [] (System/exit 0)))
-  (let [caught (->fn (:caught options)
-                     clojure.main/repl-caught)]
-    (clojure.main/repl :read (reply-read options)
-                       :eval reply-eval
-                       :print reply-print
-                       :prompt (constantly false)
-                       :caught (fn [e] (caught (clojure.main/repl-exception e)))
-                       :need-prompt (constantly false))))
+  (eval-state/set-ns "user")
+  (let [options (eval-modes.shared/set-default-options options)
+        options (assoc options :caught (->fn (:caught options)
+                                             clojure.main/repl-caught))
+        options (assoc options
+                       :read-line-fn
+                       (partial
+                         simple-jline/safe-read-line
+                         (fn [form]
+                           (binding [*print-length* nil]
+                             ((make-future-eval options) form)))))
+        non-interactive-eval (fn [form]
+                               (execute (assoc options :print-value (constantly nil))
+                                        (binding [*print-length* nil
+                                                  *print-level* nil]
+                                          (pr-str form))))]
+    (non-interactive-eval (initialization/construct-init-code options))
+    (run-repl options)
+    (simple-jline/shutdown)))
 

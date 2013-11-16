@@ -2,13 +2,12 @@
   (:import [java.util.concurrent LinkedBlockingQueue TimeUnit]
            [java.net ServerSocket])
   (:require [clojure.main]
-            [clojure.tools.nrepl.cmdline :as nrepl.cmdline]
             [clojure.tools.nrepl :as nrepl]
             [clojure.tools.nrepl.misc :as nrepl.misc]
             [clojure.tools.nrepl.server :as nrepl.server]
             [clojure.tools.nrepl.transport :as nrepl.transport]
-            [reply.conversions :refer [->fn]]
             [reply.exit]
+            [reply.eval-modes.shared :as eval-modes.shared]
             [reply.eval-state :as eval-state]
             [reply.initialization]
             [reply.parsing :as parsing]
@@ -63,8 +62,9 @@
         error (some #{"error" "eval-error"} (:status message))
         done (some #{"done" "interrupted"} (:status message))]
     (when error
-      (when-let [caught (:caught options)]
-        (execute-with-client client options (str "(" (pr-str caught) ")")))
+      (let [caught (:caught options)]
+        (when (or (symbol? caught) (list? caught))
+          (execute-with-client client options (str "(" (pr-str caught) ")"))))
       (when (:global message)
         (throw (:error message))))
 
@@ -114,9 +114,9 @@
   ([connection {:keys [prompt subsequent-prompt history-file
                        input-stream output-stream read-line-fn]
                 :as options}]
-   (loop [ns (execute-with-client connection options "")]
-     (let [ns (handle-ns-init-error ns connection options)
-           eof (Object.)
+   (loop [ns (let [ns (execute-with-client connection options "")]
+               (handle-ns-init-error ns connection options))]
+     (let [eof (Object.)
            execute (partial execute-with-client connection
                             (assoc options :interactive true))
            forms (parsing/parsed-forms
@@ -205,32 +205,13 @@
     (swap! response-queues assoc
            session (LinkedBlockingQueue.)
            completion-session (LinkedBlockingQueue.))
-    (let [custom-prompt (:custom-prompt options)
-          subsequent-prompt (:subsequent-prompt options)
-          options (assoc options :prompt
-                         (->fn custom-prompt (fn [ns] (str ns "=> "))))
-          options (assoc options :subsequent-prompt
-                         (->fn subsequent-prompt (constantly nil)))
-          print-value (:print-value options)
-          options (assoc options :print-value
-                         (->fn print-value print))
-          options (if (:color options)
-                    (merge options (clojure.set/rename-keys
-                                     nrepl.cmdline/colored-output
-                                     {:value :print-value
-                                      :out :print-out
-                                      :err :print-err}))
-                    options)
+    (let [options (eval-modes.shared/set-default-options options)
           completion-eval-fn (partial completion-eval client completion-session)
           options (assoc options
                          :read-line-fn
-                           (partial
-                             simple-jline/safe-read-line
-                             completion-eval-fn)
-                         :read-input-line-fn
-                           (partial
-                             simple-jline/safe-read-line
-                             {:no-jline true :prompt-string ""}))]
+                         (partial
+                           simple-jline/safe-read-line
+                           completion-eval-fn))]
 
       (let [^Runnable operation (bound-fn [] (poll-for-responses options connection))]
         (reset! response-poller (Thread. operation)))

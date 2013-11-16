@@ -23,6 +23,9 @@
   (or (@bindings #'*ns*)
       @(ns-resolve 'clojure.core '*ns*)))
 
+(defn get-ns-string []
+  (str (ns-name (get-ns))))
+
 (defmulti set-ns type)
 (defmethod set-ns :default [ns]
   (create-ns (symbol ns))

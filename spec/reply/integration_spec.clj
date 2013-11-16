@@ -38,6 +38,34 @@
 (ensure-test-jar clojure)
 (ensure-test-jar nrepl)
 
+(describe "standalone mode"
+  (with fake-out (java.io.ByteArrayOutputStream.))
+  (with fake-err (java.io.ByteArrayOutputStream.))
+
+  (around [it]
+    (binding [*out* (java.io.PrintWriter. @fake-out)
+              *err* (java.io.PrintWriter. @fake-err)]
+      (it)))
+
+
+  (it "prints help on startup and exits properly"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "(* 21 2)\n"))
+                             :output-stream @fake-out})
+    (should-contain "42" (str @fake-out))
+    (should-contain (with-out-str (initialization/help)) (str @fake-out))
+    (should-contain "Bye for now!\n" (str @fake-out)))
+
+  (it "tab-completes clojure.core fns"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "map\t\nexit\n"))
+                             :output-stream @fake-out})
+    (should-contain "mapcat" (str @fake-out))
+    (should-contain "map-indexed" (str @fake-out)))
+  )
+
 (describe "nrepl integration" (tags :slow)
 
   (around [f]
