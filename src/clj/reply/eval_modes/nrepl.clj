@@ -245,9 +245,6 @@
                (binding [*print-length* nil
                          *print-level* nil]
                  (pr-str (list 'do
-                           (reply.initialization/export-definition
-                             'reply.signals/set-signal-handler!)
-                           '(set-signal-handler! "INT" (fn [s]))
                            (reply.initialization/construct-init-code
                              options)))))
       (handle-client-interruption! client)
