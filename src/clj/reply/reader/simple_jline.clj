@@ -60,7 +60,9 @@
 
 (extend-protocol InteractiveLineReader
   ConsoleReader
-  (interactive-read-line [reader] (.readLine reader))
+  (interactive-read-line [reader]
+    (try (.readLine reader)
+         (catch UnsupportedOperationException e "")))
   (prepare-for-next-read [reader]
     (flush-history (.getHistory reader))
     (when-let [completer (first (.getCompleters reader))]

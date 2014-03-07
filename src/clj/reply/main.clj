@@ -19,7 +19,7 @@
             "Provide a custom help form to print instructions on repl start"
             :parse-fn read-string]
            ["--caught"
-            "[experimental] Provide an error handler function (0-1 arguments)"
+            "[experimental] Provide an error handler function (0-1 arguments)."
             :parse-fn read-string]
            ["-i" "--init" "--custom-init"
             "Provide a Clojure file to evaluate in the user ns"
