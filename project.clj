@@ -12,7 +12,7 @@
                    [com.cemerick/drawbridge "0.0.6"]
                    [trptcolin/versioneer "0.1.1"]
                    [clojure-complete "0.2.3"]
-                   [org.clojars.trptcolin/sjacket "0.1.0.5"
+                   [org.clojars.trptcolin/sjacket "0.1.0.6"
                     :exclusions [org.clojure/clojure]]]
     :min-lein-version "2.0.0"
     :profiles {:dev {:dependencies ~dev-deps}}
