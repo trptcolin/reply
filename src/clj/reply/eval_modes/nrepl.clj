@@ -74,7 +74,10 @@
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
         session-sender (nrepl/client-session client :session session)
-        message-to-send {:op "eval" :code form :id command-id}
+        message-to-send (let [msg {:op "eval" :code form :id command-id}]
+                          (if-let [renderer (:nrepl-renderer options)]
+                            (assoc msg :renderer renderer)
+                            msg))
         read-input-line-fn (:read-input-line-fn options)]
     (session-sender message-to-send)
     (reset! current-command-id command-id)
