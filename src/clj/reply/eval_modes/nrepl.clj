@@ -74,10 +74,8 @@
   (let [command-id (nrepl.misc/uuid)
         session (or (:session options) @current-session)
         session-sender (nrepl/client-session client :session session)
-        message-to-send (let [msg {:op "eval" :code form :id command-id}]
-                          (if-let [eval-options (:nrepl-interactive-eval-options options)]
-                            (merge eval-options msg)
-                            msg))
+        message-to-send (merge (get-in options [:nrepl-context :interactive-eval])
+                               {:op "eval" :code form :id command-id})
         read-input-line-fn (:read-input-line-fn options)]
     (session-sender message-to-send)
     (reset! current-command-id command-id)
