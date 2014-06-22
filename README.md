@@ -29,7 +29,7 @@ And here's how to get a standalone version up and running (assuming you have
 
     git clone https://github.com/trptcolin/reply.git
     cd reply
-    lein deps, compile
+    lein do deps, compile
 
 ## Usage
 
