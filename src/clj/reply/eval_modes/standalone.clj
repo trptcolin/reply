@@ -34,7 +34,6 @@
                  (catch InterruptedException e nil)
                  (catch Throwable t
                    (let [e (clojure.main/repl-exception t)]
-                     (set! *e e)
                      ((or print-err println) e))
                    failure-sentinel))]
     ;lazyseq: (1 2 3 4 5 ...)
