@@ -39,8 +39,8 @@
     ;lazyseq: (1 2 3 4 5 ...)
     ;pr: "(1 2 3 4 5 ...)"
     (when (not= failure-sentinel result)
-      (print-value result))
-    (when (:interactive options) (println))
+      (print-value result)
+      (when (:interactive options) (println)))
     (eval-state/get-ns-string)))
 
 (defn run-repl [{:keys [prompt subsequent-prompt history-file
