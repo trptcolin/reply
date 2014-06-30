@@ -26,7 +26,7 @@
             :parse-fn initialization/formify-file]
            ["--standalone" "Launch standalone mode instead of the default nREPL"
             :flag true]
-           ["--color" "Use color; currently only available with nREPL"
+           ["--color" "Use color"
             :flag true]
            ["--skip-default-init" "Skip the default initialization code"
             :flag true]
