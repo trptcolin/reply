@@ -24,7 +24,7 @@
 (defn handle-ctrl-c [signal]
   (concurrency/stop-running-actions))
 
-(defn execute [{:keys [print-value print-out print-err] :as options}
+(defn execute [{:keys [value-to-string print-value print-out print-err] :as options}
                form]
   (let [actual-form (try (read-string form)
                          (catch Throwable t ""))
@@ -34,13 +34,14 @@
                  (catch InterruptedException e nil)
                  (catch Throwable t
                    (let [e (clojure.main/repl-exception t)]
-                     ((or print-err println) e))
+                     ((or print-err print) e)
+                     (println))
                    failure-sentinel))]
     ;lazyseq: (1 2 3 4 5 ...)
     ;pr: "(1 2 3 4 5 ...)"
     (when (not= failure-sentinel result)
-      (print-value result))
-    (when (:interactive options) (println))
+      (print-value (value-to-string result))
+      (when (:interactive options) (println)))
     (eval-state/get-ns-string)))
 
 (defn run-repl [{:keys [prompt subsequent-prompt history-file
@@ -69,6 +70,8 @@
   (let [options (eval-modes.shared/set-default-options options)
         options (assoc options :caught (->fn (:caught options)
                                              clojure.main/repl-caught))
+        options (assoc options :value-to-string (->fn (:value-to-string options)
+                                                      pr-str))
         options (assoc options
                        :read-line-fn
                        (partial

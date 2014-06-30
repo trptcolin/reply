@@ -26,7 +26,7 @@
             :parse-fn initialization/formify-file]
            ["--standalone" "Launch standalone mode instead of the default nREPL"
             :flag true]
-           ["--color" "Use color; currently only available with nREPL"
+           ["--color" "Use color"
             :flag true]
            ["--skip-default-init" "Skip the default initialization code"
             :flag true]
@@ -35,7 +35,10 @@
             :parse-fn read-string]
            ["--subsequent-prompt" "Provide a custom subsequent prompt function"
             :parse-fn read-string]
-           ["--print-value" "Provide a custom value printing function"
+           ["--value-to-string" "Provide a custom value->string function (standalone mode only)"
+            :parse-fn read-string
+            :default "pr-str"]
+           ["--print-value" "Provide a custom value-string printing function"
             :parse-fn read-string]
            ["--attach"
             "Attach to an existing nREPL session on this port or host:port"]
