@@ -35,7 +35,10 @@
             :parse-fn read-string]
            ["--subsequent-prompt" "Provide a custom subsequent prompt function"
             :parse-fn read-string]
-           ["--print-value" "Provide a custom value printing function"
+           ["--value-to-string" "Provide a custom value->string function (standalone mode only)"
+            :parse-fn read-string
+            :default "pr-str"]
+           ["--print-value" "Provide a custom value-string printing function"
             :parse-fn read-string]
            ["--attach"
             "Attach to an existing nREPL session on this port or host:port"]
