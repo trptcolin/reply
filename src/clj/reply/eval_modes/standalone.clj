@@ -31,12 +31,12 @@
         result (if (empty? form)
                  failure-sentinel
                  (try (reply-read-eval form)
-                 (catch InterruptedException e nil)
-                 (catch Throwable t
-                   (let [e (clojure.main/repl-exception t)]
-                     ((or print-err print) e)
-                     (println))
-                   failure-sentinel)))]
+                   (catch InterruptedException e nil)
+                   (catch Throwable t
+                     (let [e (clojure.main/repl-exception t)]
+                       ((or print-err print) e)
+                       (println))
+                     failure-sentinel)))]
     ;lazyseq: (1 2 3 4 5 ...)
     ;pr: "(1 2 3 4 5 ...)"
     (when (not= failure-sentinel result)
