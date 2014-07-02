@@ -9,34 +9,35 @@
             [reply.reader.simple-jline :as simple-jline]
             [reply.signals :as signals]))
 
-(defn make-future-eval [options]
+(defn make-future-read-eval [options]
   (concurrency/act-in-future
     (fn [form]
       (eval-state/with-bindings
-        (fn [] (eval form))))))
+        (fn [] (eval (read-string form)))))))
 
-(defn make-reply-eval [options]
-  (let [future-eval (make-future-eval options)]
+(defn make-reply-read-eval [options]
+  (let [future-read-eval (make-future-read-eval options)]
     (fn [form]
       (simple-jline/shutdown)
-      (future-eval form))))
+      (future-read-eval form))))
 
 (defn handle-ctrl-c [signal]
   (concurrency/stop-running-actions))
 
 (defn execute [{:keys [value-to-string print-value print-out print-err] :as options}
                form]
-  (let [actual-form (try (read-string form)
-                         (catch Throwable t ""))
-        reply-eval (make-reply-eval options)
+  (let [reply-read-eval (make-reply-read-eval options)
         failure-sentinel (Object.)
-        result (try (reply-eval actual-form)
-                 (catch InterruptedException e nil)
-                 (catch Throwable t
-                   (let [e (clojure.main/repl-exception t)]
-                     ((or print-err print) e)
-                     (println))
-                   failure-sentinel))]
+        result (if (empty? form)
+                 failure-sentinel
+                 (do
+                   (try (reply-read-eval form)
+                   (catch InterruptedException e nil)
+                   (catch Throwable t
+                     (let [e (clojure.main/repl-exception t)]
+                       ((or print-err print) e)
+                       (println))
+                 failure-sentinel))))]
     ;lazyseq: (1 2 3 4 5 ...)
     ;pr: "(1 2 3 4 5 ...)"
     (when (not= failure-sentinel result)
@@ -78,7 +79,7 @@
                          simple-jline/safe-read-line
                          (fn [form]
                            (binding [*print-length* nil]
-                             ((make-future-eval options) form)))))
+                             ((concurrency/act-in-future eval) form)))))
         non-interactive-eval (fn [form]
                                (execute (assoc options :print-value (constantly nil))
                                         (binding [*print-length* nil

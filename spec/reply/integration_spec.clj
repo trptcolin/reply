@@ -57,6 +57,42 @@
     (should-contain (with-out-str (initialization/help)) (str @fake-out))
     (should-contain "Bye for now!\n" (str @fake-out)))
 
+  (it "echoes a string back as a string"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "\"test\"\n"))
+                             :output-stream @fake-out})
+    (should-contain "\"test\"" (str @fake-out)))
+
+  (it "prints an error when given something that can't be read"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes ")\n"))
+                             :output-stream @fake-out})
+    (should-contain "Unmatched delimiter" (str @fake-out)))
+
+  (it "puts read-time errors into *e"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes ")\n*e\n"))
+                             :output-stream @fake-out})
+    (should-contain #"Unmatched delimiter.+\n.+\n.+Unmatched delimiter" (str @fake-out)))
+
+  (it "does not print an error when given empty input lines"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "\n\n\n"))
+                             :output-stream @fake-out})
+    (should-not-contain "EOF while reading" (str @fake-out))
+    (should-not-contain "RuntimeException" (str @fake-out)))
+
+  (it "does not set *1 when given empty input lines"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "424242\n\n\n(* 2 *1)\n"))
+                             :output-stream @fake-out})
+    (should-contain "848484" (str @fake-out)))
+
   (it "tab-completes clojure.core fns"
     (main/launch-standalone {:input-stream
                              (java.io.ByteArrayInputStream.
@@ -64,6 +100,13 @@
                              :output-stream @fake-out})
     (should-contain "mapcat" (str @fake-out))
     (should-contain "map-indexed" (str @fake-out)))
+
+  (it "tab-completes without putting results into *1"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "424242\nmap\t\b\b\b(* 2 *1)\n"))
+                             :output-stream @fake-out})
+    (should-contain "848484" (str @fake-out)))
   )
 
 (describe "nrepl integration" (tags :slow)
