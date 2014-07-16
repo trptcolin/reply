@@ -107,6 +107,15 @@
                                (.getBytes "424242\nmap\t\b\b\b(* 2 *1)\n"))
                              :output-stream @fake-out})
     (should-contain "848484" (str @fake-out)))
+
+  (it "does not crash when printing throws an exception"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "(lazy-seq #())\n"))
+                             :output-stream @fake-out})
+    ; If we're not crashing, output should lack a full stack trace
+    ; that starts with clojure.lang.LazySeq.sval
+    (should-not-contain "LazySeq" (str @fake-out)))
   )
 
 (describe "nrepl integration" (tags :slow)
