@@ -26,21 +26,14 @@
 
 (defn execute [{:keys [value-to-string print-value print-out print-err] :as options}
                form]
-  (let [reply-read-eval (make-reply-read-eval options)
-        failure-sentinel (Object.)
-        result (if (empty? form)
-                 failure-sentinel
-                 (try (reply-read-eval form)
-                   (catch InterruptedException e nil)
-                   (catch Throwable t
-                     (let [e (clojure.main/repl-exception t)]
-                       ((or print-err print) e)
-                       (println))
-                     failure-sentinel)))]
-    ;lazyseq: (1 2 3 4 5 ...)
-    ;pr: "(1 2 3 4 5 ...)"
-    (when (not= failure-sentinel result)
-      (print-value (value-to-string result))
+  (let [reply-read-eval (make-reply-read-eval options)]
+    (when-not (empty? form)
+      (try
+        (print-value (value-to-string (reply-read-eval form)))
+        (catch InterruptedException e nil)
+        (catch Throwable t
+          (let [e (clojure.main/repl-exception t)]
+            ((or print-err print) e))))
       (when (:interactive options) (println)))
     (eval-state/get-ns-string)))
 
