@@ -2,11 +2,13 @@
   (:require [clojure.pprint]
             [clojure.repl]
             [clojure.main]
+            [clojure.tools.nrepl :only [version]]
             [trptcolin.versioneer.core :as version]))
 
 (def prelude
-  `[(println "REPL-y" ~(version/get-version "reply" "reply"))
-    (println "Clojure" (clojure-version))])
+  `[(println (str "REPL-y " ~(version/get-version "reply" "reply") ", nREPL " (:version-string clojure.tools.nrepl/version)))
+    (println "Clojure" (clojure-version))
+    (println (System/getProperty "java.vm.name") (System/getProperty "java.runtime.version"))])
 
 (defn help
   "Prints a list of helpful commands."
