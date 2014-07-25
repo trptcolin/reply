@@ -1,10 +1,10 @@
 (ns reply.reader.jline.completion
   (:require [reply.completion :as completion]
-            [complete.core])
+            [compliment.core])
   (:import [jline.console.completer Completer]))
 
 (defn construct-possible-completions-form [prefix ns]
-  `(~'complete.core/completions (~'str ~prefix) (~'symbol ~ns)))
+  `(~'compliment.core/completions (~'str ~prefix) (~'symbol ~ns) nil))
 
 (defn get-prefix [buffer cursor]
   (let [buffer (or buffer "")]

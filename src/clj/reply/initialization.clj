@@ -3,6 +3,7 @@
             [clojure.repl]
             [clojure.main]
             [clojure.tools.nrepl :only [version]]
+            [compliment.core :only [all-files]]
             [trptcolin.versioneer.core :as version]))
 
 (def prelude
@@ -143,30 +144,29 @@
         ((ns-resolve (symbol "cd-client.core") (symbol "pr-examples-core"))
          ~ns-str ~var-str))))
 
-(defn formify-file [f]
-  (read-string (str "(do " (slurp f) ")")))
+(defn formify-files [files]
+  (read-string (str "(do " (apply str (map slurp files)) ")")))
+
+(defn compliment-files []
+  (map #(-> (Thread/currentThread)
+            (.getContextClassLoader)
+            (.getResource %))
+       compliment.core/all-files))
 
 (defn completion-code []
   `(try
-     (require '[complete.core])
-     ; hack for 1.2 support until we release the next clojure-complete version
-     ~(export-definition 'reply.initialization/resolve-class)
-     (~'reply.exports/intern-with-meta
-       '~'complete.core '~'resolve-class ~'#'resolve-class)
+     (require '[compliment.core])
 
      (catch Exception e#
        (try
          (eval
            '~(try
-               (formify-file
-                 (-> (Thread/currentThread)
-                     (.getContextClassLoader)
-                     (.getResource "complete/core.clj")))
+               (formify-files (compliment-files))
                (catch Exception e
-                 '(throw (Exception. "Couldn't find complete/core.clj")))))
+                 '(throw (Exception. "Couldn't find compliment/core.clj")))))
          (catch Exception f#
-           (intern (create-ns '~'complete.core) '~'completions
-                   (fn [prefix# ns#] []))
+           (intern (create-ns '~'compliment.core) '~'completions
+                   (fn [prefix# ns# context#] []))
            (println "Unable to initialize completions."))))))
 
 (defn default-init-code [{:keys [custom-help] :as options}]
@@ -228,4 +228,3 @@
      ~(when custom-eval custom-eval)
      ~(when custom-init custom-init)
     nil))
-

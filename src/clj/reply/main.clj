@@ -22,8 +22,8 @@
             "[experimental] Provide an error handler function (0-1 arguments)."
             :parse-fn read-string]
            ["-i" "--init" "--custom-init"
-            "Provide a Clojure file to evaluate in the user ns"
-            :parse-fn initialization/formify-file]
+            "Provide Clojure files to evaluate in the user ns"
+            :parse-fn initialization/formify-files]
            ["--standalone" "Launch standalone mode instead of the default nREPL"
             :flag true]
            ["--color" "Use color"

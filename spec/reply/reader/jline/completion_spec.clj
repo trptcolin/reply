@@ -4,8 +4,8 @@
 
 (describe "construct-possible-completions-form"
   (it "does correct quoting in completions form request"
-    (should= '(complete.core/completions (str "clojure.core/map-") (symbol "user"))
-             (construct-possible-completions-form "clojure.core/map-" "user"))))
+      (should= '(compliment.core/completions (str "clojure.core/map-") (symbol "user") nil)
+               (construct-possible-completions-form "clojure.core/map-" "user"))))
 
 (describe "using the completer"
 
@@ -17,7 +17,7 @@
   (it "populates the list with possible completions"
     (let [candidates (java.util.LinkedList.)
           word-start (.complete @completer " (map" 5 candidates)]
-      (should= ["map" "map-indexed" "map?" "mapcat" "mapv"]
+      (should= ["map" "map?" "mapv" "mapcat" "map-indexed"]
                candidates)
       (should= 1 @@redraw-count)
       (should= 2 word-start)))

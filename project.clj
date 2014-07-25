@@ -11,7 +11,7 @@
                    [org.clojure/tools.cli "0.3.1"]
                    [com.cemerick/drawbridge "0.0.6"]
                    [trptcolin/versioneer "0.1.1"]
-                   [clojure-complete "0.2.3"]
+                   [compliment "0.2.0"]
                    [net.cgrand/sjacket "0.1.1"
                     :exclusions [org.clojure/clojure]]]
     :min-lein-version "2.0.0"
