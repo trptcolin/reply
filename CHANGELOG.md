@@ -1,5 +1,14 @@
 # REPLy Changelog
 
+## 0.3.2, 2014-08-05
+- Move to official sjacket release (off trptcolin fork)
+- Lots of --standalone bugfixes (@ivan)
+- Display JVM/nREPL versions on startup (@bbatsov)
+
+## 0.3.1, 2014-06-10
+- Bump jline version (2.11 -> 2.12) to get lots of fixes
+- nREPL rendering options to support custom printers
+
 ## 0.3.0, 2013-11-11
 - Move all shutdown-agents calls into -main (technomancy/leiningen#1288)
 - Add newline when exiting (#126)
