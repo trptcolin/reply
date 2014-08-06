@@ -1,5 +1,8 @@
 # REPLy Changelog
 
+## 0.3.4 (there was no 0.3.3), 2014-08-06
+- Exclude nrepl from drawbridge dependency
+
 ## 0.3.2, 2014-08-05
 - Move to official sjacket release (off trptcolin fork)
 - Lots of --standalone bugfixes (@ivan)
