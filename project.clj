@@ -9,7 +9,8 @@
                    [clj-stacktrace "0.2.7"]
                    [org.clojure/tools.nrepl "0.2.3"]
                    [org.clojure/tools.cli "0.3.1"]
-                   [com.cemerick/drawbridge "0.0.6"]
+                   [com.cemerick/drawbridge "0.0.6"
+                    :exclusions [org.clojure/tools.nrepl]]
                    [trptcolin/versioneer "0.1.1"]
                    [clojure-complete "0.2.3"]
                    [net.cgrand/sjacket "0.1.1"
