@@ -87,7 +87,8 @@
         (reset! current-command-id nil)
         (let [input-result (read-input-line-fn)
               in-message-id (nrepl.misc/uuid)
-              message {:op "stdin" :stdin (str input-result "\n")
+              message {:op "stdin" :stdin (when input-result
+                                            (str input-result "\n"))
                        :id in-message-id}]
           (session-sender message)
           (reset! current-command-id command-id)))
