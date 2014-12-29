@@ -2,7 +2,7 @@
   (:require [clojure.pprint]
             [clojure.repl]
             [clojure.main]
-            [clojure.tools.nrepl :only [version]]
+            [clojure.tools.nrepl :refer [version]]
             [trptcolin.versioneer.core :as version]))
 
 (def prelude
