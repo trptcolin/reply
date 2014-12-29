@@ -69,11 +69,12 @@
                '(catch Throwable t# (clojure.repl/pst t#))])
     (finally (say-goodbye))))
 
-(defn launch-nrepl [options]
+(defn launch-nrepl
   "Launches the nREPL version of REPL-y, with options already parsed out. The
   options map can also include :input-stream and :output-stream entries, which
   must be Java objects passed via this entry point, as they can't be parsed
   from a command line."
+  [options]
   (with-launching-context options
     (eval-modes.nrepl/main options)))
 
