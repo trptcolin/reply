@@ -16,7 +16,8 @@
                    [net.cgrand/sjacket "0.1.1"
                     :exclusions [org.clojure/clojure]]]
     :min-lein-version "2.0.0"
-    :profiles {:dev {:dependencies ~dev-deps}}
+    :profiles {:dev {:dependencies ~dev-deps}
+               :base {:dependencies []}}
     :plugins ~dev-deps
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
