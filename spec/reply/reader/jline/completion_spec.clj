@@ -29,6 +29,13 @@
       (should= 0 @@redraw-count)
       (should= -1 word-start)))
 
+  (it "handles a single slash"
+    (let [candidates (java.util.LinkedList.)
+          word-start (.complete @completer "/" 1 candidates)]
+      (should= [] candidates)
+      (should= 0 @@redraw-count)
+      (should= -1 word-start)))
+
   (it "handles null buffer"
     (let [candidates (java.util.LinkedList.)
           word-start (.complete @completer nil 6 candidates)]
