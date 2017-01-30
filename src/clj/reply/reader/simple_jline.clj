@@ -2,7 +2,7 @@
   (:require [reply.reader.jline.completion :as jline.completion])
   (:import [java.io File FileInputStream FileDescriptor
             PrintStream ByteArrayOutputStream IOException]
-           [jline.console ConsoleReader]
+           [jline.console ConsoleReader ConsoleKeys]
            [jline.console.history FileHistory MemoryHistory]
            [jline.internal Configuration Log]))
 
@@ -68,6 +68,24 @@
     (when-let [completer (first (.getCompleters reader))]
       (.removeCompleter reader completer))))
 
+(defn ^Integer default-history-size
+  "Get default history size from system settings, or nil if not set.
+Set `app-name` for jline's reading of inputrc, or null for default."
+  [^String app-name]
+  (try
+    (-> (ConsoleKeys. app-name (ConsoleReader/getInputRc))
+        (.getVariable "history-size")
+        (Integer/parseInt))
+    (catch IOException ioe
+      nil)))
+
+(defn configure-history
+  "Configure a MemoryHistory or FileHistory's max-size, if size
+non-nil. Return nil."
+  [hist ^Integer size]
+  (when size
+    (.setMaxSize hist size)))
+
 (defn setup-console-reader
   [{:keys [prompt-string reader input-stream output-stream
            history-file completer-factory blink-parens]
@@ -77,12 +95,16 @@
          blink-parens true}
     :as state}]
   (let [reader (ConsoleReader. input-stream output-stream)
-        file-history (FileHistory. (make-history-file history-file))
+        hist-size (default-history-size nil) ;; currently null appName
+        file-history (doto (FileHistory. (make-history-file history-file) false)
+                       (configure-history hist-size)
+                       (.load))
         history (try
                   (flush-history file-history)
                   file-history
                   (catch IOException e
-                    (MemoryHistory.)))
+                    (doto (MemoryHistory.)
+                      (configure-history hist-size))))
         completer (if completer-factory
                     (completer-factory reader)
                     nil)]

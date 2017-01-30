@@ -1,5 +1,21 @@
 # REPLy Changelog
 
+## Unreleased
+- #166: Set history file max size from inputrc
+- Use newer jline2 to support history max size config
+
+## 0.4.0
+
+## 0.3.10
+
+## 0.3.8
+
+## 0.3.7
+
+## 0.3.6
+
+## 0.3.5
+
 ## 0.3.4 (there was no 0.3.3), 2014-08-06
 - Exclude nrepl from drawbridge dependency
 
