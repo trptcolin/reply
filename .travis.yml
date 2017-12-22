@@ -1,7 +1,8 @@
 language: clojure
-lein: lein2
-script: "lein2 do compile, spec"
+lein: lein
+script: "lein do compile, spec"
 jdk:
   - openjdk6
   - openjdk7
   - oraclejdk7
+  - oraclejdk8
