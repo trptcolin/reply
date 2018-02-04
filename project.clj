@@ -3,7 +3,7 @@
 
   (defproject reply "0.3.8-SNAPSHOT"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
-    :dependencies [[org.clojure/clojure "1.4.0"]
+    :dependencies [[org.clojure/clojure "1.6.0"]
                    [jline "2.14.5"]
                    [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.7"]
@@ -21,7 +21,7 @@
     :plugins ~dev-deps
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
-    :javac-options ["-target" "1.5" "-source" "1.5" "-Xlint:-options"]
+    :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
 ;    :jvm-opts ["-Djline.internal.Log.trace=true"]
     :test-paths ["spec"]
     :repl-options {:init-ns user}
