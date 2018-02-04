@@ -1,7 +1,7 @@
 (let [dev-deps '[[speclj "2.7.2"]
                  [classlojure "0.6.6"]]]
 
-  (defproject reply "0.3.8"
+  (defproject reply "0.3.9-SNAPSHOT"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.6.0"]
                    [jline "2.14.5"]
@@ -16,6 +16,9 @@
                    [org.clojars.trptcolin/sjacket "0.1.1.1"
                     :exclusions [org.clojure/clojure]]]
     :min-lein-version "2.0.0"
+    :license {:name "Eclipse Public License"
+              :url "http://www.eclipse.org/legal/epl-v10.html"}
+    :url "https://github.com/trptcolin/reply"
     :profiles {:dev {:dependencies ~dev-deps}
                :base {:dependencies []}}
     :plugins ~dev-deps
