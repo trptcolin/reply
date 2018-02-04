@@ -1,7 +1,7 @@
 (let [dev-deps '[[speclj "2.7.2"]
                  [classlojure "0.6.6"]]]
 
-  (defproject reply "0.3.8-SNAPSHOT"
+  (defproject reply "0.3.8"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.6.0"]
                    [jline "2.14.5"]
