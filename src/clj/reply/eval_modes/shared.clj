@@ -33,3 +33,13 @@
                            {:no-jline true
                             :prompt-string ""})))]
     options))
+
+(defn load-parsed-forms-fn-in-background
+  "Loading of reply.parsing namespace takes a lot of time. We can do it in
+  background while the user is typing their first form, that way user spends
+  less time waiting.
+
+  Return the future that delivers `reply.parsing/parsed-forms` function."
+  []
+  (future (require 'reply.parsing)
+          (resolve 'reply.parsing/parsed-forms)))

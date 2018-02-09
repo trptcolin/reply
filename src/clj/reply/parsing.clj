@@ -56,12 +56,13 @@
   - prompt-string: for customizing the prompt
   - text-so-far: mostly useful in the recursion
   And returns a seq of *strings* representing complete forms."
-  [{:keys [request-exit text-so-far read-line-fn] :as options}]
-  (if-let [next-text (read-line-fn options)]
+  ([options]
+   (parsed-forms ((:read-line-fn options) options) options))
+  ([next-text {:keys [request-exit text-so-far] :as options}]
+   (if next-text
      (let [interrupted? (= :interrupted next-text)
            parse-tree (when-not interrupted? (reparse text-so-far next-text))]
        (if (or interrupted? (empty? (:content parse-tree)))
          (list "")
          (process-parse-tree parse-tree options)))
-     (list request-exit)))
-
+     (list request-exit))))

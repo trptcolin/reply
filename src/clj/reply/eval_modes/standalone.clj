@@ -5,7 +5,6 @@
             [reply.eval-state :as eval-state]
             [reply.exit :as exit]
             [reply.initialization :as initialization]
-            [reply.parsing :as parsing]
             [reply.reader.simple-jline :as simple-jline]
             [reply.signals :as signals]))
 
@@ -43,8 +42,7 @@
   (loop [ns (eval-state/get-ns-string)]
     (let [eof (Object.)
           execute (partial execute (assoc options :interactive true))
-          forms (parsing/parsed-forms
-                  {:request-exit eof
+          pf-opts {:request-exit eof
                    :prompt-string (prompt ns)
                    :ns ns
                    :read-line-fn read-line-fn
@@ -52,7 +50,10 @@
                    :input-stream input-stream
                    :output-stream output-stream
                    :subsequent-prompt-string (subsequent-prompt ns)
-                   :text-so-far nil})]
+                   :text-so-far nil}
+          parsed-forms-fn (eval-modes.shared/load-parsed-forms-fn-in-background)
+          read-text (read-line-fn pf-opts)
+          forms (@parsed-forms-fn read-text pf-opts)]
       (if (exit/done? eof (first forms))
         nil
         (recur (last (doall (map execute forms))))))))
