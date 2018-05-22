@@ -2,11 +2,11 @@
   (:require [clojure.pprint]
             [clojure.repl]
             [clojure.main]
-            [clojure.tools.nrepl]
+            [nrepl.core]
             [trptcolin.versioneer.core :as version]))
 
 (def prelude
-  `[(println (str "REPL-y " ~(version/get-version "reply" "reply") ", nREPL " (:version-string clojure.tools.nrepl/version)))
+  `[(println (str "REPL-y " ~(version/get-version "reply" "reply") ", nREPL " (:version-string nrepl.core/version)))
     (println "Clojure" (clojure-version))
     (println (System/getProperty "java.vm.name") (System/getProperty "java.runtime.version"))])
 
@@ -228,4 +228,3 @@
      ~(when custom-eval custom-eval)
      ~(when custom-init custom-init)
     nil))
-

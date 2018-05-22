@@ -7,7 +7,7 @@
                    [jline "2.14.5"]
                    [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.7"]
-                   [org.clojure/tools.nrepl "0.2.13"]
+                   [nrepl "0.4.0"]
                    [org.clojure/tools.cli "0.3.1"]
                    [com.cemerick/drawbridge "0.0.6"
                     :exclusions [org.clojure/tools.nrepl]]

@@ -2,10 +2,10 @@
   (:import [java.util.concurrent LinkedBlockingQueue TimeUnit]
            [java.net ServerSocket])
   (:require [clojure.main]
-            [clojure.tools.nrepl :as nrepl]
-            [clojure.tools.nrepl.misc :as nrepl.misc]
-            [clojure.tools.nrepl.server :as nrepl.server]
-            [clojure.tools.nrepl.transport :as nrepl.transport]
+            [nrepl.core :as nrepl]
+            [nrepl.misc :as nrepl.misc]
+            [nrepl.server :as nrepl.server]
+            [nrepl.transport :as nrepl.transport]
             [reply.exit]
             [reply.eval-modes.shared :as eval-modes.shared]
             [reply.eval-state :as eval-state]
@@ -235,4 +235,3 @@
       (run-repl client options)
       (reset-nrepl-state!)
       (simple-jline/shutdown))))
-
