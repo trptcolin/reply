@@ -73,7 +73,7 @@ me know if you are!
 ## Thanks
 
 Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
-[JLine](https://github.com/jline/jline2), [nREPL](https://github.com/clojure/tools.nrepl),
+[JLine](https://github.com/jline/jline2), [nREPL](https://github.com/nrepl/nrepl),
 [clojure-complete](https://github.com/ninjudd/clojure-complete),
 [ClojureDocs](http://clojuredocs.org), and [clojuredocs-client](https://github.com/dakrone/clojuredocs-client),
 for their work on the excellent projects that this project depends upon.
