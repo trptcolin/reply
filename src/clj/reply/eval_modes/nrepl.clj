@@ -150,7 +150,7 @@
    registered) if it's available."
   []
   (try
-    (require '[cemerick.drawbridge.client])
+    (require '[drawbridge.client])
     (catch Exception e)))
 
 (defn get-connection [{:keys [attach host port]}]
