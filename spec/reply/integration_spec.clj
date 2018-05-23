@@ -18,8 +18,8 @@
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
 (def nrepl
-  {:local-path "spec/nrepl-0.4.0.jar"
-   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.0/nrepl-0.4.0.jar"})
+  {:local-path "spec/nrepl-0.4.1.jar"
+   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.1/nrepl-0.4.1.jar"})
 
 (def logging
   {:local-path "spec/tools.logging-0.4.1.jar"
