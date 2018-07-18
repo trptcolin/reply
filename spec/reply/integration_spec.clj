@@ -58,6 +58,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "(* 21 2)\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain "42" (str @fake-out))
     (should-contain (with-out-str (initialization/help)) (str @fake-out))
     (should-contain "Bye for now!\n" (str @fake-out)))
@@ -67,6 +68,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "\"test\"\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain "\"test\"" (str @fake-out)))
 
   (it "prints an error when given something that can't be read"
@@ -74,6 +76,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes ")\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain "Unmatched delimiter" (str @fake-out)))
 
   (it "puts read-time errors into *e"
@@ -81,6 +84,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes ")\n*e\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain #"Unmatched delimiter.+\n.+\n.+Unmatched delimiter" (str @fake-out)))
 
   (it "does not print an error when given empty input lines"
@@ -88,6 +92,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "\n\n\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-not-contain "EOF while reading" (str @fake-out))
     (should-not-contain "RuntimeException" (str @fake-out)))
 
@@ -96,6 +101,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "424242\n\n\n(* 2 *1)\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain "848484" (str @fake-out)))
 
   (it "tab-completes clojure.core fns"
@@ -103,6 +109,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "map\t\nexit\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain "mapcat" (str @fake-out))
     (should-contain "map-indexed" (str @fake-out)))
 
@@ -111,6 +118,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "424242\nmap\t\b\b\b(* 2 *1)\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     (should-contain "848484" (str @fake-out)))
 
   (it "does not crash when printing throws an exception"
@@ -118,6 +126,7 @@
                              (java.io.ByteArrayInputStream.
                                (.getBytes "(lazy-seq #())\n"))
                              :output-stream @fake-out})
+    (should= "" (str @fake-err))
     ; If we're not crashing, output should lack a full stack trace
     ; that starts with clojure.lang.LazySeq.sval
     (should-not-contain "LazySeq" (str @fake-out)))
@@ -166,6 +175,7 @@
                           (java.io.ByteArrayInputStream.
                             (.getBytes "exit\n(println 'foobar)\n"))
                           :output-stream @fake-out})
+      (should= "" (str @fake-err))
       (should-contain (with-out-str (initialization/help)) (str @fake-out))
       (should-not-contain "foobar" (str @fake-out))
       (should-contain "Bye for now!\n" (str @fake-out)))
@@ -176,6 +186,7 @@
                           (java.io.ByteArrayInputStream.
                             (.getBytes "(doc map)\nexit\n"))
                           :output-stream @fake-out})
+      (should= "" (str @fake-err))
       (should-contain (with-out-str (clojure.repl/doc map))
                       (str @fake-out))))
 
@@ -187,5 +198,6 @@
                           (java.io.ByteArrayInputStream.
                             (.getBytes "map\t\nexit\n"))
                           :output-stream @fake-out})
+      (should= "" (str @fake-err))
       (should-contain "mapcat" (str @fake-out))
       (should-contain "map-indexed" (str @fake-out)))))

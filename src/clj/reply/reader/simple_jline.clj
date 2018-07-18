@@ -73,10 +73,12 @@
 Set `app-name` for jline's reading of inputrc, or null for default."
   [^String app-name]
   (try
-    (-> (ConsoleKeys. app-name (ConsoleReader/getInputRc))
-        (.getVariable "history-size")
-        (Integer/parseInt))
+    (some-> (ConsoleKeys. app-name (ConsoleReader/getInputRc))
+            (.getVariable "history-size")
+            (Integer/parseInt))
     (catch IOException ioe
+      nil)
+    (catch NumberFormatException nfe
       nil)))
 
 (defn configure-history
