@@ -18,18 +18,16 @@
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
 (def nrepl
-  {:local-path "spec/nrepl-0.4.1.jar"
-   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.1/nrepl-0.4.1.jar"})
+  {:local-path "spec/nrepl-0.4.4.jar"
+   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.4/nrepl-0.4.4.jar"})
 
 (def logging
   {:local-path "spec/tools.logging-0.4.1.jar"
    :remote-url "http://central.maven.org/maven2/org/clojure/tools.logging/0.4.1/tools.logging-0.4.1.jar"})
 
 (def clojure
-  {:local-path "spec/clojure-1.5.1.jar"
-   :remote-url "http://repo1.maven.org/maven2/org/clojure/clojure/1.5.1/clojure-1.5.1.jar"})
-  ;{:local-path "spec/clojure-1.6.0-master-SNAPSHOT.jar"
-  ; :remote-url "file:///Users/colin/.m2/repository/org/clojure/clojure/1.6.0-master-SNAPSHOT/clojure-1.6.0-master-SNAPSHOT.jar"})
+  {:local-path "spec/clojure-1.6.0.jar"
+   :remote-url "http://repo1.maven.org/maven2/org/clojure/clojure/1.6.0/clojure-1.6.0.jar"})
 
 (defn ensure-test-jar [{:keys [local-path remote-url]}]
   (let [file (java.io.File. local-path)]
