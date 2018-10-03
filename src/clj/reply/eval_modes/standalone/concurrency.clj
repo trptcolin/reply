@@ -26,7 +26,6 @@
   (let [thread (:thread @action)]
     (when thread (.interrupt thread))
     (when hard-kill-allowed
-      (Thread/sleep 2000)
       (when (and @action (not (:completed @action)) (.isAlive thread))
         (println ";;;;;;;;;;")
         (println "; Sorry, have to call Thread.stop on this command.")
