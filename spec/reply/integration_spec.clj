@@ -140,6 +140,7 @@
   (around [f]
     (let [cl (classlojure/classlojure
                (str "file:" (:local-path logging))
+               (str "file:" (:local-path bencode))
                (str "file:" (:local-path nrepl))
                (str "file:" (:local-path clojure)))
           server-port

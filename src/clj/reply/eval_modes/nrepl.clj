@@ -155,11 +155,9 @@
 
 (defn get-connection [{:keys [attach host port]}]
   (let [server (when-not attach
-                 (nrepl.server/start-server
-                   :port (Integer/parseInt (str (or port 0)))))
+                 (nrepl.server/start-server :port port))
         port (when-not attach
-               (let [^ServerSocket socket (-> server deref :ss)]
-                 (.getLocalPort socket)))
+               (:port server))
         url (url-for attach host port)]
     (when server
       (reset! nrepl-server server))
