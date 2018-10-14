@@ -18,8 +18,12 @@
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
 (def nrepl
-  {:local-path "spec/nrepl-0.4.4.jar"
-   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.4/nrepl-0.4.4.jar"})
+  {:local-path "spec/nrepl-0.4.5.jar"
+   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.5/nrepl-0.4.5.jar"})
+
+(def bencode
+  {:local-path "spec/bencode-1.0.0.jar"
+   :remote-url "https://clojars.org/repo/nrepl/bencode/1.0.0/bencode-1.0.0.jar"})
 
 (def logging
   {:local-path "spec/tools.logging-0.4.1.jar"
@@ -39,6 +43,7 @@
 
 (ensure-test-jar clojure)
 (ensure-test-jar logging)
+(ensure-test-jar bencode)
 (ensure-test-jar nrepl)
 
 (describe "standalone mode"
