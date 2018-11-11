@@ -173,7 +173,9 @@
        :session session}
       (binding [*print-length* nil
                 *print-level* nil]
-        (pr-str `(binding [*ns* (the-ns (symbol ~(deref current-ns)))] ~form))))
+        (pr-str `(binding [*ns* (or (find-ns (symbol ~(deref current-ns)))
+                                    *ns*)]
+                   ~form))))
     (read-string @results)))
 
 (defn poll-for-responses [{:keys [print-out print-err] :as options} connection]
