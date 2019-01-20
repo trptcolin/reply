@@ -137,13 +137,13 @@
          (recur (last (doall (map execute forms)))))))))
 
 ;; TODO: this could be less convoluted if we could break backwards-compat
-(defn- url-for [attach host port]
+(defn- url-for [attach host port scheme]
   (if (and attach (re-find #"^\w+://" attach))
     attach
     (let [[port host] (if attach
                         (reverse (.split ^String attach ":"))
                         [port host])]
-      (format "nrepl://%s:%s" (or host "localhost") port))))
+      (format "%s://%s:%s" scheme (or host "localhost") port))))
 
 (defn- load-drawbridge
   "Load Drawbridge (and therefore get its HTTP/HTTPS multimethods
@@ -153,12 +153,13 @@
     (require '[drawbridge.client])
     (catch Exception e)))
 
-(defn get-connection [{:keys [attach host port]}]
+(defn get-connection [{:keys [attach host port scheme]
+                       :or {scheme "nrepl"}}]
   (let [server (when-not attach
                  (nrepl.server/start-server :port port))
         port (when-not attach
                (:port server))
-        url (url-for attach host port)]
+        url (url-for attach host port scheme)]
     (when server
       (reset! nrepl-server server))
     (when (-> url java.net.URI. .getScheme .toLowerCase #{"http" "https"})
