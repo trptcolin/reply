@@ -1,24 +1,7 @@
-# See the following for getting openjdk6 installed
-# - https://github.com/travis-ci/travis-ci/issues/9713
-# - https://github.com/SethTisue/scala-parser-combinators/commit/6c7679ba609029f18ee987db716a565755b62d02
-sudo: true
-
 language: clojure
 lein: lein
-
-script:
-  - echo $JAVA_HOME
-  - if [[ $JAVA_HOME = *java-6* ]]; then jdk_switcher use openjdk6; fi
-  - java -version
-  - lein do compile, spec
-
-addons:
-  apt:
-    packages:
-      - openjdk-6-jdk
-
+script: lein do compile, spec
 jdk:
-  - openjdk6
   - openjdk7
   - openjdk8
   - oraclejdk8
