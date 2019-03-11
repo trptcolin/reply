@@ -1,9 +1,14 @@
 language: clojure
 lein: lein
 script: "lein do compile, spec"
+addons:
+  apt:
+    packages:
+      - openjdk-6-jdk
 jdk:
   - openjdk6
   - openjdk7
-  - oraclejdk7
+  - openjdk8
   - oraclejdk8
   - oraclejdk9
+  - oraclejdk11
