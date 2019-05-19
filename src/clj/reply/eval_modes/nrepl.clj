@@ -156,7 +156,9 @@
 (defn get-connection [{:keys [attach host port scheme]
                        :or {scheme "nrepl"}}]
   (let [server (when-not attach
-                 (nrepl.server/start-server :port port))
+                 (nrepl.server/start-server
+                   :port (when port
+                           (-> port str Integer/parseInt))))
         port (when-not attach
                (:port server))
         url (url-for attach host port scheme)]
