@@ -3,6 +3,7 @@
 A fitter, happier, more productive REPL for Clojure.
 
 ## Improvements over the existing REPL that comes in clojure.jar
+
 - A number of readline commands, some not available in earlier JLine versions:
   - navigation to the start/end of lines, and forward/back by word
   - history navigation and search
@@ -20,12 +21,12 @@ A fitter, happier, more productive REPL for Clojure.
 
 ## Installation
 
-REPLy is now part of [leiningen](https://github.com/technomancy/leiningen), as
+REPLy is now part of [Leiningen][], as
 of the 2.x series. It's definitely your best bet for installation and Clojure
 development in general.
 
 And here's how to get a standalone version up and running (assuming you have
-[leiningen](https://github.com/technomancy/leiningen.git) installed):
+Leiningen installed):
 
     git clone https://github.com/trptcolin/reply.git
     cd reply
@@ -69,7 +70,6 @@ You can use the `--standalone` flag to rule out any nREPL-related questions,
 but I'm not aware of anyone using `--standalone` for other purposes. Please let
 me know if you are!
 
-
 ## Thanks
 
 Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
@@ -81,10 +81,11 @@ for their work on the excellent projects that this project depends upon.
 Special thanks to [8th Light](http://8thlight.com) for allowing me to work on
 this during our open-source Friday afternoons.
 
-
 ## License
 
 Copyright (C) 2011-2014 Colin Jones
 
 Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.
+
+[Leiningen]: https://leiningen.org
