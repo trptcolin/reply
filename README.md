@@ -34,6 +34,8 @@ Leiningen installed):
 
 ## Usage
 
+### Leiningen
+
 The easiest way to use REPLy is simply to run `lein repl` (for 2.x). That's it!
 
 If you want to check out the latest stuff on REPLy master, you can run `lein
@@ -42,10 +44,27 @@ trampoline run` in this project.
 If you're confined to Leiningen 1.x, you can use the example bin scripts that
 are set up to work with Leiningen 1.x.
 
-If for some reason your use case requires avoiding Leiningen, you can use the
-bin scripts as a guide (you're probably used to shell scripting anyway, in that
-case). If you want to add additional dependencies to the classpath, setting
-`$USER_CP` will. For example: `USER_CP=$(lein classpath) reply`.
+### Boot
+
+[Boot][] bundles REPLy, so all you have to do is:
+
+    boot repl
+
+### Clojure CLI (tools.deps)
+
+**Note:** This section assumes you're using Clojure 1.9+.
+
+Starting REPLy using the `clojure` command is as easy as:
+
+    clojure -Sdeps '{:deps {reply {:mvn/version "0.4.3"}}}' -m reply.main
+
+### Other
+
+If for some reason your use case requires avoiding the tools listed so
+far, you can use the bin scripts as a guide (you're probably used to
+shell scripting anyway, in that case). If you want to add additional
+dependencies to the classpath, setting `$USER_CP` will. For example:
+`USER_CP=$(lein classpath) reply`.
 
 If you want to use REPLy from another piece of software, your entry point
 should be `reply.main/launch-nrepl`. There are lots of options, which you can
@@ -89,3 +108,4 @@ Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.
 
 [Leiningen]: https://leiningen.org
+[Boot]: https://boot-clj.com/
