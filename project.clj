@@ -6,7 +6,7 @@
     :dependencies [[org.clojure/clojure "1.6.0"]
                    [jline "2.14.6"]
                    [org.thnetos/cd-client "0.3.6"]
-                   [clj-stacktrace "0.2.7"]
+                   [clj-stacktrace "0.2.8"]
                    [nrepl "0.7.0"]
                    [org.clojure/tools.cli "0.3.1"]
                    [nrepl/drawbridge "0.2.1"]
