@@ -56,7 +56,7 @@ are set up to work with Leiningen 1.x.
 
 Starting REPLy using the `clojure` command is as easy as:
 
-    clojure -Sdeps '{:deps {reply {:mvn/version "0.4.3"}}}' -m reply.main
+    clojure -Sdeps '{:deps {reply {:mvn/version "0.4.4"}}}' -m reply.main
 
 ### Other
 
