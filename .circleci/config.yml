@@ -25,7 +25,7 @@ jobs:
           key: reply-{{ checksum "project.clj" }}
       - run:
           name: Run Tests
-          command: lein test
+          command: lein do compile, spec
       - save_cache:
           paths:
             - $HOME/.m2
