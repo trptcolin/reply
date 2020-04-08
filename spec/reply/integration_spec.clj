@@ -18,20 +18,12 @@
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
 (def nrepl
-  {:local-path "spec/nrepl-0.4.5.jar"
-   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.4.5/nrepl-0.4.5.jar"})
-
-(def bencode
-  {:local-path "spec/bencode-1.0.0.jar"
-   :remote-url "https://clojars.org/repo/nrepl/bencode/1.0.0/bencode-1.0.0.jar"})
-
-(def logging
-  {:local-path "spec/tools.logging-0.4.1.jar"
-   :remote-url "http://central.maven.org/maven2/org/clojure/tools.logging/0.4.1/tools.logging-0.4.1.jar"})
+  {:local-path "spec/nrepl-0.7.0.jar"
+   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.7.0/nrepl-0.7.0.jar"})
 
 (def clojure
-  {:local-path "spec/clojure-1.6.0.jar"
-   :remote-url "http://repo1.maven.org/maven2/org/clojure/clojure/1.6.0/clojure-1.6.0.jar"})
+  {:local-path "spec/clojure-1.7.0.jar"
+   :remote-url "https://search.maven.org/artifact/org.clojure/clojure/1.7.0/jar"})
 
 (defn ensure-test-jar [{:keys [local-path remote-url]}]
   (let [file (java.io.File. local-path)]
@@ -42,8 +34,6 @@
         (io/copy in out)))))
 
 (ensure-test-jar clojure)
-(ensure-test-jar logging)
-(ensure-test-jar bencode)
 (ensure-test-jar nrepl)
 
 (describe "standalone mode"
@@ -139,8 +129,6 @@
 
   (around [f]
     (let [cl (classlojure/classlojure
-               (str "file:" (:local-path logging))
-               (str "file:" (:local-path bencode))
                (str "file:" (:local-path nrepl))
                (str "file:" (:local-path clojure)))
           server-port
