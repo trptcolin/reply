@@ -23,7 +23,7 @@
 
 (def clojure
   {:local-path "spec/clojure-1.7.0.jar"
-   :remote-url "https://search.maven.org/artifact/org.clojure/clojure/1.7.0/jar"})
+   :remote-url "https://repo1.maven.org/maven2/org/clojure/clojure/1.7.0/clojure-1.7.0.jar"})
 
 (defn ensure-test-jar [{:keys [local-path remote-url]}]
   (let [file (java.io.File. local-path)]
