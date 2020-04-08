@@ -1,0 +1,49 @@
+version: 2.1
+
+executors:
+  clojure:
+    docker:
+      - image: clojure:<< parameters.java_version >>-lein-2.9.1
+    parameters:
+      java_version:
+        description: "Java version"
+        default: "openjdk-11"
+        type: string
+    working_directory: ~/reply
+
+jobs:
+  build:
+    executor: clojure
+    parameters:
+      java_version:
+        description: "Java version"
+        default: << parameters.java_version >>
+        type: string
+    steps:
+      - checkout
+      - restore_cache:
+          key: reply-{{ checksum "project.clj" }}
+      - run:
+          name: Run Tests
+          command: lein test
+      - save_cache:
+          paths:
+            - $HOME/.m2
+            - $HOME/.lein
+          key: reply-{{ checksum "project.clj" }}
+
+workflows:
+  test-with-matrix:
+    jobs:
+      - build:
+          name: "openjdk8"
+          java_version: "openjdk-8"
+      - build:
+          name: "openjdk11"
+          java_version: "openjdk-11"
+      - build:
+          name: "openjdk13"
+          java_version: "openjdk-13"
+      - build:
+          name: "openjdk14"
+          java_version: "openjdk-14"

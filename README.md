@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/trptcolin/reply/tree/master.svg?style=svg)](https://circleci.com/gh/trptcolin/reply/tree/master)
+
 # REPL-y
 
 A fitter, happier, more productive REPL for Clojure.
