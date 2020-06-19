@@ -78,7 +78,8 @@
                                (.getBytes ")\n*e\n"))
                              :output-stream @fake-out})
     (should= "" (str @fake-err))
-    (should-contain #"Unmatched delimiter.+\n.+\n.+Unmatched delimiter" (str @fake-out)))
+    (should-contain #"Unmatched delimiter" (str @fake-out))
+    (should-contain #"user=> \*e\n#error" (str @fake-out)))
 
   (it "does not print an error when given empty input lines"
     (main/launch-standalone {:input-stream
@@ -120,10 +121,8 @@
                                (.getBytes "(lazy-seq #())\n"))
                              :output-stream @fake-out})
     (should= "" (str @fake-err))
-    ; If we're not crashing, output should lack a full stack trace
-    ; that starts with clojure.lang.LazySeq.sval
-    (should-not-contain "LazySeq" (str @fake-out)))
-  )
+    ;; clean shutdown
+    (should-contain "\nuser=> Bye for now!\n" (str @fake-out))))
 
 (describe "nrepl integration" (tags :slow)
 
