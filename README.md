@@ -25,11 +25,9 @@ A fitter, happier, more productive REPL for Clojure.
 
 ## Installation
 
-REPLy is now part of [Leiningen][], as
-of the 2.x series. It's definitely your best bet for installation and Clojure
-development in general.
+REPLy is bundled with [Leiningen][] and [Boot][]. If you're using one of the two then you're covered.
 
-And here's how to get a standalone version up and running (assuming you have
+Here's how to get a standalone version up and running (assuming you have
 Leiningen installed):
 
     git clone https://github.com/trptcolin/reply.git
@@ -40,13 +38,10 @@ Leiningen installed):
 
 ### Leiningen
 
-The easiest way to use REPLy is simply to run `lein repl` (for 2.x). That's it!
+The easiest way to use REPLy is simply to run `lein repl`. That's it!
 
 If you want to check out the latest stuff on REPLy master, you can run `lein
 trampoline run` in this project.
-
-If you're confined to Leiningen 1.x, you can use the example bin scripts that
-are set up to work with Leiningen 1.x.
 
 ### Boot
 
@@ -60,15 +55,15 @@ Starting REPLy using the `clojure` command is as easy as:
 
     # Assuming Clojure 1.9, and Clojure CLI 1.10.1.727 or later
     clojure -Sdeps '{:deps {reply/reply {:mvn/version "0.4.4"}}}' -M -m reply.main
-    
+
     # Assuming Clojure 1.9 and later, and Clojure CLI before 1.10.1.727
     clojure -Sdeps '{:deps {reply {:mvn/version "0.4.4"}}}' -m reply.main
-    
-**Note:** use `clojure -Sdescribe` to see your Clojure CLI version. On the other
+
+**Note:** Use `clojure -Sdescribe` to see your Clojure CLI version. On the other
 hand, the Clojure version, being Clojure just a library, depends on the deps.
 To see what you could consider the default Clojure, you could use
 `clojure -e '(clojure-version)'`.
-[More information about the disctintion between Clojure CLI and Clojure](https://clojureverse.org/t/how-to-declare-a-super-specific-version-of-clojure-in-the-deps-edn/6751/2?u=jgomo3).
+[More information about the distinction between Clojure CLI and Clojure](https://clojureverse.org/t/how-to-declare-a-super-specific-version-of-clojure-in-the-deps-edn/6751/2?u=jgomo3).
 
 ### Other
 
