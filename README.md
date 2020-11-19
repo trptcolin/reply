@@ -56,11 +56,19 @@ are set up to work with Leiningen 1.x.
 
 ### Clojure CLI (tools.deps)
 
-**Note:** This section assumes you're using Clojure 1.9+.
-
 Starting REPLy using the `clojure` command is as easy as:
 
+    # Assuming Clojure 1.9, and Clojure CLI 1.10.1.727 or later
+    clojure -Sdeps '{:deps {reply/reply {:mvn/version "0.4.4"}}}' -M -m reply.main
+    
+    # Assuming Clojure 1.9 and later, and Clojure CLI before 1.10.1.727
     clojure -Sdeps '{:deps {reply {:mvn/version "0.4.4"}}}' -m reply.main
+    
+**Note:** use `clojure -Sdescribe` to see your Clojure CLI version. On the other
+hand, the Clojure version, being Clojure just a library, depends on the deps.
+To see what you could consider the default Clojure, you could use
+`clojure -e '(clojure-version)'`.
+[More information about the disctintion between Clojure CLI and Clojure](https://clojureverse.org/t/how-to-declare-a-super-specific-version-of-clojure-in-the-deps-edn/6751/2?u=jgomo3).
 
 ### Other
 
