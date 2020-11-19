@@ -8,6 +8,7 @@
                    [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.8"]
                    [nrepl "0.8.3"]
+                   ;; tools.cli 1.0 requires Clojure 1.8
                    [org.clojure/tools.cli "0.3.1"]
                    [nrepl/drawbridge "0.2.1"]
                    [trptcolin/versioneer "0.1.1"]
