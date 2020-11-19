@@ -23,7 +23,7 @@
     :plugins ~dev-deps
     :source-paths ["src/clj"]
     :java-source-paths ["src/java"]
-    :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
+    :javac-options ["-target" "8" "-source" "8" "-Xlint:-options"]
 ;    :jvm-opts ["-Djline.internal.Log.trace=true"]
     :test-paths ["spec"]
     :repl-options {:init-ns user}
