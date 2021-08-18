@@ -12,7 +12,7 @@
                    [org.clojure/tools.cli "0.3.1"]
                    [nrepl/drawbridge "0.2.1"]
                    [trptcolin/versioneer "0.1.1"]
-                   [clojure-complete "0.2.5"]
+                   [org.nrepl/incomplete "0.1.0"]
                    [org.clojars.trptcolin/sjacket "0.1.1.1"
                     :exclusions [org.clojure/clojure]]]
     :min-lein-version "2.0.0"
