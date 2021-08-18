@@ -1,6 +1,7 @@
 [![CircleCI](https://circleci.com/gh/trptcolin/reply/tree/main.svg?style=svg)](https://circleci.com/gh/trptcolin/reply/tree/main)
 [![Clojars Project](https://img.shields.io/clojars/v/reply/reply.svg)](https://clojars.org/reply/reply)
 [![cljdoc badge](https://cljdoc.org/badge/reply/reply)](https://cljdoc.org/d/reply/reply/CURRENT)
+[![downloads badge](https://versions.deps.co/reply/reply/downloads.svg)](https://clojars.org/reply/reply)
 
 # REPL-y
 
