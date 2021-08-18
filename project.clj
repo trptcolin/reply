@@ -1,7 +1,7 @@
 (let [dev-deps '[[speclj "2.7.2"]
                  [classlojure "0.6.6"]]]
 
-  (defproject reply "0.4.5-SNAPSHOT"
+  (defproject reply "0.5.0"
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.7.0"]
                    [jline "2.14.6"]
@@ -29,4 +29,8 @@
     :test-paths ["spec"]
     :repl-options {:init-ns user}
     :aot [reply.reader.jline.JlineInputReader]
-    :main ^{:skip-aot true} reply.ReplyMain))
+    :main ^{:skip-aot true} reply.ReplyMain
+    :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
+                                      :username :env/clojars_username
+                                      :password :env/clojars_password
+                                      :sign-releases true}]]))
