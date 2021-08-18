@@ -100,7 +100,7 @@ me know if you are!
 
 Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
 [JLine](https://github.com/jline/jline2), [nREPL](https://github.com/nrepl/nrepl),
-[clojure-complete](https://github.com/ninjudd/clojure-complete),
+[incomplete](https://github.com/nrepl/incomplete),
 [ClojureDocs](http://clojuredocs.org), and [clojuredocs-client](https://github.com/dakrone/clojuredocs-client),
 for their work on the excellent projects that this project depends upon.
 

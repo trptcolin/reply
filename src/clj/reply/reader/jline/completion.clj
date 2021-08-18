@@ -1,10 +1,10 @@
 (ns reply.reader.jline.completion
   (:require [reply.completion :as completion]
-            [complete.core])
+            [incomplete.core])
   (:import [jline.console.completer Completer]))
 
 (defn construct-possible-completions-form [prefix ns]
-  `(~'complete.core/completions (~'str ~prefix) (~'symbol ~ns)))
+  `(~'incomplete.core/completions (~'str ~prefix) (~'symbol ~ns)))
 
 (defn get-prefix [buffer cursor]
   (let [buffer (or buffer "")]
@@ -23,6 +23,6 @@
             (if (empty? possible-completions)
               -1
               (do
-                (.addAll candidates (map str possible-completions))
+                (.addAll candidates (map :candidate possible-completions))
                 (redraw-line-fn)
                 (- cursor prefix-length)))))))))

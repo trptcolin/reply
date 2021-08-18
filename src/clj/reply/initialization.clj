@@ -148,11 +148,11 @@
 
 (defn completion-code []
   `(try
-     (require '[complete.core])
+     (require '[incomplete.core])
      ; hack for 1.2 support until we release the next clojure-complete version
      ~(export-definition 'reply.initialization/resolve-class)
      (~'reply.exports/intern-with-meta
-       '~'complete.core '~'resolve-class ~'#'resolve-class)
+       '~'incomplete.core '~'resolve-class ~'#'resolve-class)
 
      (catch Exception e#
        (try
@@ -161,11 +161,11 @@
                (formify-file
                  (-> (Thread/currentThread)
                      (.getContextClassLoader)
-                     (.getResource "complete/core.clj")))
+                     (.getResource "incomplete/core.clj")))
                (catch Exception e
-                 '(throw (Exception. "Couldn't find complete/core.clj")))))
+                 '(throw (Exception. "Couldn't find incomplete/core.clj")))))
          (catch Exception f#
-           (intern (create-ns '~'complete.core) '~'completions
+           (intern (create-ns '~'incomplete.core) '~'completions
                    (fn [prefix# ns#] []))
            (println "Unable to initialize completions."))))))
 
