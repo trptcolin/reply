@@ -110,7 +110,7 @@ this during our open-source Friday afternoons.
 
 ## License
 
-Copyright (C) 2011-2020 Colin Jones
+Copyright (C) 2011-2021 Colin Jones
 
 Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.
