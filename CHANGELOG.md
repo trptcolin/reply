@@ -1,14 +1,35 @@
 # REPLy Changelog
 
 ## Unreleased
+
+## 0.5.0 (2021-08-18)
+- [#203](https://github.com/trptcolin/reply/pull/203): Replace `clojure-complete` with `incomplete`.
+
+## 0.4.4
+- Remove JDK 6 support
+- Restore parsing of :port option in nREPL mode
+- Url to connect to supports new transport schemes
+
+## 0.4.3
+- Fix completion-eval to not bind to namespaces that don't exist.
+
+## 0.4.2
+- Remove SIGINT interruption delay
+
+## 0.4.1
 - #166: Set history file max size from inputrc
 - Use newer jline2 to support history max size config
 
 ## 0.4.0
+- #181: Update to nREPL 0.4.
 
 ## 0.3.10
+- Defer loading of reply.parsing namespace for faster startup
+- Bump nREPL dep to 0.2.13
 
 ## 0.3.8
+- Require JDK 1.6
+- Bump a bunch of deps
 
 ## 0.3.7
 
