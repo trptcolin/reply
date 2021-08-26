@@ -32,15 +32,6 @@
 (defn export-definition [s]
   (read-string (clojure.repl/source-fn s)))
 
-(def resolve-class
-  (fn [sym]
-    (try (let [val (resolve sym)]
-      (when (class? val) val))
-        (catch Exception e
-          (when (not= ClassNotFoundException
-                      (class (clojure.main/repl-exception e)))
-            (throw e))))))
-
 (defn unresolve
   "Given a var, return a sequence of all symbols that resolve to the
   var from the current namespace *ns*."
@@ -146,29 +137,6 @@
 (defn formify-file [f]
   (read-string (str "(do " (slurp f) ")")))
 
-(defn completion-code []
-  `(try
-     (require '[incomplete.core])
-     ; hack for 1.2 support until we release the next clojure-complete version
-     ~(export-definition 'reply.initialization/resolve-class)
-     (~'reply.exports/intern-with-meta
-       '~'incomplete.core '~'resolve-class ~'#'resolve-class)
-
-     (catch Exception e#
-       (try
-         (eval
-           '~(try
-               (formify-file
-                 (-> (Thread/currentThread)
-                     (.getContextClassLoader)
-                     (.getResource "incomplete/core.clj")))
-               (catch Exception e
-                 '(throw (Exception. "Couldn't find incomplete/core.clj")))))
-         (catch Exception f#
-           (intern (create-ns '~'incomplete.core) '~'completions
-                   (fn [prefix# ns#] []))
-           (println "Unable to initialize completions."))))))
-
 (defn default-init-code [{:keys [custom-help] :as options}]
   `(do
      ~@prelude
@@ -205,8 +173,6 @@
      ~(export-definition 'reply.initialization/lazy-clojuredocs)
      (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
      (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
-
-     ~(completion-code)
 
      (in-ns (ns-name ~'reply.exports/original-ns))
 
