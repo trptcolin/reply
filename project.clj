@@ -5,7 +5,6 @@
     :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
     :dependencies [[org.clojure/clojure "1.7.0"]
                    [jline "2.14.6"]
-                   [org.thnetos/cd-client "0.3.6"]
                    [clj-stacktrace "0.2.8"]
                    [nrepl "0.8.3"]
                    ;; tools.cli 1.0 requires Clojure 1.8
