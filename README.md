@@ -55,10 +55,10 @@ trampoline run` in this project.
 Starting REPLy using the `clojure` command is as easy as:
 
     # Assuming Clojure 1.9, and Clojure CLI 1.10.1.727 or later
-    clojure -Sdeps '{:deps {reply/reply {:mvn/version "0.4.4"}}}' -M -m reply.main
+    clojure -Sdeps '{:deps {reply/reply {:mvn/version "0.5.0"}}}' -M -m reply.main
 
     # Assuming Clojure 1.9 and later, and Clojure CLI before 1.10.1.727
-    clojure -Sdeps '{:deps {reply {:mvn/version "0.4.4"}}}' -m reply.main
+    clojure -Sdeps '{:deps {reply {:mvn/version "0.5.0"}}}' -m reply.main
 
 **Note:** Use `clojure -Sdescribe` to see your Clojure CLI version. On the other
 hand, the Clojure version, being Clojure just a library, depends on the deps.
