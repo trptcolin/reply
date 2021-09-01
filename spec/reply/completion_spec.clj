@@ -16,10 +16,14 @@
     (should= "map" (get-word-ending-at "map" 3))
     (should= "map" (get-word-ending-at "(map first [0 1 2])" 4)))
 
-  (it "finds namespaces, also as symbols or keywords"
+  (it "finds namespaces, also as symbols"
     (should= "clojure.c" (get-word-ending-at "clojure.c" 9))
-    (should= "clojure.c" (get-word-ending-at "'clojure.c" 10))
-    (should= "clojure.c" (get-word-ending-at ":clojure.c" 10)))
+    (should= "clojure.c" (get-word-ending-at "'clojure.c" 10)))
+
+  (it "finds keywords"
+    (should= ":clojure.c" (get-word-ending-at ":clojure.c" 10))
+    (should= ":ke" (get-word-ending-at ":keyword" 3))
+    (should= "::foobar" (get-word-ending-at "::foobar" 8)))
 
   (it "omits brackets of several sorts (but takes asterisks)"
     (should= "*foo" (get-word-ending-at "(*foo" 5))
