@@ -21,7 +21,6 @@ A fitter, happier, more productive REPL for Clojure.
   - Clojure namespace-qualified vars
   - Java classes, packages
   - Java package-qualified classes, static methods
-- ClojureDocs support via a `clojuredocs` command
 - Optional nREPL integration
 
 ## Installation
@@ -102,7 +101,6 @@ me know if you are!
 Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
 [JLine](https://github.com/jline/jline2), [nREPL](https://github.com/nrepl/nrepl),
 [incomplete](https://github.com/nrepl/incomplete),
-[ClojureDocs](http://clojuredocs.org), and [clojuredocs-client](https://github.com/dakrone/clojuredocs-client),
 for their work on the excellent projects that this project depends upon.
 
 Special thanks to [8th Light](http://8thlight.com) for allowing me to work on

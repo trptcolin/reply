@@ -19,10 +19,7 @@
   (println "              (find-doc \"part-of-name-here\")")
   (println "Find by Name: (find-name \"part-of-name-here\")")
   (println "      Source: (source function-name-here)")
-  (println "     Javadoc: (javadoc java-object-or-class-here)")
-  (println "    Examples from clojuredocs.org: [clojuredocs or cdoc]")
-  (println "              (user/clojuredocs name-here)")
-  (println "              (user/clojuredocs \"ns-here\" \"name-here\")"))
+  (println "     Javadoc: (javadoc java-object-or-class-here)"))
 
 (defn intern-with-meta [ns sym value-var]
   (intern ns
@@ -100,49 +97,6 @@
                                       (ns-publics ns)))))
                      (all-ns)))))))
 
-(def clojuredocs-available?
-  (delay
-   (try
-     (println "Loading clojuredocs-client...")
-     (require '[cd-client.core])
-     true
-     (catch Exception e#
-       (println "Warning: Could not load the ClojureDocs client, so"
-                "`clojuredocs` will be unavailable")
-       (println "  Details:" e# "\n")
-       false))))
-
-(defn call-with-ns-and-name
-  [f v]
-  (let [m (meta v)
-        ns (str (.name ^clojure.lang.Namespace (:ns m)))
-        name (str (:name m))]
-    (f ns name)))
-
-(defmacro handle-fns-etc
-  [name fn]
-  (if (special-symbol? `~name)
-    `(~fn "clojure.core" (str '~name))
-    (let [nspace (find-ns name)]
-      (if nspace
-        `(println "No usage examples for namespaces as a whole like" '~name
-                  "\nTry a particular symbol in a namespace,"
-                  "e.g. clojure.string/join")
-        `(reply.exports/call-with-ns-and-name ~fn (var ~name))))))
-
-(defmacro lazy-clojuredocs
-  "Lazily checks if the clojuredocs client is available, and uses it to
-  retrieve examples if it is."
-  ([v]
-     `(when (deref reply.exports/clojuredocs-available?)
-        (reply.exports/handle-fns-etc
-         ~v (ns-resolve (symbol "cd-client.core")
-                        (symbol "pr-examples-core")))))
-  ([ns-str var-str]
-     `(when (deref reply.exports/clojuredocs-available?)
-        ((ns-resolve (symbol "cd-client.core") (symbol "pr-examples-core"))
-         ~ns-str ~var-str))))
-
 (defn formify-file [f]
   (read-string (str "(do " (slurp f) ")")))
 
@@ -198,13 +152,6 @@
      ~(export-definition 'reply.initialization/apropos-better)
      (~'intern-with-meta '~'user '~'apropos-better ~'#'apropos-better)
      (~'intern-with-meta '~'user '~'find-name ~'#'apropos-better)
-
-     ~(export-definition 'reply.initialization/clojuredocs-available?)
-     ~(export-definition 'reply.initialization/call-with-ns-and-name)
-     ~(export-definition 'reply.initialization/handle-fns-etc)
-     ~(export-definition 'reply.initialization/lazy-clojuredocs)
-     (~'intern-with-meta '~'user '~'clojuredocs ~'#'lazy-clojuredocs)
-     (~'intern-with-meta '~'user '~'cdoc ~'#'lazy-clojuredocs)
 
      ~(completion-code)
 
