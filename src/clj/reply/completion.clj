@@ -30,6 +30,5 @@
   (let [input-start (input-up-to input index)
         last-word (or (last-word input-start) "")]
     (if (re-seq (re-pattern word-pattern-string) last-word)
-      (str/replace last-word #"[':]" "")
+      (str/replace last-word #"[']" "")
       "")))
-
