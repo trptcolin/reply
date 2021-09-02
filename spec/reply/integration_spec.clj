@@ -107,6 +107,15 @@
     (should-contain "mapcat" (str @fake-out))
     (should-contain "map-indexed" (str @fake-out)))
 
+  (it "tab-completes fns in aliased namespaces"
+    (main/launch-standalone {:input-stream
+                             (java.io.ByteArrayInputStream.
+                               (.getBytes "(require '[clojure.string :as s])\ns/\tsplit\nexit\n"))
+                             :output-stream @fake-out})
+    (should= "" (str @fake-err))
+    (should-contain "s/split" (str @fake-out))
+    (should-contain "s/replace" (str @fake-out)))
+
   (it "tab-completes without putting results into *1"
     (main/launch-standalone {:input-stream
                              (java.io.ByteArrayInputStream.
@@ -191,4 +200,14 @@
                           :output-stream @fake-out})
       (should= "" (str @fake-err))
       (should-contain "mapcat" (str @fake-out))
-      (should-contain "map-indexed" (str @fake-out)))))
+      (should-contain "map-indexed" (str @fake-out)))
+
+    (it "tab-completes fns in aliased namespaces"
+      (main/launch-nrepl {:attach (str *server-port*)
+                          :input-stream
+                          (java.io.ByteArrayInputStream.
+                            (.getBytes "(require '[clojure.string :as s])\ns/\tsplit\nexit\n"))
+                          :output-stream @fake-out})
+      (should= "" (str @fake-err))
+      (should-contain "s/split" (str @fake-out))
+      (should-contain "s/replace" (str @fake-out)))))
