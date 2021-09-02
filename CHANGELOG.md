@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.5.1 (2021-09-02)
+- [#209](https://github.com/trptcolin/reply/pull/209): Remove clojuredocs integration, which had been broken for quite awhile
+- [#208](https://github.com/trptcolin/reply/pull/208): Allow keyword completion
+- [#207](https://github.com/trptcolin/reply/pull/207): Remove legacy initialization code, which was breaking completion in some scenarios
+
 ## 0.5.0 (2021-08-18)
 - [#203](https://github.com/trptcolin/reply/pull/203): Replace `clojure-complete` with `incomplete`.
 
