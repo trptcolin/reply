@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Remove `ReplyMain` class as `clojure.main -m` makes it obsolete.
+- Remove unnecessary `CustomizableBufferLineNumberingPushbackReader` class.
+
 ## 0.5.1 (2021-09-02)
 - [#209](https://github.com/trptcolin/reply/pull/209): Remove clojuredocs integration, which had been broken for quite awhile
 - [#208](https://github.com/trptcolin/reply/pull/208): Allow keyword completion

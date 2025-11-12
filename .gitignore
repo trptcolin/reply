@@ -8,3 +8,6 @@ pom.xml.asc
 .lein-deps-sum
 .lein-repl-history
 checkouts
+.clj-kondo
+.lsp
+.nrepl-port

@@ -32,7 +32,7 @@ Leiningen installed):
 
     git clone https://github.com/trptcolin/reply.git
     cd reply
-    lein do deps, compile
+    lein compile
 
 ## Usage
 
@@ -40,7 +40,7 @@ Leiningen installed):
 
 The easiest way to use REPLy is simply to run `lein repl`. That's it!
 
-If you want to check out the latest stuff on REPLy master, you can run `lein
+If you want to check out the latest stuff on REPLy main, you can run `lein
 trampoline run` in this project.
 
 ### Boot
@@ -66,12 +66,6 @@ To see what you could consider the default Clojure, you could use
 [More information about the distinction between Clojure CLI and Clojure](https://clojureverse.org/t/how-to-declare-a-super-specific-version-of-clojure-in-the-deps-edn/6751/2?u=jgomo3).
 
 ### Other
-
-If for some reason your use case requires avoiding the tools listed so
-far, you can use the bin scripts as a guide (you're probably used to
-shell scripting anyway, in that case). If you want to add additional
-dependencies to the classpath, setting `$USER_CP` will. For example:
-`USER_CP=$(lein classpath) reply`.
 
 If you want to use REPLy from another piece of software, your entry point
 should be `reply.main/launch-nrepl`. There are lots of options, which you can
