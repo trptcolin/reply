@@ -7,6 +7,8 @@ pom.xml.asc
 .lein-failures
 .lein-deps-sum
 .lein-repl-history
+.clj-kondo
+.lsp
 checkouts
 .clj-kondo
 .lsp

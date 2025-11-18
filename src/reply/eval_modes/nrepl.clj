@@ -113,7 +113,7 @@
 (defn run-repl
   ([connection] (run-repl connection nil))
   ([connection {:keys [prompt subsequent-prompt history-file
-                       input-stream output-stream read-line-fn]
+                       input-stream output-stream reader]
                 :as options}]
    (loop [ns (let [ns (execute-with-client connection options "")]
                (handle-ns-init-error ns connection options))]
@@ -123,14 +123,14 @@
            pf-opts {:request-exit eof
                     :prompt-string (prompt ns)
                     :ns ns
-                    :read-line-fn read-line-fn
+                    :reader reader
                     :history-file history-file
                     :input-stream input-stream
                     :output-stream output-stream
                     :subsequent-prompt-string (subsequent-prompt ns)
                     :text-so-far nil}
            parsed-forms-fn (eval-modes.shared/load-parsed-forms-fn-in-background)
-           read-text (read-line-fn pf-opts)
+           read-text (simple-jline/safe-read-line pf-opts)
            forms (@parsed-forms-fn read-text pf-opts)]
        (if (reply.exit/done? eof (first forms))
          nil
@@ -213,11 +213,7 @@
            completion-session (LinkedBlockingQueue.))
     (let [options (eval-modes.shared/set-default-options options)
           completion-eval-fn (partial completion-eval client completion-session)
-          options (assoc options
-                         :read-line-fn
-                         (partial
-                           simple-jline/safe-read-line
-                           completion-eval-fn))]
+          options (assoc options :reader (simple-jline/setup-reader options))]
 
       (let [^Runnable operation (bound-fn [] (poll-for-responses options connection))]
         (reset! response-poller (Thread. operation)))
@@ -236,5 +232,4 @@
                              options)))))
       (handle-client-interruption! client)
       (run-repl client options)
-      (reset-nrepl-state!)
-      (simple-jline/shutdown))))
+      (reset-nrepl-state!))))

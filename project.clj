@@ -1,7 +1,7 @@
 (defproject reply "0.6.0-SNAPSHOT"
   :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [jline "2.14.6"]
+                 [org.jline/jline "3.3.1"]
                  [clj-stacktrace "0.2.8"]
                  [nrepl "0.8.3"]
                  ;; tools.cli 1.0 requires Clojure 1.8
@@ -17,11 +17,9 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :url "https://github.com/trptcolin/reply"
-  :profiles {:dev {:dependencies [[classlojure "0.6.6"]]}
-             :base {:dependencies []}}
+  :profiles {:dev {:dependencies [[classlojure "0.6.6"]]}}
   :javac-options ["-target" "8" "-source" "8" "-Xlint:-options"]
   ;;    :jvm-opts ["-Djline.internal.Log.trace=true"]
-  :aot [reply.reader.jline.JlineInputReader]
   :main ^{:skip-aot true} reply.main
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
                                     :username :env/clojars_username

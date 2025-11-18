@@ -8,7 +8,7 @@
             [reply.reader.simple-jline :as simple-jline]
             [reply.signals :as signals]))
 
-(defn make-future-read-eval [options]
+(defn make-future-read-eval [_options]
   (concurrency/act-in-future
     (fn [form]
       (eval-state/with-bindings
@@ -17,10 +17,9 @@
 (defn make-reply-read-eval [options]
   (let [future-read-eval (make-future-read-eval options)]
     (fn [form]
-      (simple-jline/shutdown)
       (future-read-eval form))))
 
-(defn handle-ctrl-c [signal]
+(defn handle-ctrl-c [_signal]
   (concurrency/stop-running-actions))
 
 (defn execute [{:keys [value-to-string print-value print-out print-err] :as options}
@@ -36,6 +35,10 @@
       (when (:interactive options) (println)))
     (eval-state/get-ns-string)))
 
+(defn completion-fn [form]
+  (binding [*print-length* nil]
+    ((concurrency/act-in-future eval) form)))
+
 (defn run-repl [{:keys [prompt subsequent-prompt history-file
                         input-stream output-stream read-line-fn]
                  :as options}]
@@ -49,6 +52,7 @@
                    :history-file history-file
                    :input-stream input-stream
                    :output-stream output-stream
+                   :completion-eval-fn completion-fn
                    :subsequent-prompt-string (subsequent-prompt ns)
                    :text-so-far nil}
           parsed-forms-fn (eval-modes.shared/load-parsed-forms-fn-in-background)
@@ -62,23 +66,17 @@
   (signals/set-signal-handler! "INT" handle-ctrl-c)
   (eval-state/set-ns "user")
   (let [options (eval-modes.shared/set-default-options options)
-        options (assoc options :caught (->fn (:caught options)
-                                             clojure.main/repl-caught))
-        options (assoc options :value-to-string (->fn (:value-to-string options)
-                                                      pr-str))
-        options (assoc options
-                       :read-line-fn
-                       (partial
-                         simple-jline/safe-read-line
-                         (fn [form]
-                           (binding [*print-length* nil]
-                             ((concurrency/act-in-future eval) form)))))
+        options (-> options
+                    (assoc :caught (->fn (:caught options)
+                                         clojure.main/repl-caught)
+                           :value-to-string (->fn (:value-to-string options)
+                                                  pr-str)
+                           :reader (simple-jline/setup-reader options)))
         non-interactive-eval (fn [form]
                                (execute (assoc options :print-value (constantly nil))
                                         (binding [*print-length* nil
                                                   *print-level* nil]
                                           (pr-str form))))]
     (non-interactive-eval (initialization/construct-init-code options))
-    (run-repl options)
-    (simple-jline/shutdown)))
+    (run-repl options)))
 

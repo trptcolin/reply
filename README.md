@@ -32,7 +32,7 @@ Leiningen installed):
 
     git clone https://github.com/trptcolin/reply.git
     cd reply
-    lein compile
+    lein trampoline run
 
 ## Usage
 
