@@ -1,43 +1,54 @@
-version: 2.1
-
-executors:
-  clojure:
-    docker:
-      - image: << parameters.tag >>
-    parameters:
-      image:
-        description: "tag"
-        default: "temurin-25-lein"
-        type: string
-    working_directory: ~/reply
-
-jobs:
-  build:
-    executor: clojure
-    parameters:
-      tag:
-        description: "tag"
-        default: << parameters.tag >>
-        type: string
-    steps:
-      - checkout
-      - restore_cache:
-          key: reply-{{ checksum "project.clj" }}
-      - run:
-          name: Run Tests
-          command: lein test
-      - save_cache:
-          paths:
-            - $HOME/.m2
-            - $HOME/.lein
-          key: reply-{{ checksum "project.clj" }}
-
-workflows:
-  test-with-matrix:
-    jobs:
-      - build:
-          name: "temurin25"
-          tag: "temurin-25-lein"
-      - build:
-          name: "openjdk8"
-          tag: "openjdk-8-lein"
+# -*- js -*-
+{
+  "version": 2.1,
+  "executors": {
+    "clojure": {
+      "docker": [{"image": "clojure:<< parameters.java_version >>"}],
+      "parameters": {
+        "java_version": {
+          "description": "Java version",
+          "default": "temurin-25-lein",
+          "type": "string"
+        }
+      },
+      "working_directory": "~/leiningen"
+    }
+  },
+  "jobs": {
+    "build": {
+      "executor": "clojure",
+      "parameters": {
+        "java_version": {
+          "description": "Java version",
+          "default": "<< parameters.java_version >>",
+          "type": "string"
+        }
+      },
+      "steps": [
+        "checkout",
+        {
+          "restore_cache": {
+            "key": "reply-{{ checksum \"project.clj\" }}"
+          }
+        },
+        {
+          "run": "lein test"
+        },
+        {
+          "save_cache": {
+            "paths": ["~/.m2/repository"],
+            "key": "reply-{{ checksum \"project.clj\" }}"
+          }
+        }
+      ]
+    }
+  },
+  "workflows": {
+    "test-with-matrix": {
+      "jobs": [
+        {"build": {"name": "openjdk8", "java_version": "openjdk-8-lein"}},
+        {"build": {"name": "temurin", "java_version": "temurin-25-lein"}},
+      ]
+    }
+  }
+}
