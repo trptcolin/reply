@@ -2,6 +2,8 @@
   (:use [reply.reader.jline.completion]
         [speclj.core]))
 
+;; TODO: don't bother to port these to clojure.test until jline3 is working
+
 (describe "construct-possible-completions-form"
   (it "does correct quoting in completions form request"
     (should= '(incomplete.core/completions (str "clojure.core/map-") (symbol "user"))

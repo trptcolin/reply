@@ -2,6 +2,8 @@
   (:use [speclj.core])
   (:import [reply.reader.jline JlineInputReader]))
 
+;; TODO: don't bother to port these to clojure.test until jline3 is working
+
 (defprotocol LineReader
   (readLine [_]))
 

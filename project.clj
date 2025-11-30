@@ -17,13 +17,10 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :url "https://github.com/trptcolin/reply"
-  :profiles {:dev {:dependencies [[speclj "2.7.2"]
-                                  [classlojure "0.6.6"]]}
+  :profiles {:dev {:dependencies [[classlojure "0.6.6"]]}
              :base {:dependencies []}}
-  :plugins [[speclj "2.7.2"]]
   :javac-options ["-target" "8" "-source" "8" "-Xlint:-options"]
   ;;    :jvm-opts ["-Djline.internal.Log.trace=true"]
-  :test-paths ["spec"]
   :aot [reply.reader.jline.JlineInputReader]
   :main ^{:skip-aot true} reply.main
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
