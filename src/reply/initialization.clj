@@ -114,10 +114,7 @@
   `(do
      ~@prelude
 
-     (use '[clojure.repl :only ~'[source apropos dir]])
-     ; doc and find-doc live in clojure.core in 1.2
-     (when (ns-resolve '~'clojure.repl '~'pst)
-       (refer 'clojure.repl :only '~'[pst doc find-doc]))
+     (use '[clojure.repl :only ~'[source apropos dir pst doc find-doc]])
 
      (use '[clojure.java.javadoc :only ~'[javadoc]])
      (use '[clojure.pprint :only ~'[pp pprint]])
