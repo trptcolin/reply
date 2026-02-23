@@ -12,7 +12,7 @@
                   :exclusions [org.clojure/clojure]]
                  ;; bump transitive dep to avoid compatibility warning
                  [net.cgrand/parsley "0.9.3" :exclusions [org.clojure/clojure]]]
-  :min-lein-version "2.0.0"
+  :min-lein-version "2.9.1"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :url "https://github.com/trptcolin/reply"
