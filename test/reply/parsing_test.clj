@@ -37,8 +37,28 @@
                (with-in-str "\n\n"
                  (doall (p/parsed-forms options))))))
 
-    (t/testing "gets wht/testingespace"
+    (t/testing "gets whitespace"
       (t/is (= [""]
                (with-in-str "  \n \n"
                  (doall (p/parsed-forms options))))))))
 
+;; Syntax that was broken under sjacket/parsley (#172, #200)
+(t/deftest modern-syntax
+  (let [eof (Object.)
+        read-line-fn (fn [state] (read-line))
+        options {:request-exit eof :read-line-fn read-line-fn}]
+
+    (t/testing "namespaced maps (#200)"
+      (t/is (= ["#::{:a 1}"]
+               (with-in-str "#::{:a 1}"
+                 (doall (p/parsed-forms options))))))
+
+    (t/testing "tagged literals (#172)"
+      (t/is (= ["#inst \"2024-01-01\""]
+               (with-in-str "#inst \"2024-01-01\""
+                 (doall (p/parsed-forms options))))))
+
+    (t/testing "reader conditionals"
+      (t/is (= ["#?(:clj 1 :cljs 2)"]
+               (with-in-str "#?(:clj 1 :cljs 2)"
+                 (doall (p/parsed-forms options))))))))
