@@ -1,28 +1,24 @@
 (ns reply.reader.jline.completion
   (:require [reply.completion :as completion]
             [incomplete.core])
-  (:import [jline.console.completer Completer]))
+  (:import [org.jline.reader Completer Candidate ParsedLine LineReader]))
 
 (defn construct-possible-completions-form [prefix ns]
   `(~'incomplete.core/completions (~'str ~prefix) (~'symbol ~ns)))
 
-(defn get-prefix [buffer cursor]
-  (let [buffer (or buffer "")]
-    (or (completion/get-word-ending-at buffer cursor) "")))
+(defn get-prefix [^ParsedLine line]
+  (let [word (.word line)]
+    (or word "")))
 
-(defn make-completer [eval-fn redraw-line-fn ns]
+(defn make-completer [eval-fn ns]
   (proxy [Completer] []
-    (complete [^String buffer cursor ^java.util.List candidates]
-      (let [prefix ^String (get-prefix buffer cursor)
+    (complete [^LineReader reader ^ParsedLine line ^java.util.List candidates]
+      (let [prefix ^String (get-prefix line)
             prefix-length (.length prefix)]
-        (if (zero? prefix-length)
-          -1
+        (when-not (zero? prefix-length)
           (let [possible-completions-form (construct-possible-completions-form
                                             prefix ns)
                 possible-completions (eval-fn possible-completions-form)]
-            (if (empty? possible-completions)
-              -1
-              (do
-                (.addAll candidates (map :candidate possible-completions))
-                (redraw-line-fn)
-                (- cursor prefix-length)))))))))
+            (when-not (empty? possible-completions)
+              (doseq [c possible-completions]
+                (.add candidates (Candidate. (:candidate c)))))))))))
