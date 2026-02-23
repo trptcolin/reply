@@ -1,10 +1,9 @@
 (defproject reply "0.6.0-SNAPSHOT"
   :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [jline "2.14.6"]
                  [clj-stacktrace "0.2.8"]
                  [nrepl "0.8.3"]
-                 ;; tools.cli 1.0 requires Clojure 1.8
                  [org.clojure/tools.cli "0.3.1"]
                  [nrepl/drawbridge "0.2.1"]
                  [trptcolin/versioneer "0.1.1"]
@@ -18,7 +17,14 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :url "https://github.com/trptcolin/reply"
   :profiles {:dev {:dependencies [[classlojure "0.6.6"]]}
-             :base {:dependencies []}}
+             :base {:dependencies []}
+             ;; Clojure versions matrix
+             :provided {:dependencies [[org.clojure/clojure "1.12.4"]]}
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :1.10 {:dependencies [[org.clojure/clojure "1.10.3"]]}
+             :1.11 {:dependencies [[org.clojure/clojure "1.11.4"]]}
+             :1.12 {:dependencies [[org.clojure/clojure "1.12.4"]]}}
   :javac-options ["-target" "8" "-source" "8" "-Xlint:-options"]
   ;;    :jvm-opts ["-Djline.internal.Log.trace=true"]
   :aot [reply.reader.jline.JlineInputReader]
