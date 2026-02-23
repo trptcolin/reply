@@ -4,7 +4,7 @@
                  [jline "2.14.6"]
                  [clj-stacktrace "0.2.8"]
                  [nrepl "1.5.2"]
-                 [org.clojure/tools.cli "0.3.1"]
+                 [org.clojure/tools.cli "1.3.250"]
                  [nrepl/drawbridge "0.2.1"]
                  [trptcolin/versioneer "0.1.1"]
                  [org.nrepl/incomplete "0.1.0"]
