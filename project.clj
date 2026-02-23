@@ -8,7 +8,7 @@
                  [nrepl/drawbridge "0.3.0"]
                  [trptcolin/versioneer "0.2.0"]
                  [org.nrepl/incomplete "0.1.0"]
-                 [org.clojars.trptcolin/sjacket "0.1.1.1"
+                 [org.clojars.trptcolin/sjacket "0.1.4"
                   :exclusions [org.clojure/clojure]]
                  ;; bump transitive dep to avoid compatibility warning
                  [net.cgrand/parsley "0.9.3" :exclusions [org.clojure/clojure]]]
