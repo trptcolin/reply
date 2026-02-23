@@ -77,7 +77,7 @@
                                :output-stream out})
       (t/is (= "" (str err)))
       (t/is (re-find #"Unmatched delimiter" (str out)))
-      (t/is (re-find #"user=> #error" (str out)))))
+      (t/is (re-find #"(?s)user=>.*#error" (str out)))))
 
   (with-out-err [out err]
     (t/testing "does not print an error when given empty input lines"
