@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/trptcolin/reply/tree/main.svg?style=svg)](https://circleci.com/gh/trptcolin/reply/tree/main)
+[![Tests](https://github.com/trptcolin/reply/actions/workflows/test.yml/badge.svg)](https://github.com/trptcolin/reply/actions/workflows/test.yml)
 [![Clojars Project](https://img.shields.io/clojars/v/reply/reply.svg)](https://clojars.org/reply/reply)
 [![cljdoc badge](https://cljdoc.org/badge/reply/reply)](https://cljdoc.org/d/reply/reply/CURRENT)
 [![downloads badge](https://versions.deps.co/reply/reply/downloads.svg)](https://clojars.org/reply/reply)
@@ -102,7 +102,7 @@ this during our open-source Friday afternoons.
 
 ## License
 
-Copyright (C) 2011-2021 Colin Jones
+Copyright (C) 2011-2026 Colin Jones
 
 Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.
