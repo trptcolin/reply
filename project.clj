@@ -25,7 +25,6 @@
              :1.10 {:dependencies [[org.clojure/clojure "1.10.3"]]}
              :1.11 {:dependencies [[org.clojure/clojure "1.11.4"]]}
              :1.12 {:dependencies [[org.clojure/clojure "1.12.4"]]}}
-  :javac-options ["-target" "8" "-source" "8" "-Xlint:-options"]
   ;;    :jvm-opts ["-Djline.internal.Log.trace=true"]
   :aot [reply.reader.jline.JlineInputReader]
   :main ^{:skip-aot true} reply.main
