@@ -5,7 +5,7 @@
                  [clj-stacktrace "0.2.8"]
                  [nrepl "1.5.2"]
                  [org.clojure/tools.cli "1.3.250"]
-                 [nrepl/drawbridge "0.2.1"]
+                 [nrepl/drawbridge "0.3.0"]
                  [trptcolin/versioneer "0.1.1"]
                  [org.nrepl/incomplete "0.1.0"]
                  [org.clojars.trptcolin/sjacket "0.1.1.1"
