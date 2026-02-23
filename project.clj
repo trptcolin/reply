@@ -3,7 +3,7 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [jline "2.14.6"]
                  [clj-stacktrace "0.2.8"]
-                 [nrepl "0.8.3"]
+                 [nrepl "1.5.2"]
                  [org.clojure/tools.cli "0.3.1"]
                  [nrepl/drawbridge "0.2.1"]
                  [trptcolin/versioneer "0.1.1"]
