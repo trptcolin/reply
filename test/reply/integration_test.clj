@@ -14,12 +14,12 @@
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
 (def nrepl
-  {:local-path "spec/nrepl-0.8.3.jar"
-   :remote-url "https://clojars.org/repo/nrepl/nrepl/0.8.3/nrepl-0.8.3.jar"})
+  {:local-path "spec/nrepl-1.5.2.jar"
+   :remote-url "https://clojars.org/repo/nrepl/nrepl/1.5.2/nrepl-1.5.2.jar"})
 
 (def clojure
-  {:local-path "spec/clojure-1.7.0.jar"
-   :remote-url "https://repo1.maven.org/maven2/org/clojure/clojure/1.7.0/clojure-1.7.0.jar"})
+  {:local-path "spec/clojure-1.8.0.jar"
+   :remote-url "https://repo1.maven.org/maven2/org/clojure/clojure/1.8.0/clojure-1.8.0.jar"})
 
 (defn ensure-test-jar [{:keys [local-path remote-url]}]
   (let [file (java.io.File. local-path)]
