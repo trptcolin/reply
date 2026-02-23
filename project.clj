@@ -1,7 +1,7 @@
 (defproject reply "0.6.0-SNAPSHOT"
   :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [jline "2.14.6"]
+                 [org.jline/jline "3.28.0"]
                  [clj-stacktrace "0.2.8"]
                  [nrepl "1.5.2"]
                  [org.clojure/tools.cli "1.3.250"]
@@ -25,7 +25,6 @@
              :1.10 {:dependencies [[org.clojure/clojure "1.10.3"]]}
              :1.11 {:dependencies [[org.clojure/clojure "1.11.4"]]}
              :1.12 {:dependencies [[org.clojure/clojure "1.12.4"]]}}
-  ;;    :jvm-opts ["-Djline.internal.Log.trace=true"]
   :aot [reply.reader.jline.JlineInputReader]
   :main ^{:skip-aot true} reply.main
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
