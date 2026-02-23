@@ -79,7 +79,7 @@ issue](https://github.com/trptcolin/reply/issues), but the following may help.
 For keybinding issues, check out `~/.inputrc` - you can mostly use the same
 specifications there as you can with normal readline applications like bash,
 but from time to time we do come across missing features that we then add to
-[jline](https://github.com/jline/jline2).
+[jline](https://github.com/jline/jline3).
 
 To get a very detailed look at what jline is doing under the hood, you can
 `export JLINE_LOGGING=trace` (or `debug`) before starting REPLy. There may be
@@ -93,7 +93,7 @@ me know if you are!
 ## Thanks
 
 Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
-[JLine](https://github.com/jline/jline2), [nREPL](https://github.com/nrepl/nrepl),
+[JLine](https://github.com/jline/jline3), [nREPL](https://github.com/nrepl/nrepl),
 [incomplete](https://github.com/nrepl/incomplete),
 for their work on the excellent projects that this project depends upon.
 
