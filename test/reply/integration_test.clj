@@ -14,16 +14,17 @@
 ;; TODO: this is easy but seems like wasted effort
 ;;       probably better to use pomegranate
 (def nrepl
-  {:local-path "spec/nrepl-1.5.2.jar"
+  {:local-path "target/test-jars/nrepl-1.5.2.jar"
    :remote-url "https://clojars.org/repo/nrepl/nrepl/1.5.2/nrepl-1.5.2.jar"})
 
 (def clojure
-  {:local-path "spec/clojure-1.8.0.jar"
+  {:local-path "target/test-jars/clojure-1.8.0.jar"
    :remote-url "https://repo1.maven.org/maven2/org/clojure/clojure/1.8.0/clojure-1.8.0.jar"})
 
 (defn ensure-test-jar [{:keys [local-path remote-url]}]
   (let [file (java.io.File. local-path)]
     (when-not (.exists file)
+      (.mkdirs (.getParentFile file))
       (.createNewFile file)
       (let [out (java.io.FileOutputStream. file)
             in (io/input-stream remote-url)]
