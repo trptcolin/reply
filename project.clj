@@ -6,7 +6,7 @@
                  [nrepl "1.5.2"]
                  [org.clojure/tools.cli "1.3.250"]
                  [nrepl/drawbridge "0.3.0"]
-                 [trptcolin/versioneer "0.1.1"]
+                 [trptcolin/versioneer "0.2.0"]
                  [org.nrepl/incomplete "0.1.0"]
                  [org.clojars.trptcolin/sjacket "0.1.1.1"
                   :exclusions [org.clojure/clojure]]
