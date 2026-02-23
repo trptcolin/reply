@@ -8,10 +8,7 @@
                  [nrepl/drawbridge "0.3.0"]
                  [trptcolin/versioneer "0.2.0"]
                  [org.nrepl/incomplete "0.1.0"]
-                 [org.clojars.trptcolin/sjacket "0.1.4"
-                  :exclusions [org.clojure/clojure]]
-                 ;; bump transitive dep to avoid compatibility warning
-                 [net.cgrand/parsley "0.9.3" :exclusions [org.clojure/clojure]]]
+                 [org.clojure/tools.reader "1.5.0"]]
   :min-lein-version "2.9.1"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}

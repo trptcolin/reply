@@ -1,11 +1,6 @@
 (ns reply.parsing
-  (:require [net.cgrand.sjacket :as sjacket]
-            [net.cgrand.sjacket.parser :as sjacket.parser]))
-
-(defn node-completed? [node]
-  (or (not= :net.cgrand.parsley/unfinished (:tag node))
-      (some #(= :net.cgrand.parsley/unexpected (:tag %))
-            (tree-seq :tag :content node))))
+  (:require [clojure.tools.reader :as r]
+            [clojure.tools.reader.reader-types :as rt]))
 
 (defn subsequent-prompt-string [{:keys [prompt-string
                                         subsequent-prompt-string]}]
@@ -15,37 +10,98 @@
                                  \space)
                          "#_=> "))))
 
-(defn remove-whitespace [forms]
-  (remove #(contains? #{:whitespace :comment :discard} (:tag %))
-          forms))
+(defn- make-tracking-reader
+  "Create a tools.reader-compatible reader over `text` that tracks
+  its position via the `pos` atom. After each r/read call completes,
+  @pos is the offset of the next unread character in `text`."
+  [^String text pos]
+  (let [len (count text)]
+    (reify
+      rt/Reader
+      (read-char [_]
+        (let [p @pos]
+          (if (>= p len)
+            nil
+            (let [ch (.charAt text p)]
+              (swap! pos inc)
+              ch))))
+      (peek-char [_]
+        (let [p @pos]
+          (if (>= p len)
+            nil
+            (.charAt text p))))
+      rt/IPushbackReader
+      (unread [_ ch]
+        (when ch
+          (swap! pos dec))))))
 
-(defn reparse [text-so-far next-text]
-  (sjacket.parser/parser
-    (if text-so-far
-      (str text-so-far \newline next-text)
-      next-text)))
+(defn- try-read
+  "Attempt to read one form from `reader`.
+  Returns {:status :ok :val v}
+       or {:status :incomplete}
+       or {:status :error}
+       or {:status :eof}"
+  [reader]
+  (try
+    (let [val (binding [r/*read-eval* false]
+                (r/read {:eof ::eof :read-cond :allow :features #{:clj}}
+                        reader))]
+      (if (= ::eof val)
+        {:status :eof}
+        {:status :ok :val val}))
+    (catch Exception e
+      (let [eof-incomplete?
+            (or (= :eof (:ex-kind (ex-data e)))
+                (let [cause (.getCause e)]
+                  (and (= :reader-exception (:type (ex-data e)))
+                       cause
+                       (= :eof (:ex-kind (ex-data cause))))))]
+        (if eof-incomplete?
+          {:status :incomplete}
+          {:status :error})))))
+
+(defn- read-forms
+  "Read all complete forms from `text` using tools.reader.
+  Returns [form-strings remaining-text] where remaining-text is the
+  incomplete trailing portion (or nil if everything was consumed)."
+  [text]
+  (let [pos (atom 0)
+        reader (make-tracking-reader text pos)]
+    (loop [forms []]
+      (let [start @pos
+            result (try-read reader)]
+        (case (:status result)
+          :ok (let [end @pos
+                    form-str (.trim (subs text start end))]
+                (recur (conj forms form-str)))
+          :eof [forms nil]
+          :incomplete (let [remainder (.trim (subs text start))]
+                        [forms remainder])
+          :error (let [end @pos
+                       form-str (.trim (subs text start end))]
+                   (if (.isEmpty form-str)
+                     [forms nil]
+                     (recur (conj forms form-str)))))))))
+
 
 (declare parsed-forms)
 
-(defn process-parse-tree [parse-tree options]
-  (let [complete-forms (take-while node-completed? (:content parse-tree))
-        remainder (drop-while node-completed? (:content parse-tree))
-        form-strings (map sjacket/str-pt
-                          (remove-whitespace complete-forms))]
-    (cond
-      (seq remainder)
-        (lazy-seq
-          (concat form-strings
-                  (parsed-forms
-                    (assoc options
-                           :text-so-far
-                           (apply str (map sjacket/str-pt remainder))
-                           :prompt-string
-                           (subsequent-prompt-string options)))))
-      (seq form-strings)
+(defn- process-input [text-so-far next-text options]
+  (let [text (if text-so-far
+               (str text-so-far \newline next-text)
+               next-text)
+        [form-strings remainder] (read-forms text)]
+    (if (and remainder (not (.isEmpty remainder)))
+      (lazy-seq
+        (concat form-strings
+                (parsed-forms
+                  (assoc options
+                         :text-so-far remainder
+                         :prompt-string
+                         (subsequent-prompt-string options)))))
+      (if (seq form-strings)
         form-strings
-      :else
-        (list ""))))
+        (list "")))))
 
 (defn parsed-forms
   "Requires the following options:
@@ -60,9 +116,7 @@
    (parsed-forms ((:read-line-fn options) options) options))
   ([next-text {:keys [request-exit text-so-far] :as options}]
    (if next-text
-     (let [interrupted? (= :interrupted next-text)
-           parse-tree (when-not interrupted? (reparse text-so-far next-text))]
-       (if (or interrupted? (empty? (:content parse-tree)))
-         (list "")
-         (process-parse-tree parse-tree options)))
+     (if (= :interrupted next-text)
+       (list "")
+       (process-input text-so-far next-text options))
      (list request-exit))))
