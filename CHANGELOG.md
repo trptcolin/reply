@@ -1,7 +1,8 @@
 # REPLy Changelog
 
-## Unreleased
+## 0.6.0 (2026-06-16)
 
+- [#217](https://github.com/trptcolin/reply/pull/217): Simplify the launch macro for Clojure 1.8+, clear all reflection warnings, and drop the redundant `:base` profile.
 - [#216](https://github.com/trptcolin/reply/pull/216): Replace `sjacket`/`parsley` with `clojure.tools.reader` for form parsing.
 - [#215](https://github.com/trptcolin/reply/pull/215): Migrate from JLine 2 to JLine 3 (and port the legacy speclj specs to `clojure.test`).
 - [#214](https://github.com/trptcolin/reply/pull/214): Switch CI from CircleCI to GitHub Actions and raise minimum Clojure to 1.8.

@@ -1,4 +1,4 @@
-(defproject reply "0.6.0-SNAPSHOT"
+(defproject reply "0.6.0"
   :description "REPL-y: A fitter, happier, more productive REPL for Clojure."
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.jline/jline "3.28.0"]
