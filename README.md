@@ -33,6 +33,7 @@ Leiningen installed):
     git clone https://github.com/trptcolin/reply.git
     cd reply
     lein compile
+    lein run
 
 ## Usage
 
@@ -75,10 +76,10 @@ specifications there as you can with normal readline applications like bash,
 but from time to time we do come across missing features that we then add to
 [jline](https://github.com/jline/jline3).
 
-To get a very detailed look at what jline is doing under the hood, you can
-`export JLINE_LOGGING=trace` (or `debug`) before starting REPLy. There may be
-more output than you'd like, but this kind of output is especially helpful when
-debugging keybinding issues.
+By default REPLy quiets JLine's own logging: during startup it sets the
+`org.jline` `java.util.logging` logger to `SEVERE`. If you need to see what
+JLine is doing under the hood (handy for debugging keybinding issues), lower
+that logger's level to something more verbose like `FINE` after REPLy starts.
 
 You can use the `--standalone` flag to rule out any nREPL-related questions,
 but I'm not aware of anyone using `--standalone` for other purposes. Please let
@@ -88,7 +89,7 @@ me know if you are!
 
 Thanks to the developers of [Clojure](https://github.com/clojure/clojure),
 [JLine](https://github.com/jline/jline3), [nREPL](https://github.com/nrepl/nrepl),
-[incomplete](https://github.com/nrepl/incomplete),
+and [incomplete](https://github.com/nrepl/incomplete)
 for their work on the excellent projects that this project depends upon.
 
 Special thanks to [8th Light](http://8thlight.com) for allowing me to work on
