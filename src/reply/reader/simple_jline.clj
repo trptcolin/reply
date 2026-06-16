@@ -15,7 +15,7 @@
 
 (def ^:private default-history-size-value 500)
 
-(defn- make-history-file [^String history-path]
+(defn- make-history-file ^File [^String history-path]
   (if history-path
     (let [history-file (File. history-path)]
       (if (.getParentFile history-file)
@@ -40,7 +40,7 @@
   [^File history-file]
   (when (.exists history-file)
     (try
-      (let [first-line (with-open [rdr (clojure.java.io/reader history-file)]
+      (let [first-line (with-open [^BufferedReader rdr (clojure.java.io/reader history-file)]
                          (.readLine rdr))]
         (when (and first-line
                    (not (re-find #"^\d+:" first-line)))
@@ -70,6 +70,7 @@
     (flush-history (.getHistory reader))))
 
 (defn setup-console-reader
+  ^LineReader
   [{:keys [prompt-string reader input-stream output-stream
            history-file completer-factory blink-parens]
     :or {prompt-string "=> "
@@ -139,7 +140,7 @@
     (do
       (shutdown state)
       (let [reader (setup-console-reader state)
-            prompt (or (:prompt-string state) "=> ")
+            ^String prompt (or (:prompt-string state) "=> ")
             input (try (.readLine reader prompt)
                     (catch UserInterruptException e
                       :interrupted)

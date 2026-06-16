@@ -91,7 +91,7 @@
                (str text-so-far \newline next-text)
                next-text)
         [form-strings remainder] (read-forms text)]
-    (if (and remainder (not (.isEmpty remainder)))
+    (if (seq remainder)
       (lazy-seq
         (concat form-strings
                 (parsed-forms
