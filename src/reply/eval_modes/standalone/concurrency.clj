@@ -23,7 +23,7 @@
           (throw e))))))
 
 (defn stop [action & {:keys [hard-kill-allowed]}]
-  (let [thread (:thread @action)]
+  (let [^Thread thread (:thread @action)]
     (when thread (.interrupt thread))
     (when hard-kill-allowed
       (when (and @action (not (:completed @action)) (.isAlive thread))
