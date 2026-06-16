@@ -57,16 +57,13 @@
     (with-redefs [clojure.core/print-sequential hacks.printing/print-sequential
                   clojure.repl/pst clj-stacktrace.repl/pst]
       ~@body)
-    ~@(filter identity
-              [(when (resolve 'ex-info)
-                 `(catch clojure.lang.ExceptionInfo e#
-                    (let [status# (:status (:object (ex-data e#)))
-                          body# (:body (:object (ex-data e#)))]
-                      (cond (= 401 status#) (println "Unauthorized.")
-                            (number? status#) (println "Remote error:"
-                                                       (slurp ~body))
-                            :else (clojure.repl/pst e#)))))
-               '(catch Throwable t# (clojure.repl/pst t#))])
+    (catch clojure.lang.ExceptionInfo e#
+      (let [status# (:status (:object (ex-data e#)))
+            body# (:body (:object (ex-data e#)))]
+        (cond (= 401 status#) (println "Unauthorized.")
+              (number? status#) (println "Remote error:" (slurp body#))
+              :else (clojure.repl/pst e#))))
+    (catch Throwable t# (clojure.repl/pst t#))
     (finally (say-goodbye))))
 
 (defn launch-nrepl
