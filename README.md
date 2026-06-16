@@ -25,7 +25,7 @@ A fitter, happier, more productive REPL for Clojure.
 
 ## Installation
 
-REPLy is bundled with [Leiningen][] and [Boot][]. If you're using one of the two then you're covered.
+REPLy is bundled with [Leiningen][]. If you're using it then you're covered.
 
 Here's how to get a standalone version up and running (assuming you have
 Leiningen installed):
@@ -42,12 +42,6 @@ The easiest way to use REPLy is simply to run `lein repl`. That's it!
 
 If you want to check out the latest stuff on REPLy main, you can run `lein
 trampoline run` in this project.
-
-### Boot
-
-[Boot][] bundles REPLy, so all you have to do is:
-
-    boot repl
 
 ### Clojure CLI (tools.deps)
 
@@ -108,4 +102,3 @@ Distributed under the Eclipse Public License, the same as Clojure. See the
 LICENSE file for details.
 
 [Leiningen]: https://leiningen.org
-[Boot]: https://boot-clj.com/
