@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- [#216](https://github.com/trptcolin/reply/pull/216): Replace `sjacket`/`parsley` with `clojure.tools.reader` for form parsing.
+- [#215](https://github.com/trptcolin/reply/pull/215): Migrate from JLine 2 to JLine 3 (and port the legacy speclj specs to `clojure.test`).
+- [#214](https://github.com/trptcolin/reply/pull/214): Switch CI from CircleCI to GitHub Actions and raise minimum Clojure to 1.8.
+- [#214](https://github.com/trptcolin/reply/pull/214): Bump dependencies (nREPL 1.5.2, tools.cli 1.3.250, drawbridge 0.3.0, versioneer 0.2.0) and drop the last Java sources.
 - Remove `ReplyMain` class as `clojure.main -m` makes it obsolete.
 - Remove unnecessary `CustomizableBufferLineNumberingPushbackReader` class.
 
