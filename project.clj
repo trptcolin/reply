@@ -14,7 +14,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :url "https://github.com/trptcolin/reply"
   :profiles {:dev {:dependencies [[classlojure "0.6.6"]]}
-             :base {:dependencies []}
              ;; Clojure versions matrix
              :provided {:dependencies [[org.clojure/clojure "1.12.4"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
